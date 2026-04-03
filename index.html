@@ -3562,42 +3562,59 @@ function parsearArrayGestores(dataNIT, dataDANE) {
 }
 
 function parsearArrayReclamaciones(data) {
-  if(!data || data.length < 2) return [];
-  const headers = data[0].map(h => String(h||'').trim());
-  console.log('[RedSalud] Reclamaciones headers (primeros 20):', headers.slice(0,20));
+  if(!data || data.length < 3) return [];
+  
+  // Detectar fila de headers real — buscar la que tenga 'NIT' o 'CONSECUTIVO'
+  let headerRowIdx = 0;
+  for(let i = 0; i < Math.min(5, data.length); i++) {
+    const row = data[i].map(c => String(c||'').toUpperCase());
+    if(row.some(c => c.includes('NIT') || c.includes('CONSECUTIVO') || c.includes('REGIONAL IPS'))) {
+      headerRowIdx = i;
+      break;
+    }
+  }
+  
+  const headers = data[headerRowIdx].map(h => String(h||'').trim());
+  console.log('[RedSalud] Reclamaciones headerRowIdx:', headerRowIdx);
+  console.log('[RedSalud] Reclamaciones headers reales:', headers.slice(0,15));
 
   const findCol = (...kws) => {
     for(const kw of kws) {
-      const i = headers.findIndex(h=>h.toLowerCase().includes(kw.toLowerCase()));
+      const i = headers.findIndex(h=>h.toUpperCase().includes(kw.toUpperCase()));
       if(i>=0) return i;
     }
     return -1;
   };
 
   const cols = {
-    nit:           findCol('NIT PRESTADOR'),
-    nombre:        findCol('NOMBRE SUCURSAL'),
-    regional:      findCol('REGIONAL IPS'),
-    ciudad:        findCol('CIUDAD RESPONSABLE'),
-    concepto:      findCol('CONCEPTO'),
-    vr_cartera:    findCol('VR CARTERA CONCILIADA'),
-    vr_total:      findCol('VALOR TOTAL DESAGREGADO'),
-    vr_eps:        findCol('VALOR ASUMIDO EPS'),
-    vr_ips:        findCol('VALOR ASUMIDO IPS'),
-    pct_eps:       findCol('% ASUMIDO EPS'),
-    estado_cartera:findCol('ESTADO CONCILIACION'),
-    estado_proceso:findCol('ESTADO PROCESO'),
-    vr_1ra_cuota:  findCol('VR PAGO (UNICA', 'VR PAGO UNICA', '1RA CUOTA)'),
-    periodo_desde: findCol('PERIODO RECLAMADO DESDE'),
-    periodo_hasta: findCol('PERIODO RECLAMADO HASTA'),
+    nit:            findCol('NIT PRESTADOR', 'NIT'),
+    nombre:         findCol('NOMBRE SUCURSAL', 'NOMBRE PRESTADOR'),
+    regional:       findCol('REGIONAL IPS', 'REGIONAL'),
+    ciudad:         findCol('CIUDAD RESPONSABLE', 'CIUDAD'),
+    concepto:       findCol('CONCEPTO'),
+    vr_cartera:     findCol('VR CARTERA CONCILIADA', 'CARTERA CONCILIADA'),
+    vr_total:       findCol('VALOR TOTAL DESAGREGADO'),
+    vr_eps:         findCol('VALOR ASUMIDO EPS'),
+    vr_ips:         findCol('VALOR ASUMIDO IPS'),
+    pct_eps:        findCol('% ASUMIDO EPS'),
+    estado_cartera: findCol('ESTADO CONCILIACION'),
+    estado_proceso: findCol('ESTADO PROCESO'),
+    vr_1ra_cuota:   findCol('VR PAGO (UNICA', 'VR PAGO UNICA', '1RA CUOTA'),
+    periodo_desde:  findCol('PERIODO RECLAMADO DESDE'),
+    periodo_hasta:  findCol('PERIODO RECLAMADO HASTA'),
   };
+  
+  console.log('[RedSalud] Reclamaciones cols mapeadas:', cols);
 
   const get    = (row,col) => col>=0&&col<row.length ? String(row[col]||'').trim() : '';
-  const getNum = (row,col) => parseFloat(get(row,col).replace(/[$,.]/g,'').replace(',','.')) || 0;
+  const getNum = (row,col) => {
+    const v = get(row,col);
+    return parseFloat(v.replace(/[$. ]/g,'').replace(',','.')) || 0;
+  };
 
-  return data.slice(1).map(row=>{
-    const nit = get(row,cols.nit);
-    if(!nit) return null;
+  const result = data.slice(headerRowIdx + 1).map(row=>{
+    const nit = get(row, cols.nit);
+    if(!nit || nit === '#N/A' || nit === 'NIT PRESTADOR') return null;
     return {
       nit, nombre:get(row,cols.nombre), regional:get(row,cols.regional),
       ciudad:get(row,cols.ciudad), concepto:get(row,cols.concepto),
@@ -3608,7 +3625,10 @@ function parsearArrayReclamaciones(data) {
       vr_1ra_cuota:getNum(row,cols.vr_1ra_cuota),
       periodo_desde:get(row,cols.periodo_desde), periodo_hasta:get(row,cols.periodo_hasta),
     };
-  }).filter(Boolean);
+  }).filter(r => r && r.nit && r.nit !== '#N/A');
+
+  console.log(`[RedSalud] Reclamaciones parseadas: ${result.length}`);
+  return result;
 }
 
 function parsearCSVPrestadores(csv) {
