@@ -573,20 +573,28 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   </div>
   <div class="grid-2">
     <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Estado red de prestadores</div><div class="card-sub">Habilitación + estado financiero</div></div><div class="card-act">Ver todo →</div></div>
+      <div class="card-head">
+        <div><div class="card-title">Estado red de prestadores</div><div class="card-sub" id="resumen-tabla-sub">Habilitación + estado financiero</div></div>
+        <div class="card-act" onclick="navigate('prestadores')" style="cursor:pointer">Ver todo →</div>
+      </div>
       <div class="card-body" style="padding:0 20px"><div class="scroll">
-        <table class="table"><thead><tr><th>Prestador</th><th>Estado</th><th>Score</th><th>Pago</th><th>Mora</th></tr></thead>
-        <tbody>
-          <tr><td class="nm">Clínica El Bosque</td><td><span class="badge bg-g"><span class="bd"></span>Activo</span></td><td><div class="score-row"><div class="bar-track"><div class="bar-fill" style="width:92%;background:var(--green)"></div></div><div class="bar-val">92</div></div></td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">Centro Médico Compensar</td><td><span class="badge bg-g"><span class="bd"></span>Activo</span></td><td><div class="score-row"><div class="bar-track"><div class="bar-fill" style="width:88%;background:var(--green)"></div></div><div class="bar-val">88</div></div></td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">IPS San Rafael</td><td><span class="badge bg-a"><span class="bd"></span>Observación</span></td><td><div class="score-row"><div class="bar-track"><div class="bar-fill" style="width:67%;background:var(--amber)"></div></div><div class="bar-val">67</div></div></td><td><span class="badge bg-a">Pendiente</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">32d</td></tr>
-          <tr><td class="nm">Clínica Palermo</td><td><span class="badge bg-r"><span class="bd"></span>Suspendido</span></td><td><div class="score-row"><div class="bar-track"><div class="bar-fill" style="width:44%;background:var(--red)"></div></div><div class="bar-val">44</div></div></td><td><span class="badge bg-r">Vencido</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">67d</td></tr>
-          <tr><td class="nm">Lab. Clínico Norte</td><td><span class="badge bg-g"><span class="bd"></span>Activo</span></td><td><div class="score-row"><div class="bar-track"><div class="bar-fill" style="width:95%;background:var(--green)"></div></div><div class="bar-val">95</div></div></td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-        </tbody></table>
+        <table class="table">
+          <thead><tr><th>Prestador</th><th>Ciudad</th><th>Modelo</th><th>Estado hab.</th><th>Fact. 2025</th></tr></thead>
+          <tbody id="tabla-resumen-prestadores">
+            <tr><td class="nm">Clínica El Bosque</td><td>Bogotá</td><td><span class="badge bg-b">Evento</span></td><td><span class="badge bg-g"><span class="bd"></span>Activo</span></td><td style="font-family:'DM Mono',monospace;font-size:11px">$2,840 M</td></tr>
+            <tr><td class="nm">Centro Médico Compensar</td><td>Bogotá</td><td><span class="badge bg-p">PGP</span></td><td><span class="badge bg-g"><span class="bd"></span>Activo</span></td><td style="font-family:'DM Mono',monospace;font-size:11px">$1,980 M</td></tr>
+            <tr><td class="nm">IPS San Rafael</td><td>Bogotá</td><td><span class="badge bg-b">Evento</span></td><td><span class="badge bg-a"><span class="bd"></span>Observación</span></td><td style="font-family:'DM Mono',monospace;font-size:11px">$1,420 M</td></tr>
+            <tr><td class="nm">Clínica Palermo</td><td>Bogotá</td><td><span class="badge bg-t">MRC</span></td><td><span class="badge bg-r"><span class="bd"></span>Suspendido</span></td><td style="font-family:'DM Mono',monospace;font-size:11px">$1,240 M</td></tr>
+            <tr><td class="nm">Lab. Clínico Norte</td><td>Bogotá</td><td><span class="badge bg-b">Evento</span></td><td><span class="badge bg-g"><span class="bd"></span>Activo</span></td><td style="font-family:'DM Mono',monospace;font-size:11px">$920 M</td></tr>
+          </tbody>
+        </table>
       </div></div>
     </div>
     <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Alertas prioritarias</div></div><div class="card-act">Gestionar →</div></div>
+      <div class="card-head">
+        <div><div class="card-title">Alertas prioritarias</div></div>
+        <div class="card-act" onclick="navigate('alertas')" style="cursor:pointer">Gestionar →</div>
+      </div>
       <div class="card-body">
         <div class="al-item" style="--alc:var(--red)"><div><div class="al-title">Clínica Palermo — Habilitación vencida</div><div class="al-meta">+ cartera vencida 67 días · $842 M en riesgo</div></div><div class="al-time">Hoy</div></div>
         <div class="al-item" style="--alc:var(--red)"><div><div class="al-title">Pharmos Domicilios — ANS 63% + mora 45d</div><div class="al-meta">3 tutelas activas · $1,240 M pendientes de pago</div></div><div class="al-time">Ayer</div></div>
@@ -4260,6 +4268,9 @@ function construirFiltros() {
   const prest = DATOS_CARGADOS.prestadores;
   if(!prest || !prest.length) return;
 
+  // Normalizar a título: "BARRANQUILLA" y "Barranquilla" → "Barranquilla"
+  const toTitulo = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+
   const fmtOpt = (val, tipo) => {
     const isSelected = FILTROS[tipo] === val;
     return `<div onclick="aplicarFiltro('${tipo}','${val.replace(/'/g,"\\'")}',this)"
@@ -4271,26 +4282,25 @@ function construirFiltros() {
       onmouseout="if(!${isSelected})this.style.background='transparent'">${val}</div>`;
   };
 
-  // Todos (reset) option
   const resetOpt = (tipo, label) =>
     `<div onclick="aplicarFiltro('${tipo}','',this)"
       style="padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12px;color:var(--text2);margin-bottom:6px;border-bottom:1px solid var(--border)">
       ✕ ${label}</div>`;
 
-  // Departamentos únicos
-  const deptos = [...new Set(prest.map(p=>p.departamento).filter(Boolean))].sort();
+  // Normalizar y deduplicar departamentos
+  const deptos = [...new Set(prest.map(p=>toTitulo(p.departamento)).filter(Boolean))].sort();
   const listaDep = document.getElementById('lista-departamentos');
   if(listaDep) listaDep.innerHTML = resetOpt('departamento','Todos los departamentos') +
     deptos.map(d => fmtOpt(d,'departamento')).join('');
 
-  // Regionales únicas
-  const regs = [...new Set(prest.map(p=>p.regional).filter(Boolean))].sort();
+  // Normalizar y deduplicar regionales
+  const regs = [...new Set(prest.map(p=>toTitulo(p.regional)).filter(Boolean))].sort();
   const listaReg = document.getElementById('lista-regionales');
   if(listaReg) listaReg.innerHTML = resetOpt('regional','Todas las regionales') +
     regs.map(r => fmtOpt(r,'regional')).join('');
 
-  // Modelos únicos
-  const mods = [...new Set(prest.map(p=>p.modelo).filter(Boolean))].sort();
+  // Normalizar y deduplicar modelos
+  const mods = [...new Set(prest.map(p=>toTitulo(p.modelo)).filter(Boolean))].sort();
   const listaMod = document.getElementById('lista-modelos');
   if(listaMod) listaMod.innerHTML = resetOpt('modelo','Todos los modelos') +
     mods.map(m => fmtOpt(m,'modelo')).join('');
@@ -4324,10 +4334,11 @@ function aplicarFiltro(tipo, valor, el) {
 
 function getPrestadoresFiltrados() {
   const prest = DATOS_CARGADOS.prestadores || [];
+  const toTitulo = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
   return prest.filter(p => {
-    if(FILTROS.departamento && p.departamento !== FILTROS.departamento) return false;
-    if(FILTROS.regional     && p.regional     !== FILTROS.regional)     return false;
-    if(FILTROS.modelo       && p.modelo       !== FILTROS.modelo)       return false;
+    if(FILTROS.departamento && toTitulo(p.departamento) !== FILTROS.departamento) return false;
+    if(FILTROS.regional     && toTitulo(p.regional)     !== FILTROS.regional)     return false;
+    if(FILTROS.modelo       && toTitulo(p.modelo)       !== FILTROS.modelo)       return false;
     return true;
   });
 }
@@ -4373,6 +4384,29 @@ function aplicarFiltrosGlobales() {
       FILTROS.departamento, FILTROS.regional, FILTROS.modelo
     ].filter(Boolean).join(' · ');
     cnt.textContent = `${fmtN(total)} prestadores${filtroTexto?' · Filtro: '+filtroTexto:''} · ${fmtN(conContrato)} con contrato`;
+  }
+
+  // ── Tabla resumen ejecutivo (top 8 por facturación) ──────────────
+  const tablaResumen = document.getElementById('tabla-resumen-prestadores');
+  if(tablaResumen) {
+    const top8 = [...filtrados].sort((a,b)=>b.fact_2025-a.fact_2025).slice(0,8);
+    tablaResumen.innerHTML = top8.map(p => {
+      const hab = p.habilitacion === 'Si';
+      const badgeClass = hab ? 'bg-g' : 'bg-r';
+      const badgeLabel = hab ? 'Activo' : 'Inactivo';
+      const modKey = p.modelo?.split(' ')[0]||'';
+      const modBadge = {CAPITA:'bg-b',EVENTO:'bg-g',MRC:'bg-t',PGP:'bg-p',TECHO:'bg-a'}[modKey]||'';
+      return `<tr>
+        <td class="nm">${p.nombre||p.nit}</td>
+        <td style="font-size:11px;color:var(--text2)">${p.ciudad||'—'}</td>
+        <td><span class="badge ${modBadge}">${p.modelo?.split(' ')[0]||'—'}</span></td>
+        <td><span class="badge ${badgeClass}"><span class="bd"></span>${badgeLabel}</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${fmtM(p.fact_2025)}</td>
+      </tr>`;
+    }).join('');
+    // Actualizar subtítulo
+    const sub = document.getElementById('resumen-tabla-sub');
+    if(sub) sub.textContent = `${fmtN(total)} prestadores · ${fmtN(habilitados)} habilitados`;
   }
 
   // ── Tabla prestadores ─────────────────────────────────────────────
