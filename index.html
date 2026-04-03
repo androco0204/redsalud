@@ -3343,17 +3343,6 @@ function getSheetExportUrl(id, hoja) {
   return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(hoja)}`;
 }
 
-function abrirCargador() {
-  document.getElementById('modal-cargador').style.display = 'flex';
-}
-function cerrarCargador() {
-  document.getElementById('modal-cargador').style.display = 'none';
-}
-function cerrarCargadorFuera(e) {
-  if(e.target === document.getElementById('modal-cargador')) cerrarCargador();
-}
-
-// ── CARGA AUTOMÁTICA AL ABRIR LA PÁGINA ────────────────────────────────
 async function cargaAutomatica() {
   // Actualizar botón topbar
   const icon = document.getElementById('datos-estado-icon');
@@ -3376,8 +3365,7 @@ async function cargarDesdeDrive() {
   actualizarEstadoFuente('prestadores','⏳ Cargando...','var(--bdim)','var(--blue)');
   try {
     const raw = await fetchViaAppsScript(DRIVE_CONFIG.prestadores.id, DRIVE_CONFIG.prestadores.hoja);
-    const csv = arrayToCSV(raw);
-    const prest = parsearCSVPrestadores(csv);
+    const prest = parsearArrayPrestadores(raw);
     DATOS_CARGADOS.prestadores = prest;
     actualizarEstadoFuente('prestadores',`✓ ${prest.length.toLocaleString('es-CO')} prestadores`,'var(--gdim)','var(--green)');
     resultados.push(`${prest.length.toLocaleString('es-CO')} prestadores`);
@@ -3386,13 +3374,12 @@ async function cargarDesdeDrive() {
     console.error('Prestadores:', e);
   }
 
-  // ── 2. Gestores NITs ───────────────────────────────────────────────
+  // ── 2. Gestores ────────────────────────────────────────────────────
   actualizarEstadoFuente('medicamentos','⏳ Cargando...','var(--bdim)','var(--blue)');
   try {
     const rawNIT  = await fetchViaAppsScript(DRIVE_CONFIG.medicamentos_nit.id,  DRIVE_CONFIG.medicamentos_nit.hoja);
     const rawDANE = await fetchViaAppsScript(DRIVE_CONFIG.medicamentos_dane.id, DRIVE_CONFIG.medicamentos_dane.hoja);
-    const gestores  = parsearCSVGestores(arrayToCSV(rawNIT));
-    const cobertura = parsearCSVCobertura(arrayToCSV(rawDANE));
+    const {gestores, cobertura} = parsearArrayGestores(rawNIT, rawDANE);
     DATOS_CARGADOS.gestores = { gestores, cobertura };
     actualizarEstadoFuente('medicamentos',`✓ ${gestores.length} gestores · ${cobertura.length.toLocaleString()} municipios`,'var(--gdim)','var(--green)');
     resultados.push(`${gestores.length} gestores`);
@@ -3405,8 +3392,7 @@ async function cargarDesdeDrive() {
   actualizarEstadoFuente('reclamaciones','⏳ Cargando...','var(--bdim)','var(--blue)');
   try {
     const rawRec = await fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id, DRIVE_CONFIG.reclamaciones.hoja);
-    const csv = arrayToCSV(rawRec);
-    const rec = parsearCSVReclamaciones(csv);
+    const rec = parsearArrayReclamaciones(rawRec);
     DATOS_CARGADOS.reclamaciones = rec;
     const totalCartera = rec.reduce((a,r)=>a+r.vr_cartera,0);
     const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$0';
@@ -3453,24 +3439,176 @@ function actualizarEstadoFuente(key, texto, bg, color) {
   if(el){ el.textContent=texto; el.style.background=bg; el.style.color=color; }
 }
 
-// ── PARSERS CSV ────────────────────────────────────────────────────────
-function parsearCSV(text) {
-  const lines = text.split('\n').filter(l=>l.trim());
-  if(!lines.length) return {headers:[], rows:[]};
-  const parseRow = (line) => {
-    const result = [];
-    let inQ = false, cur = '';
-    for(let c of line) {
-      if(c==='"') { inQ=!inQ; }
-      else if(c===',' && !inQ) { result.push(cur.trim()); cur=''; }
-      else { cur+=c; }
+// ── PARSERS PRINCIPALES ────────────────────────────────────────────────
+// El Apps Script devuelve Array de Arrays [[headers...],[row1...],[row2...]]
+// arrayToCSV convierte a CSV para compatibilidad, pero mejor usar array directo
+
+function parsearArrayPrestadores(data) {
+  // data = [[header1, header2...], [val1, val2...], ...]
+  if(!data || data.length < 2) return [];
+  const headers = data[0].map(h => String(h||'').trim());
+  
+  // Debug: log headers to find exact column names
+  console.log('[RedSalud] Prestadores headers (primeros 25):', headers.slice(0,25));
+  
+  // Fuzzy matching — busca la columna por palabras clave
+  const findCol = (...keywords) => {
+    for(const kw of keywords) {
+      const idx = headers.findIndex(h => h.toLowerCase().includes(kw.toLowerCase()));
+      if(idx >= 0) return idx;
     }
-    result.push(cur.trim());
-    return result;
+    return -1;
   };
-  const headers = parseRow(lines[0]);
-  const rows = lines.slice(1).map(l=>parseRow(l));
-  return {headers, rows};
+
+  const cols = {
+    nit:             findCol('NIT') !== findCol('DIGITO') ? findCol('NIT') : 2,
+    nombre:          findCol('Nombre del Prestador', 'NOMBRE DEL PRESTADOR'),
+    nombre_sucursal: findCol('NOMBRE SUCURSAL'),
+    ciudad:          findCol('DESCRIPCION CIUDAD'),
+    departamento:    findCol('DEPARTAMENTO'),
+    regional:        findCol('REGIONAL PARAMETRIZADA', 'REGIONAL'),
+    especialidad:    findCol('ESPECIALIDAD'),
+    habilitacion:    findCol('Habilitación  de Sedes', 'Habilitacion de Sedes', 'HABILITACIÓN', 'REPS'),
+    nivel:           findCol('Nivel complejidad', 'NIVEL COMPLEJIDAD'),
+    tipo:            findCol('Tipo Prestador(privada', 'TIPO PRESTADOR'),
+    modelo:          findCol('FORMA CONTRATACION'),
+    tiene_contrato:  findCol('Cuenta con Contrato', 'TIENE CONTRATO'),
+    no_contrato:     findCol('No. Contrato', 'NUMERO CONTRATO'),
+    estado_tarifas:  findCol('Estado Tarifas 2026'),
+    responsable:     findCol('Responsable Equipo', 'RESPONSABLE'),
+    red_seguimiento: findCol('Red de Seguimiento', 'RED DE SEGUIMIENTO'),
+    fact_2024:       findCol('Analitica- 2024', 'Analítica 2024', 'FACTURACION 2024', 'Facturación Reporte'),
+    fact_2025:       findCol('Facturación total 2025', 'FACTURACION TOTAL 2025', 'total 2025'),
+    fact_2026:       findCol('Facturación total 2026', 'FACTURACION TOTAL 2026', 'total 2026'),
+  };
+
+  // Para facturación mensual 2026, buscar columnas con fechas
+  let fact_mar26_col = -1;
+  headers.forEach((h, i) => {
+    const hl = h.toLowerCase();
+    if(hl.includes('2026-03') || hl.includes('mar') && hl.includes('2026') || hl.includes('marzo')) {
+      fact_mar26_col = i;
+    }
+  });
+
+  console.log('[RedSalud] Mapeo de columnas:', cols);
+  console.log('[RedSalud] Habilitación col:', cols.habilitacion, '→ header:', headers[cols.habilitacion]);
+  console.log('[RedSalud] Fact 2025 col:', cols.fact_2025, '→ header:', headers[cols.fact_2025]);
+
+  const get = (row, col) => col >= 0 && col < row.length ? String(row[col]||'').trim() : '';
+  const getNum = (row, col) => {
+    const v = get(row, col);
+    return parseFloat(v.replace(/[$,.]/g,'').replace(',','.')) || 0;
+  };
+
+  const result = data.slice(1).map(row => {
+    const nombre = get(row, cols.nombre) || get(row, cols.nombre_sucursal);
+    const nit = get(row, cols.nit);
+    if(!nit || !nombre) return null;
+    return {
+      nit, nombre,
+      ciudad:          get(row, cols.ciudad),
+      departamento:    get(row, cols.departamento),
+      regional:        get(row, cols.regional),
+      especialidad:    get(row, cols.especialidad),
+      modelo:          get(row, cols.modelo),
+      habilitacion:    get(row, cols.habilitacion),
+      nivel:           get(row, cols.nivel),
+      tipo:            get(row, cols.tipo),
+      tiene_contrato:  get(row, cols.tiene_contrato),
+      no_contrato:     get(row, cols.no_contrato),
+      estado_tarifas:  get(row, cols.estado_tarifas),
+      responsable:     get(row, cols.responsable),
+      red_seguimiento: get(row, cols.red_seguimiento),
+      fact_2024:       getNum(row, cols.fact_2024),
+      fact_2025:       getNum(row, cols.fact_2025),
+      fact_2026:       getNum(row, cols.fact_2026),
+      fact_mar26:      getNum(row, fact_mar26_col),
+    };
+  }).filter(Boolean);
+
+  console.log(`[RedSalud] Prestadores parseados: ${result.length}`);
+  if(result.length > 0) {
+    console.log('[RedSalud] Muestra primer prestador:', result[0]);
+  }
+  return result;
+}
+
+function parsearArrayGestores(dataNIT, dataDANE) {
+  const gestores = (dataNIT||[]).slice(1).map(r=>({
+    nit:    String(r[0]||'').replace('.0','').trim(),
+    nombre: String(r[1]||'').trim(),
+    tipo:   String(r[2]||'').trim(),
+  })).filter(g=>g.nit&&g.nombre);
+
+  const hDANE = dataDANE && dataDANE[0] ? dataDANE[0] : [];
+  const cobertura = (dataDANE||[]).slice(2).map(r=>{
+    const dane = String(r[0]||'').replace('.0','').trim();
+    if(!dane || isNaN(parseFloat(dane))) return null;
+    return {
+      dane,
+      regional:         String(r[1]||'').trim(),
+      departamento:     String(r[2]||'').trim(),
+      municipio:        String(r[3]||'').trim(),
+      contributivo:     parseInt(r[4])||0,
+      subsidiado:       parseInt(r[5])||0,
+      total_afiliados:  parseInt(r[6])||0,
+      gf_pbs:           String(r[9]||'').trim(),
+      gf_no_pbs:        String(r[13]||'').trim(),
+    };
+  }).filter(Boolean);
+
+  return { gestores, cobertura };
+}
+
+function parsearArrayReclamaciones(data) {
+  if(!data || data.length < 2) return [];
+  const headers = data[0].map(h => String(h||'').trim());
+  console.log('[RedSalud] Reclamaciones headers (primeros 20):', headers.slice(0,20));
+
+  const findCol = (...kws) => {
+    for(const kw of kws) {
+      const i = headers.findIndex(h=>h.toLowerCase().includes(kw.toLowerCase()));
+      if(i>=0) return i;
+    }
+    return -1;
+  };
+
+  const cols = {
+    nit:           findCol('NIT PRESTADOR'),
+    nombre:        findCol('NOMBRE SUCURSAL'),
+    regional:      findCol('REGIONAL IPS'),
+    ciudad:        findCol('CIUDAD RESPONSABLE'),
+    concepto:      findCol('CONCEPTO'),
+    vr_cartera:    findCol('VR CARTERA CONCILIADA'),
+    vr_total:      findCol('VALOR TOTAL DESAGREGADO'),
+    vr_eps:        findCol('VALOR ASUMIDO EPS'),
+    vr_ips:        findCol('VALOR ASUMIDO IPS'),
+    pct_eps:       findCol('% ASUMIDO EPS'),
+    estado_cartera:findCol('ESTADO CONCILIACION'),
+    estado_proceso:findCol('ESTADO PROCESO'),
+    vr_1ra_cuota:  findCol('VR PAGO (UNICA', 'VR PAGO UNICA', '1RA CUOTA)'),
+    periodo_desde: findCol('PERIODO RECLAMADO DESDE'),
+    periodo_hasta: findCol('PERIODO RECLAMADO HASTA'),
+  };
+
+  const get    = (row,col) => col>=0&&col<row.length ? String(row[col]||'').trim() : '';
+  const getNum = (row,col) => parseFloat(get(row,col).replace(/[$,.]/g,'').replace(',','.')) || 0;
+
+  return data.slice(1).map(row=>{
+    const nit = get(row,cols.nit);
+    if(!nit) return null;
+    return {
+      nit, nombre:get(row,cols.nombre), regional:get(row,cols.regional),
+      ciudad:get(row,cols.ciudad), concepto:get(row,cols.concepto),
+      vr_cartera:getNum(row,cols.vr_cartera), vr_total:getNum(row,cols.vr_total),
+      vr_eps:getNum(row,cols.vr_eps), vr_ips:getNum(row,cols.vr_ips),
+      pct_eps:getNum(row,cols.pct_eps),
+      estado_cartera:get(row,cols.estado_cartera), estado_proceso:get(row,cols.estado_proceso),
+      vr_1ra_cuota:getNum(row,cols.vr_1ra_cuota),
+      periodo_desde:get(row,cols.periodo_desde), periodo_hasta:get(row,cols.periodo_hasta),
+    };
+  }).filter(Boolean);
 }
 
 function parsearCSVPrestadores(csv) {
@@ -3632,95 +3770,6 @@ function aplicarReclamaciones() {
 }
 
 // ── CARGA LOCAL (fallback si Drive no está disponible) ─────────────────
-function cargarArchivo(input, tipo) {
-  const file = input.files[0];
-  if(!file) return;
-  const estado = document.getElementById('estado-drive-'+tipo) ||
-                 document.getElementById('estado-'+tipo);
-  if(estado){ estado.textContent='⏳ Leyendo...'; estado.style.background='var(--bdim)'; estado.style.color='var(--blue)'; }
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type:'array', cellDates:true });
-      if(tipo==='prestadores') {
-        const sn = wb.SheetNames.find(s=>s.toLowerCase().includes('sanitas'))||wb.SheetNames[0];
-        const raw = XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''});
-        const csv = raw.map(r=>r.join(',')).join('\n');
-        const prest = parsearCSVPrestadores(csv);
-        DATOS_CARGADOS.prestadores = prest;
-        if(estado){ estado.textContent=`✓ ${prest.length.toLocaleString()} prestadores`; estado.style.background='var(--gdim)'; estado.style.color='var(--green)'; }
-        aplicarPrestadores();
-      } else if(tipo==='medicamentos') {
-        const snNIT = wb.SheetNames.find(s=>s.toLowerCase().includes('nit'))||wb.SheetNames[1];
-        const rawNIT = XLSX.utils.sheet_to_json(wb.Sheets[snNIT],{header:1,defval:''});
-        const gestores = parsearCSVGestores(rawNIT.map(r=>r.join(',')).join('\n'));
-        const snDANE = wb.SheetNames.find(s=>s.toLowerCase().includes('dane'))||wb.SheetNames[0];
-        const rawDANE = XLSX.utils.sheet_to_json(wb.Sheets[snDANE],{header:1,defval:''});
-        const cobertura = parsearCSVCobertura(rawDANE.map(r=>r.join(',')).join('\n'));
-        DATOS_CARGADOS.gestores = {gestores, cobertura};
-        if(estado){ estado.textContent=`✓ ${gestores.length} gestores · ${cobertura.length} municipios`; estado.style.background='var(--gdim)'; estado.style.color='var(--green)'; }
-        aplicarGestores();
-      }
-      habilitarAplicar();
-    } catch(err) {
-      if(estado){ estado.textContent='✗ Error: '+err.message; estado.style.background='var(--rdim)'; estado.style.color='var(--red)'; }
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function habilitarAplicar() {
-  const alguno = DATOS_CARGADOS.prestadores||DATOS_CARGADOS.gestores||DATOS_CARGADOS.reclamaciones;
-  const btn = document.getElementById('btn-aplicar');
-  if(alguno&&btn){ btn.disabled=false; btn.style.opacity='1'; btn.style.cursor='pointer'; }
-}
-
-function aplicarDatos() {
-  cerrarCargador();
-  if(DATOS_CARGADOS.prestadores) aplicarPrestadores();
-  if(DATOS_CARGADOS.gestores) aplicarGestores();
-  datosListos=true;
-  const icon=document.getElementById('datos-estado-icon');
-  const lbl=document.getElementById('datos-estado-lbl');
-  const partes=[];
-  if(DATOS_CARGADOS.prestadores) partes.push(DATOS_CARGADOS.prestadores.length.toLocaleString()+' prest.');
-  if(DATOS_CARGADOS.gestores) partes.push(DATOS_CARGADOS.gestores.gestores.length+' gestores');
-  if(icon) icon.textContent='✅';
-  if(lbl) lbl.textContent=partes.join(' · ');
-  const toast=document.getElementById('notif-toast');
-  if(toast){ toast.textContent=`✓ Datos cargados — ${partes.join(' · ')}`; toast.style.display='block'; setTimeout(()=>{toast.style.display='none';},4000); }
-}
-
-// Mapeo de columnas de Base_Prestadores_Nacionales
-const COL_PREST = {
-  forma_contratacion: 1,   // FORMA CONTRATACION
-  nit: 2,                  // NIT
-  cod_sucursal: 6,         // CODIGO SUCURSAL
-  nombre_sucursal: 7,      // NOMBRE SUCURSAL
-  ciudad: 9,               // DESCRIPCION CIUDAD
-  departamento: 10,        // DEPARTAMENTO
-  regional: 11,            // REGIONAL PARAMETRIZADA
-  especialidad: 12,        // ESPECIALIDAD
-  habilitacion_reps: 22,   // Habilitación de Sedes en REPS
-  nivel_complejidad: 23,   // Nivel complejidad
-  tipo_prestador_pub: 24,  // Tipo Prestador(privada publica)
-  nombre_prestador: 20,    // Nombre del Prestador
-  fact_2024: 33,           // Facturación Reporte Analitica 2024
-  fact_2025: 36,           // Facturación total 2025
-  fact_ene26: 37,          // 2026-01
-  fact_feb26: 38,          // 2026-02
-  fact_mar26: 39,          // 2026-03
-  fact_total_2026: 49,     // Facturación total 2026
-  tiene_contrato: 50,      // ¿Cuenta con Contrato?
-  no_contrato: 51,         // No. Contrato
-  fecha_inicio: 53,        // Fecha de Inicio Relación Contractual
-  duracion_meses: 55,      // Duración en Meses de Contrato
-  estado_tarifas_2026: 104,// Estado Tarifas 2026
-  responsable: 198,        // Responsable Equipo Gestión
-  red_seguimiento: 202,    // Red de Seguimiento
-};
-
 function abrirCargador() {
   document.getElementById('modal-cargador').style.display = 'flex';
 }
