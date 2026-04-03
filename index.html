@@ -513,8 +513,33 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="btn" onclick="abrirCargador()" style="background:var(--gdim);border-color:var(--green);color:var(--green);display:flex;align-items:center;gap:6px">
       <span id="datos-estado-icon">📂</span> <span id="datos-estado-lbl">Cargar datos</span>
     </div>
-    <div class="btn">▼ Todos los departamentos</div>
-    <div class="btn">▼ Todas las EPS</div>
+    <div style="position:relative">
+      <div class="btn" id="btn-departamento" onclick="toggleFiltroPanel('departamento')" style="min-width:160px;display:flex;justify-content:space-between;gap:8px">
+        <span id="lbl-departamento">▼ Todos los departamentos</span>
+      </div>
+      <div id="panel-departamento" style="display:none;position:absolute;top:42px;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:10px;min-width:220px;z-index:400;box-shadow:0 8px 32px rgba(0,0,0,.4);max-height:320px;overflow-y:auto">
+        <div style="font-size:11px;color:var(--text2);padding:4px 8px 8px;text-transform:uppercase;letter-spacing:.05em">Departamento</div>
+        <div id="lista-departamentos"></div>
+      </div>
+    </div>
+    <div style="position:relative">
+      <div class="btn" id="btn-regional" onclick="toggleFiltroPanel('regional')" style="min-width:140px;display:flex;justify-content:space-between;gap:8px">
+        <span id="lbl-regional">▼ Todas las regionales</span>
+      </div>
+      <div id="panel-regional" style="display:none;position:absolute;top:42px;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:10px;min-width:200px;z-index:400;box-shadow:0 8px 32px rgba(0,0,0,.4);max-height:320px;overflow-y:auto">
+        <div style="font-size:11px;color:var(--text2);padding:4px 8px 8px;text-transform:uppercase;letter-spacing:.05em">Regional</div>
+        <div id="lista-regionales"></div>
+      </div>
+    </div>
+    <div style="position:relative">
+      <div class="btn" id="btn-modelo-fil" onclick="toggleFiltroPanel('modelo')" style="min-width:130px;display:flex;justify-content:space-between;gap:8px">
+        <span id="lbl-modelo">▼ Todos los modelos</span>
+      </div>
+      <div id="panel-modelo" style="display:none;position:absolute;top:42px;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:10px;min-width:180px;z-index:400;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+        <div style="font-size:11px;color:var(--text2);padding:4px 8px 8px;text-transform:uppercase;letter-spacing:.05em">Modelo contratación</div>
+        <div id="lista-modelos"></div>
+      </div>
+    </div>
     <div class="btn" id="btn-periodo" onclick="togglePeriodoPanel()" style="position:relative">
       📅 <span id="periodo-label">Mar 2026 · T1</span> ▾
       <div id="periodo-panel" style="display:none;position:absolute;top:38px;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:16px;min-width:280px;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.4)">
@@ -3408,6 +3433,10 @@ async function cargarDesdeDrive() {
   if(DATOS_CARGADOS.gestores)    aplicarGestores();
   if(DATOS_CARGADOS.reclamaciones) aplicarReclamaciones();
 
+  // Construir filtros con datos reales y aplicar estado inicial
+  construirFiltros();
+  aplicarFiltrosGlobales();
+
   datosListos = resultados.length > 0;
   cargandoDesdeDrive = false;
 
@@ -4202,6 +4231,228 @@ function actualizarKPI(id, valor) {
   if(el) {
     el.textContent = valor;
     el.style.animation = 'fadeUp .3s ease';
+  }
+}
+
+// ─── SISTEMA DE FILTROS GLOBALES ─────────────────────────────────────
+const FILTROS = { departamento: '', regional: '', modelo: '' };
+
+function toggleFiltroPanel(tipo) {
+  const paneles = ['departamento','regional','modelo'];
+  paneles.forEach(p => {
+    const el = document.getElementById('panel-'+p);
+    if(el) el.style.display = (p===tipo && el.style.display==='none') ? 'block' : 'none';
+  });
+}
+
+// Cerrar paneles al hacer clic fuera
+document.addEventListener('click', e => {
+  ['departamento','regional','modelo'].forEach(tipo => {
+    const btn   = document.getElementById('btn-'+tipo) || document.getElementById('btn-'+tipo+'-fil');
+    const panel = document.getElementById('panel-'+tipo);
+    if(panel && btn && !btn.contains(e.target) && !panel.contains(e.target)) {
+      panel.style.display = 'none';
+    }
+  });
+});
+
+function construirFiltros() {
+  const prest = DATOS_CARGADOS.prestadores;
+  if(!prest || !prest.length) return;
+
+  const fmtOpt = (val, tipo) => {
+    const isSelected = FILTROS[tipo] === val;
+    return `<div onclick="aplicarFiltro('${tipo}','${val.replace(/'/g,"\\'")}',this)"
+      style="padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12.5px;
+             background:${isSelected?'var(--blue)':'transparent'};
+             color:${isSelected?'var(--bg)':'var(--text)'};margin-bottom:2px;
+             transition:background .1s"
+      onmouseover="if(!${isSelected})this.style.background='var(--bg3)'"
+      onmouseout="if(!${isSelected})this.style.background='transparent'">${val}</div>`;
+  };
+
+  // Todos (reset) option
+  const resetOpt = (tipo, label) =>
+    `<div onclick="aplicarFiltro('${tipo}','',this)"
+      style="padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12px;color:var(--text2);margin-bottom:6px;border-bottom:1px solid var(--border)">
+      ✕ ${label}</div>`;
+
+  // Departamentos únicos
+  const deptos = [...new Set(prest.map(p=>p.departamento).filter(Boolean))].sort();
+  const listaDep = document.getElementById('lista-departamentos');
+  if(listaDep) listaDep.innerHTML = resetOpt('departamento','Todos los departamentos') +
+    deptos.map(d => fmtOpt(d,'departamento')).join('');
+
+  // Regionales únicas
+  const regs = [...new Set(prest.map(p=>p.regional).filter(Boolean))].sort();
+  const listaReg = document.getElementById('lista-regionales');
+  if(listaReg) listaReg.innerHTML = resetOpt('regional','Todas las regionales') +
+    regs.map(r => fmtOpt(r,'regional')).join('');
+
+  // Modelos únicos
+  const mods = [...new Set(prest.map(p=>p.modelo).filter(Boolean))].sort();
+  const listaMod = document.getElementById('lista-modelos');
+  if(listaMod) listaMod.innerHTML = resetOpt('modelo','Todos los modelos') +
+    mods.map(m => fmtOpt(m,'modelo')).join('');
+}
+
+function aplicarFiltro(tipo, valor, el) {
+  FILTROS[tipo] = valor;
+
+  // Actualizar label del botón
+  const labels = {
+    departamento: valor || '▼ Todos los departamentos',
+    regional:     valor || '▼ Todas las regionales',
+    modelo:       valor || '▼ Todos los modelos',
+  };
+  const lblEl = document.getElementById('lbl-'+tipo) ||
+                document.getElementById('lbl-'+tipo+'-fil');
+  if(lblEl) {
+    lblEl.textContent = valor ? `✓ ${valor}` : labels[tipo];
+  }
+
+  // Cerrar panel
+  const panel = document.getElementById('panel-'+tipo);
+  if(panel) panel.style.display = 'none';
+
+  // Reconstruir opciones con nuevo estado
+  construirFiltros();
+
+  // Aplicar filtro a todos los módulos
+  aplicarFiltrosGlobales();
+}
+
+function getPrestadoresFiltrados() {
+  const prest = DATOS_CARGADOS.prestadores || [];
+  return prest.filter(p => {
+    if(FILTROS.departamento && p.departamento !== FILTROS.departamento) return false;
+    if(FILTROS.regional     && p.regional     !== FILTROS.regional)     return false;
+    if(FILTROS.modelo       && p.modelo       !== FILTROS.modelo)       return false;
+    return true;
+  });
+}
+
+function aplicarFiltrosGlobales() {
+  const filtrados = getPrestadoresFiltrados();
+  const total     = filtrados.length;
+
+  if(!total) {
+    const toast = document.getElementById('notif-toast');
+    if(toast){ toast.textContent='Sin resultados para los filtros seleccionados'; toast.style.display='block'; setTimeout(()=>{toast.style.display='none';},3000); }
+    return;
+  }
+
+  const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
+  const fmtN = v=>v.toLocaleString('es-CO');
+
+  const habilitados  = filtrados.filter(p=>p.habilitacion==='Si').length;
+  const conContrato  = filtrados.filter(p=>p.tiene_contrato==='Si').length;
+  const regionales   = [...new Set(filtrados.map(p=>p.regional).filter(Boolean))];
+  const departamentos= [...new Set(filtrados.map(p=>p.departamento).filter(Boolean))];
+  const modelos      = [...new Set(filtrados.map(p=>p.modelo).filter(Boolean))];
+  const fact2025     = filtrados.reduce((a,p)=>a+p.fact_2025,0);
+  const factMar26    = filtrados.reduce((a,p)=>a+p.fact_mar26,0);
+  const pctHab       = total>0?Math.round(habilitados/total*100):0;
+  const pctContrato  = total>0?Math.round(conContrato/total*100):0;
+
+  // ── Resumen ejecutivo ─────────────────────────────────────────────
+  actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
+  actualizarKPI('kpi-resumen-prestadores-delta', `${pctHab}% habilitados · ${regionales.length} regionales`);
+  actualizarKPI('kpi-resumen-cobertura', pctContrato+'%');
+  actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(conContrato)} con contrato activo`);
+  actualizarKPI('kpi-fin-fact2025', fmtM(fact2025));
+
+  // ── KPIs Red de prestadores ───────────────────────────────────────
+  actualizarKPI('kpi-prest-total', fmtN(total));
+  actualizarKPI('kpi-prest-hab', pctHab+'%');
+  actualizarKPI('kpi-prest-contrato', fmtN(conContrato));
+  actualizarKPI('kpi-prest-regionales', regionales.length);
+  const cnt = document.getElementById('cnt-prestadores');
+  if(cnt) {
+    const filtroTexto = [
+      FILTROS.departamento, FILTROS.regional, FILTROS.modelo
+    ].filter(Boolean).join(' · ');
+    cnt.textContent = `${fmtN(total)} prestadores${filtroTexto?' · Filtro: '+filtroTexto:''} · ${fmtN(conContrato)} con contrato`;
+  }
+
+  // ── Tabla prestadores ─────────────────────────────────────────────
+  const tbody = document.getElementById('tabla-prestadores-body');
+  if(tbody) {
+    const top = [...filtrados].sort((a,b)=>b.fact_2025-a.fact_2025).slice(0,100);
+    tbody.innerHTML = top.map(p=>{
+      const hab = p.habilitacion==='Si';
+      const semColor = hab?'var(--green)':'var(--red)';
+      const semBg    = hab?'var(--gdim)':'var(--rdim)';
+      const modKey   = p.modelo?.split(' ')[0]||'';
+      const modColor = {CAPITA:'var(--blue)',EVENTO:'var(--green)',MRC:'var(--purple)',PGP:'var(--teal)',TECHO:'var(--amber)'}[modKey]||'var(--text2)';
+      return `<tr>
+        <td style="font-size:11.5px;font-weight:500;color:var(--text)">${p.nombre||p.nit}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${p.nit}</td>
+        <td style="font-size:11px;color:var(--text2)">${p.ciudad||'—'}</td>
+        <td style="font-size:11px;color:var(--text2)">${p.regional||'—'}</td>
+        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:${modColor};font-weight:500">${p.modelo||'—'}</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.fact_2025)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${fmtM(p.fact_mar26)}</td>
+        <td><span style="font-size:10.5px;padding:2px 8px;border-radius:4px;background:${semBg};color:${semColor};font-weight:500">${hab?'✓ Activo':'✗ Inactivo'}</span></td>
+        <td style="font-size:11px;color:var(--text2)">${p.estado_tarifas||'—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Gráfico por modelo ─────────────────────────────────────────────
+  const porModelo = {};
+  modelos.forEach(m=>{
+    const g = filtrados.filter(p=>p.modelo===m);
+    porModelo[m] = { count:g.length, fact2025:g.reduce((a,p)=>a+p.fact_2025,0) };
+  });
+  const grafModelo = document.getElementById('grafico-por-modelo');
+  if(grafModelo) {
+    const maxFact = Math.max(...Object.values(porModelo).map(v=>v.fact2025), 1);
+    grafModelo.innerHTML = Object.entries(porModelo)
+      .sort((a,b)=>b[1].fact2025-a[1].fact2025)
+      .map(([mod,v])=>{
+        const pct = Math.round(v.fact2025/maxFact*100);
+        const color = {CAPITA:'var(--blue)',EVENTO:'var(--green)',MRC:'var(--purple)',PGP:'var(--teal)',TECHO:'var(--amber)'}[mod.split(' ')[0]]||'var(--text2)';
+        return `<div class="hist-bar-row">
+          <span class="hist-bar-lbl" style="font-size:11px">${mod.split(' ')[0]}</span>
+          <div class="hist-bar-track"><div class="hist-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+          <span class="hist-bar-val" style="color:${color};font-size:11px">${fmtM(v.fact2025)} · ${fmtN(v.count)}</span>
+        </div>`;
+      }).join('');
+  }
+
+  // ── KPIs Cobertura ────────────────────────────────────────────────
+  actualizarKPI('kpi-cobertura-dept', departamentos.length);
+  actualizarKPI('kpi-cobertura-ciudades', [...new Set(filtrados.map(p=>p.ciudad).filter(Boolean))].length);
+  actualizarKPI('kpi-cobertura-prest', fmtN(total));
+
+  // ── KPIs Modelos ──────────────────────────────────────────────────
+  actualizarKPI('kpi-modelos-count', modelos.length);
+  actualizarKPI('kpi-modelos-prest', fmtN(total));
+  actualizarKPI('kpi-modelos-fact', fmtM(fact2025));
+
+  // ── Reclamaciones filtradas por NIT ───────────────────────────────
+  const nitsFiltr = new Set(filtrados.map(p=>p.nit));
+  const recFiltradas = (DATOS_CARGADOS.reclamaciones||[]).filter(r=>
+    !FILTROS.departamento && !FILTROS.regional && !FILTROS.modelo ? true : nitsFiltr.has(r.nit)
+  );
+  if(recFiltradas.length > 0) {
+    const totalCartera = recFiltradas.reduce((a,r)=>a+r.vr_cartera,0);
+    const totalEPS     = recFiltradas.reduce((a,r)=>a+r.vr_eps,0);
+    actualizarKPI('kpi-resumen-cartera', fmtM(totalCartera));
+    actualizarKPI('kpi-fin-cartera', fmtM(totalCartera));
+    actualizarKPI('kpi-fin-cartera-delta', `EPS: ${fmtM(totalEPS)} · ${fmtN(recFiltradas.length)} registros`);
+  }
+
+  // Toast confirmación
+  const filtroActivo = [FILTROS.departamento, FILTROS.regional, FILTROS.modelo].filter(Boolean);
+  if(filtroActivo.length > 0) {
+    const toast = document.getElementById('notif-toast');
+    if(toast){
+      toast.textContent = `Filtro activo: ${filtroActivo.join(' · ')} — ${fmtN(total)} prestadores`;
+      toast.style.display='block';
+      setTimeout(()=>{toast.style.display='none';},3000);
+    }
   }
 }
 
