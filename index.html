@@ -540,10 +540,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- ══ RESUMEN ══ -->
 <div class="screen active" id="screen-resumen">
   <div class="kpi-strip cols-5">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Prestadores activos</div><div class="kpi-value" style="color:var(--green)">1,248</div><div class="kpi-delta up">↑ 3.2% vs mes anterior</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)">87.4%</div><div class="kpi-delta up">↑ 1.1% · meta 90%</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Prestadores activos</div><div class="kpi-value" style="color:var(--green)" id="kpi-resumen-prestadores">1,248</div><div class="kpi-delta up" id="kpi-resumen-prestadores-delta">↑ 3.2% vs mes anterior</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">87.4%</div><div class="kpi-delta up" id="kpi-resumen-cobertura-delta">↑ 1.1% · meta 90%</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas activas</div><div class="kpi-value" style="color:var(--amber)">7</div><div class="kpi-delta warn">3 críticas · 4 medias</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)">$4,218 M</div><div class="kpi-delta dn">↑ 8.4% vs mes ant.</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">$4,218 M</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">↑ 8.4% vs mes ant.</div></div>
     <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Score cumplimiento</div><div class="kpi-value" style="color:var(--purple)">81.3</div><div class="kpi-delta up">↑ 2.4pts vs T4 2025</div></div>
   </div>
   <div class="grid-2">
@@ -701,7 +701,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- ══ FINANCIERO ══ -->
 <div class="screen" id="screen-financiero">
   <div class="kpi-strip cols-5">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Valor contratos activos</div><div class="kpi-value" style="color:var(--blue)">$41,240 M</div><div class="kpi-delta neu">Mar 2026</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Facturación total 2025</div><div class="kpi-value" style="color:var(--blue)" id="kpi-fin-fact2025">$41,240 M</div><div class="kpi-delta neu">Mar 2026</div></div>
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Pagos al día</div><div class="kpi-value" style="color:var(--green)">$34,820 M</div><div class="kpi-delta up">84.4% del total</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Pagos pendientes</div><div class="kpi-value" style="color:var(--amber)">$2,202 M</div><div class="kpi-delta warn">14 prestadores · 8 gestores</div></div>
     <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)">$4,218 M</div><div class="kpi-delta dn">↑ 8.4% vs mes ant.</div></div>
@@ -778,8 +778,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- ══ CONTRATACION ══ -->
 <div class="screen" id="screen-contratacion">
   <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Modelos activos</div><div class="kpi-value" style="color:var(--teal)">4</div><div class="kpi-delta neu">Capita · Evento · MRC · PGP</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--blue)">1,248</div><div class="kpi-delta neu">Red completa</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Modelos activos</div><div class="kpi-value" style="color:var(--teal)" id="kpi-modelos-count">4</div><div class="kpi-delta neu">Capita · Evento · MRC · PGP</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--blue)" id="kpi-modelos-prest">1,248</div><div class="kpi-delta neu">Red completa</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">MRC en alerta</div><div class="kpi-value" style="color:var(--amber)">1</div><div class="kpi-delta warn">Siniestralidad +6.8% sobre esperada</div></div>
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Eficiencia global</div><div class="kpi-value" style="color:var(--green)">84.2%</div><div class="kpi-delta up">↑ 1.2% vs T4 2025</div></div>
   </div>
@@ -3590,9 +3590,13 @@ function aplicarReclamaciones() {
   const regionales     = [...new Set(rec.map(r=>r.regional).filter(Boolean))];
 
   // ── Resumen ejecutivo ──────────────────────────────────────────────
-  actualizarKPI('kpi-cartera-total', fmtM(totalCartera));
-  actualizarKPI('kpi-cartera-eps',   fmtM(totalEPS));
-  actualizarKPI('kpi-rec-count',     fmtN(rec.length));
+  actualizarKPI('kpi-cartera-total',    fmtM(totalCartera));
+  actualizarKPI('kpi-cartera-eps',      fmtM(totalEPS));
+  actualizarKPI('kpi-rec-count',        fmtN(rec.length));
+  actualizarKPI('kpi-resumen-cartera',  fmtM(totalCartera));
+  actualizarKPI('kpi-resumen-cartera-delta', `${fmtN(rec.length)} registros · ${fmtN(enProceso)} en proceso`);
+  actualizarKPI('kpi-fin-cartera',      fmtM(totalCartera));
+  actualizarKPI('kpi-fin-cartera-delta',`EPS: ${fmtM(totalEPS)} · IPS: ${fmtM(totalIPS)}`);
 
   // ── Módulo financiero ──────────────────────────────────────────────
   actualizarKPI('kpi-financiero-cartera',    fmtM(totalCartera));
@@ -3990,12 +3994,15 @@ function aplicarPrestadores() {
   actualizarKPI('kpi-fact-2025', fmtM(fact2025));
   actualizarKPI('kpi-habilitados', pctHab+'%');
   actualizarKPI('kpi-regionales', regionales.length);
-
-  // KPIs del resumen ejecutivo (IDs en el HTML estático)
-  actualizarTexto('[data-kpi="prestadores-activos"] .kpi-value', fmtN(habilitados));
-  actualizarTexto('[data-kpi="prestadores-activos"] .kpi-delta', `↑ ${pctHab}% habilitados`);
-  actualizarTexto('[data-kpi="cobertura-red"] .kpi-value', pctHab+'%');
-  actualizarTexto('[data-kpi="fact-total"] .kpi-value', fmtM(fact2025));
+  // KPIs con IDs directos en el HTML
+  actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
+  actualizarKPI('kpi-resumen-prestadores-delta', `${pctHab}% habilitados · ${regionales.length} regionales`);
+  actualizarKPI('kpi-resumen-cobertura', pctContrato+'%');
+  actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(conContrato)} con contrato activo`);
+  // Módulo financiero
+  actualizarKPI('kpi-fin-fact2025', fmtM(fact2025));
+  actualizarKPI('kpi-modelos-count', modelos.length);
+  actualizarKPI('kpi-modelos-prest', fmtN(total));
 
   // ══ RED DE PRESTADORES ══════════════════════════════════════════════
   actualizarKPI('kpi-prest-total', fmtN(total));
