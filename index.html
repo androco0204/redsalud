@@ -3574,13 +3574,57 @@ function parsearCSVReclamaciones(csv) {
 
 function aplicarReclamaciones() {
   const rec = DATOS_CARGADOS.reclamaciones;
-  if(!rec||!rec.length) return;
-  const totalCartera = rec.reduce((a,r)=>a+r.vr_cartera,0);
-  const totalEPS = rec.reduce((a,r)=>a+r.vr_eps,0);
-  const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$'+v.toLocaleString('es-CO');
+  if(!rec || !rec.length) return;
+
+  const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
+  const fmtN = v=>v.toLocaleString('es-CO');
+
+  // Cálculos
+  const totalCartera   = rec.reduce((a,r)=>a+r.vr_cartera,0);
+  const totalEPS       = rec.reduce((a,r)=>a+r.vr_eps,0);
+  const totalIPS       = rec.reduce((a,r)=>a+r.vr_ips,0);
+  const total1raCuota  = rec.reduce((a,r)=>a+r.vr_1ra_cuota,0);
+  const conciliadas    = rec.filter(r=>r.estado_cartera&&r.estado_cartera.toLowerCase().includes('concilia')).length;
+  const enProceso      = rec.filter(r=>r.estado_proceso&&!r.estado_proceso.toLowerCase().includes('cerr')).length;
+  const conPagoCuotas  = rec.filter(r=>r.vr_1ra_cuota>0).length;
+  const regionales     = [...new Set(rec.map(r=>r.regional).filter(Boolean))];
+
+  // ── Resumen ejecutivo ──────────────────────────────────────────────
   actualizarKPI('kpi-cartera-total', fmtM(totalCartera));
-  actualizarKPI('kpi-cartera-eps', fmtM(totalEPS));
-  actualizarKPI('kpi-rec-count', rec.length.toLocaleString('es-CO'));
+  actualizarKPI('kpi-cartera-eps',   fmtM(totalEPS));
+  actualizarKPI('kpi-rec-count',     fmtN(rec.length));
+
+  // ── Módulo financiero ──────────────────────────────────────────────
+  actualizarKPI('kpi-financiero-cartera',    fmtM(totalCartera));
+  actualizarKPI('kpi-financiero-eps',        fmtM(totalEPS));
+  actualizarKPI('kpi-financiero-ips',        fmtM(totalIPS));
+  actualizarKPI('kpi-financiero-cuotas',     fmtM(total1raCuota));
+  actualizarKPI('kpi-financiero-conciliadas',fmtN(conciliadas));
+  actualizarKPI('kpi-financiero-proceso',    fmtN(enProceso));
+  actualizarKPI('kpi-financiero-registros',  fmtN(rec.length));
+  actualizarKPI('kpi-financiero-regionales', regionales.length);
+
+  // Tabla de reclamaciones top 20 por valor
+  const tablaRec = document.getElementById('tabla-reclamaciones-body');
+  if(tablaRec) {
+    const top = [...rec].sort((a,b)=>b.vr_cartera-a.vr_cartera).slice(0,20);
+    tablaRec.innerHTML = top.map(r=>{
+      const estadoColor = r.estado_proceso?.toLowerCase().includes('cerr') ? 'var(--green)' :
+                          r.estado_proceso?.toLowerCase().includes('proceso') ? 'var(--amber)' : 'var(--blue)';
+      const estadoBg    = r.estado_proceso?.toLowerCase().includes('cerr') ? 'var(--gdim)' :
+                          r.estado_proceso?.toLowerCase().includes('proceso') ? 'var(--adim)' : 'var(--bdim)';
+      return `<tr>
+        <td style="font-size:11.5px;font-weight:500;color:var(--text)">${r.nombre||r.nit}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${r.nit}</td>
+        <td style="font-size:11px;color:var(--text2)">${r.regional||'—'}</td>
+        <td style="font-size:11px;color:var(--text2)">${r.concepto||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--red)">${fmtM(r.vr_cartera)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${fmtM(r.vr_eps)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${fmtM(r.vr_1ra_cuota)}</td>
+        <td><span style="font-size:10.5px;padding:2px 8px;border-radius:4px;background:${estadoBg};color:${estadoColor};font-weight:500">${r.estado_proceso||'—'}</span></td>
+      </tr>`;
+    }).join('');
+  }
 }
 
 // ── CARGA LOCAL (fallback si Drive no está disponible) ─────────────────
@@ -3895,88 +3939,154 @@ function aplicarPrestadores() {
   const prest = DATOS_CARGADOS.prestadores;
   if(!prest || !prest.length) return;
 
-  // ── KPIs de resumen ejecutivo ──────────────────────────────────────
-  const total = prest.length;
+  // ── Cálculos base ──────────────────────────────────────────────────
+  const total       = prest.length;
   const conContrato = prest.filter(p=>p.tiene_contrato==='Si').length;
   const habilitados = prest.filter(p=>p.habilitacion==='Si').length;
-  const modelos = [...new Set(prest.map(p=>p.modelo).filter(Boolean))];
-  const regionales = [...new Set(prest.map(p=>p.regional).filter(Boolean))];
+  const sinHab      = total - habilitados;
+  const redSeg      = prest.filter(p=>p.red_seguimiento==='SI'||p.red_seguimiento==='Si').length;
+  const modelos     = [...new Set(prest.map(p=>p.modelo).filter(Boolean))];
+  const regionales  = [...new Set(prest.map(p=>p.regional).filter(Boolean))];
+  const ciudades    = [...new Set(prest.map(p=>p.ciudad).filter(Boolean))];
 
-  // Facturación total 2025
-  const fact2025 = prest.reduce((a,p)=>a+p.fact_2025,0);
-  const fact2024 = prest.reduce((a,p)=>a+p.fact_2024,0);
+  const fact2024  = prest.reduce((a,p)=>a+p.fact_2024,0);
+  const fact2025  = prest.reduce((a,p)=>a+p.fact_2025,0);
+  const fact2026  = prest.reduce((a,p)=>a+p.fact_2026,0);
   const factMar26 = prest.reduce((a,p)=>a+p.fact_mar26,0);
 
-  const fmtM = v => v>=1e9 ? '$'+(v/1e9).toFixed(1)+'B' : v>=1e6 ? '$'+(v/1e6).toFixed(0)+'M' : '$'+v.toLocaleString('es-CO');
+  const pctHab    = Math.round(habilitados/total*100);
+  const pctContrato = Math.round(conContrato/total*100);
+  const varFact   = fact2024>0 ? ((fact2025-fact2024)/fact2024*100).toFixed(1) : 0;
 
-  // Update KPI cards on resumen screen
-  actualizarKPI('kpi-total-prestadores', total.toLocaleString('es-CO'));
+  const fmtM = v => v>=1e12?'$'+(v/1e12).toFixed(1)+'T':v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
+  const fmtN = v => v.toLocaleString('es-CO');
+
+  // ── Por modelo ─────────────────────────────────────────────────────
+  const porModelo = {};
+  modelos.forEach(m=>{
+    const g = prest.filter(p=>p.modelo===m);
+    porModelo[m] = {
+      count: g.length,
+      habilitados: g.filter(p=>p.habilitacion==='Si').length,
+      fact2025: g.reduce((a,p)=>a+p.fact_2025,0),
+      fact2026: g.reduce((a,p)=>a+p.fact_2026,0),
+      factMar26: g.reduce((a,p)=>a+p.fact_mar26,0),
+    };
+  });
+
+  // ── Por regional ───────────────────────────────────────────────────
+  const porRegional = {};
+  regionales.forEach(r=>{
+    const g = prest.filter(p=>p.regional===r);
+    porRegional[r] = {
+      count: g.length,
+      habilitados: g.filter(p=>p.habilitacion==='Si').length,
+      fact2025: g.reduce((a,p)=>a+p.fact_2025,0),
+    };
+  });
+
+  // ══ RESUMEN EJECUTIVO ═══════════════════════════════════════════════
+  actualizarKPI('kpi-total-prestadores', fmtN(total));
   actualizarKPI('kpi-fact-2025', fmtM(fact2025));
-  actualizarKPI('kpi-habilitados', Math.round(habilitados/total*100)+'%');
+  actualizarKPI('kpi-habilitados', pctHab+'%');
   actualizarKPI('kpi-regionales', regionales.length);
 
-  // ── Tabla de prestadores ───────────────────────────────────────────
+  // KPIs del resumen ejecutivo (IDs en el HTML estático)
+  actualizarTexto('[data-kpi="prestadores-activos"] .kpi-value', fmtN(habilitados));
+  actualizarTexto('[data-kpi="prestadores-activos"] .kpi-delta', `↑ ${pctHab}% habilitados`);
+  actualizarTexto('[data-kpi="cobertura-red"] .kpi-value', pctHab+'%');
+  actualizarTexto('[data-kpi="fact-total"] .kpi-value', fmtM(fact2025));
+
+  // ══ RED DE PRESTADORES ══════════════════════════════════════════════
+  actualizarKPI('kpi-prest-total', fmtN(total));
+  actualizarKPI('kpi-prest-hab', pctHab+'%');
+  actualizarKPI('kpi-prest-contrato', fmtN(conContrato));
+  actualizarKPI('kpi-prest-regionales', regionales.length);
+
+  // Contador subtitle
+  const cnt = document.getElementById('cnt-prestadores');
+  if(cnt) cnt.textContent = `${fmtN(total)} prestadores · ${fmtN(conContrato)} con contrato · ${regionales.length} regionales · ${ciudades.length} ciudades`;
+
+  // Tabla top 50 por facturación
   const tbody = document.getElementById('tabla-prestadores-body');
   if(tbody) {
-    // Show top 50 sorted by facturación
     const top = [...prest].sort((a,b)=>b.fact_2025-a.fact_2025).slice(0,50);
-    tbody.innerHTML = top.map((p,i)=>{
+    tbody.innerHTML = top.map(p=>{
       const hab = p.habilitacion==='Si';
       const semColor = hab?'var(--green)':'var(--red)';
       const semBg    = hab?'var(--gdim)':'var(--rdim)';
-      const modColor = {
-        'CAPITA':'var(--blue)','EVENTO':'var(--green)',
-        'MRC':'var(--purple)','PGP':'var(--teal)','TECHO':'var(--amber)'
-      }[p.modelo?.split(' ')[0]] || 'var(--text2)';
-      const f25 = p.fact_2025>0 ? fmtM(p.fact_2025) : '—';
-      const f26 = p.fact_mar26>0 ? fmtM(p.fact_mar26) : '—';
+      const modKey   = p.modelo?.split(' ')[0]||'';
+      const modColor = {CAPITA:'var(--blue)',EVENTO:'var(--green)',MRC:'var(--purple)',PGP:'var(--teal)',TECHO:'var(--amber)'}[modKey]||'var(--text2)';
       return `<tr>
         <td style="font-size:11.5px;font-weight:500;color:var(--text)">${p.nombre||p.nit}</td>
         <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${p.nit}</td>
         <td style="font-size:11px;color:var(--text2)">${p.ciudad||'—'}</td>
         <td style="font-size:11px;color:var(--text2)">${p.regional||'—'}</td>
         <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:${modColor};font-weight:500">${p.modelo||'—'}</span></td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${f25}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${f26}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.fact_2025)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${fmtM(p.fact_mar26)}</td>
         <td><span style="font-size:10.5px;padding:2px 8px;border-radius:4px;background:${semBg};color:${semColor};font-weight:500">${hab?'✓ Activo':'✗ Inactivo'}</span></td>
         <td style="font-size:11px;color:var(--text2)">${p.estado_tarifas||'—'}</td>
       </tr>`;
     }).join('');
-
-    // Update counter
-    const cnt = document.getElementById('cnt-prestadores');
-    if(cnt) cnt.textContent = `${total.toLocaleString('es-CO')} prestadores · ${conContrato.toLocaleString()} con contrato · ${regionales.length} regionales`;
   }
 
-  // ── KPIs pantalla prestadores ──────────────────────────────────────
-  actualizarKPI('kpi-prest-total', total.toLocaleString('es-CO'));
-  actualizarKPI('kpi-prest-hab', Math.round(habilitados/total*100)+'%');
-  actualizarKPI('kpi-prest-contrato', conContrato.toLocaleString('es-CO'));
-  actualizarKPI('kpi-prest-regionales', regionales.length);
+  // ══ MÓDULO FINANCIERO ═══════════════════════════════════════════════
+  // KPIs financieros
+  actualizarKPI('kpi-fact-anual-2025', fmtM(fact2025));
+  actualizarKPI('kpi-fact-var', (varFact>0?'↑ ':'↓ ')+Math.abs(varFact)+'% vs 2024');
+  actualizarKPI('kpi-fact-mar26', fmtM(factMar26));
+  actualizarKPI('kpi-prestadores-red', fmtN(redSeg));
 
-  // ── Comparativo por modelo (módulo financiero) ─────────────────────
-  const porModelo = {};
-  modelos.forEach(m=>{
-    const grupo = prest.filter(p=>p.modelo===m);
-    porModelo[m] = {
-      count: grupo.length,
-      fact2025: grupo.reduce((a,p)=>a+p.fact_2025,0),
-      factMar26: grupo.reduce((a,p)=>a+p.fact_mar26,0),
-    };
-  });
-  const contenedor = document.getElementById('grafico-por-modelo');
-  if(contenedor) {
+  // Gráfico por modelo
+  const grafModelo = document.getElementById('grafico-por-modelo');
+  if(grafModelo) {
     const maxFact = Math.max(...Object.values(porModelo).map(v=>v.fact2025));
-    contenedor.innerHTML = Object.entries(porModelo).sort((a,b)=>b[1].fact2025-a[1].fact2025).map(([mod,v])=>{
-      const pct = maxFact>0 ? Math.round(v.fact2025/maxFact*100) : 0;
-      const color = {CAPITA:'var(--blue)',EVENTO:'var(--green)',MRC:'var(--purple)',PGP:'var(--teal)',TECHO:'var(--amber)'}[mod.split(' ')[0]]||'var(--text2)';
-      return `<div class="hist-bar-row">
-        <span class="hist-bar-lbl">${mod.split(' ')[0]}</span>
-        <div class="hist-bar-track"><div class="hist-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-        <span class="hist-bar-val" style="color:${color}">${fmtM(v.fact2025)}</span>
-      </div>`;
-    }).join('');
+    grafModelo.innerHTML = Object.entries(porModelo)
+      .sort((a,b)=>b[1].fact2025-a[1].fact2025)
+      .map(([mod,v])=>{
+        const pct = maxFact>0 ? Math.round(v.fact2025/maxFact*100) : 0;
+        const color = {CAPITA:'var(--blue)',EVENTO:'var(--green)',MRC:'var(--purple)',PGP:'var(--teal)',TECHO:'var(--amber)'}[mod.split(' ')[0]]||'var(--text2)';
+        return `<div class="hist-bar-row">
+          <span class="hist-bar-lbl" style="font-size:11px">${mod.split(' ')[0]}</span>
+          <div class="hist-bar-track"><div class="hist-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+          <span class="hist-bar-val" style="color:${color};font-size:11px">${fmtM(v.fact2025)}</span>
+        </div>`;
+      }).join('');
   }
+
+  // Distribución por modelo en pantalla prestadores
+  const distModelo = document.getElementById('dist-por-modelo');
+  if(distModelo) {
+    distModelo.innerHTML = Object.entries(porModelo)
+      .sort((a,b)=>b[1].count-a[1].count)
+      .map(([mod,v])=>`
+        <div class="stat-row">
+          <span style="font-size:12px;color:var(--text)">${mod}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${fmtN(v.count)} · ${fmtM(v.fact2025)}</span>
+        </div>`).join('');
+  }
+
+  // ══ MODELOS DE CONTRATACIÓN ══════════════════════════════════════════
+  actualizarKPI('kpi-modelos-count', modelos.length);
+  actualizarKPI('kpi-modelos-prest', fmtN(total));
+  actualizarKPI('kpi-modelos-fact', fmtM(fact2025));
+  actualizarKPI('kpi-modelos-hab', pctHab+'%');
+
+  // ══ RANKING ══════════════════════════════════════════════════════════
+  actualizarKPI('kpi-ranking-total', fmtN(total));
+  actualizarKPI('kpi-ranking-verde', fmtN(habilitados));
+  actualizarKPI('kpi-ranking-rojo', fmtN(sinHab));
+
+  // ══ COBERTURA GEOGRÁFICA ══════════════════════════════════════════════
+  actualizarKPI('kpi-cobertura-dept', [...new Set(prest.map(p=>p.departamento).filter(Boolean))].length);
+  actualizarKPI('kpi-cobertura-ciudades', ciudades.length);
+  actualizarKPI('kpi-cobertura-prest', fmtN(total));
+}
+
+function actualizarTexto(selector, valor) {
+  const el = document.querySelector(selector);
+  if(el) el.textContent = valor;
 }
 
 function aplicarGestores() {
