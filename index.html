@@ -2562,15 +2562,19 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
           </div>
           <div class="val-sum-card">
             <div class="val-sum-val" id="val-sum-presentes" style="color:var(--green)">—</div>
-            <div class="val-sum-lbl">Indicadores presentes ✓</div>
+            <div class="val-sum-lbl">Presentes en contrato ✓</div>
           </div>
           <div class="val-sum-card">
             <div class="val-sum-val" id="val-sum-faltantes" style="color:var(--red)">—</div>
-            <div class="val-sum-lbl">Indicadores faltantes ✗</div>
+            <div class="val-sum-lbl">Faltantes ✗</div>
+          </div>
+          <div class="val-sum-card">
+            <div class="val-sum-val" id="val-sum-total-bat" style="color:var(--blue)">—</div>
+            <div class="val-sum-lbl">Total batería oficial</div>
           </div>
           <div class="val-sum-card">
             <div class="val-sum-val" id="val-sum-extras" style="color:var(--amber)">—</div>
-            <div class="val-sum-lbl">Adicionales no estándar ⚠</div>
+            <div class="val-sum-lbl">Adicionales ⚠</div>
           </div>
         </div>
         <div class="val-result" id="val-result-list"></div>
@@ -3990,9 +3994,15 @@ function mostrarNombrePdf(input) {
 }
 
 function valGoStep3() {
+  // Forzar lectura de todos los checkboxes marcados antes de validar
+  valIndicadoresContrato = [...document.querySelectorAll('#val-checklist input[type=checkbox]:checked')]
+    .map(chk => chk.dataset.ind).filter(Boolean);
+
   valStep = 3;
-  document.getElementById('val-step2').style.display = 'none';
-  document.getElementById('val-step3').style.display = 'block';
+  const s2 = document.getElementById('val-step2');
+  const s3 = document.getElementById('val-step3');
+  if(s2) s2.style.display = 'none';
+  if(s3) s3.style.display = 'block';
   updateStepBar(3);
   runValidation();
 }
@@ -4157,8 +4167,6 @@ function limpiarValidador() {
   if(fn) { fn.textContent=''; fn.style.color=''; }
   const rl = document.getElementById('val-result-list');
   if(rl) rl.innerHTML = '';
-  const btn3 = document.getElementById('val-btn-step3');
-  if(btn3) { btn3.disabled=true; btn3.style.opacity='0.5'; btn3.style.cursor='not-allowed'; }
   updateStepBar(1);
 }
 
