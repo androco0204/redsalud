@@ -2517,20 +2517,32 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <!-- PASO 2: Carga PDF -->
       <div id="val-step2" style="display:none">
         <div id="val-bateria-resumen"></div>
-        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px">2. Carga el contrato o anexo de indicadores en PDF</div>
-        <div class="upload-zone" ondrop="handlePdfDrop(event)" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
-          <input type="file" accept=".pdf" onchange="handlePdfDrop(event)">
-          <div class="upload-icon">📄</div>
-          <div class="upload-title">Arrastra el PDF aquí o haz clic para seleccionarlo</div>
-          <div class="upload-sub">Contrato, anexo de indicadores o otrosí · Máximo 50 MB</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">2. Marca los indicadores presentes en el contrato</div>
+        <div style="font-size:11.5px;color:var(--text2);margin-bottom:14px">Revisa el contrato o anexo y marca ✓ cada indicador que esté incluido. El sistema calcula automáticamente el cumplimiento vs. la batería oficial.</div>
+
+        <!-- Controles -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+          <button class="btn" onclick="marcarTodos(true)" style="font-size:11px;padding:5px 12px">✓ Marcar todos</button>
+          <button class="btn" onclick="marcarTodos(false)" style="font-size:11px;padding:5px 12px">✗ Desmarcar todos</button>
+          <span id="val-checklist-count" style="font-size:11.5px;color:var(--text2);margin-left:8px">0 de 0 marcados</span>
         </div>
-        <div id="val-filename" style="margin-top:10px;font-size:12px;color:var(--text2);text-align:center"></div>
+
+        <!-- Checklist de indicadores -->
+        <div id="val-checklist" style="max-height:420px;overflow-y:auto;border:1px solid var(--border2);border-radius:10px;padding:4px"></div>
+
         <div style="display:flex;gap:8px;margin-top:16px">
           <button class="btn" onclick="document.getElementById('val-step2').style.display='none';document.getElementById('val-step1').style.display='block';updateStepBar(1)">← Volver</button>
-          <button id="val-btn-step3" class="btn pri" style="opacity:0.5;cursor:not-allowed" disabled onclick="valGoStep3()">Validar contrato →</button>
+          <button id="val-btn-step3" class="btn pri" onclick="valGoStep3()">Ver resultados →</button>
         </div>
-        <div style="margin-top:16px;padding:12px;background:var(--bdim);border-radius:8px;font-size:11.5px;color:var(--blue)">
-          💡 <strong>¿Cómo funciona?</strong> El sistema extrae los nombres de los indicadores del PDF y los compara contra la batería oficial del modelo seleccionado. Identifica cuáles están presentes ✓, cuáles faltan ✗ y cuáles son adicionales no estándar ⚠.
+
+        <!-- También acepta PDF para referencia -->
+        <div style="margin-top:14px;padding:12px;background:var(--bg3);border-radius:8px;font-size:11.5px;color:var(--text2)">
+          📄 También puedes cargar el PDF del contrato como referencia visual mientras marcas los indicadores:
+          <label style="display:inline-block;margin-top:6px;cursor:pointer">
+            <input type="file" accept=".pdf" onchange="mostrarNombrePdf(this)" style="display:none">
+            <span style="color:var(--blue);text-decoration:underline">Seleccionar PDF de referencia</span>
+          </label>
+          <span id="val-filename" style="font-size:11px;color:var(--green);margin-left:8px"></span>
         </div>
       </div>
 
@@ -3903,17 +3915,78 @@ function valGoStep2() {
   document.getElementById('val-step1').style.display = 'none';
   document.getElementById('val-step2').style.display = 'block';
   updateStepBar(2);
-  // Show battery summary for selected models
+
   const bateria = getBateriaConsolidada([...valModelos]);
   const resumen = document.getElementById('val-bateria-resumen');
   if(resumen) {
     const porMod = {};
     bateria.forEach(i=>{ porMod[i.modelo]=(porMod[i.modelo]||0)+1; });
+    const conSan = bateria.filter(i=>i.san&&i.san!=='NA').length;
     resumen.innerHTML = `<div style="padding:10px 14px;background:var(--bdim);border-radius:8px;font-size:12px;color:var(--blue);margin-bottom:12px">
-      📋 Batería oficial consolidada: <strong>${bateria.length} indicadores</strong> de ${valModelos.size} tipo(s) seleccionado(s)<br>
-      ${Object.entries(porMod).map(([m,n])=>`<span style="color:var(--text2)">${m}: ${n}</span>`).join(' · ')}
+      📋 <strong>${bateria.length} indicadores</strong> en batería oficial · ${conSan} con sanción potencial<br>
+      <span style="color:var(--text2)">${Object.entries(porMod).map(([m,n])=>`${m}: ${n}`).join(' · ')}</span>
     </div>`;
   }
+  construirChecklist(bateria);
+}
+
+function construirChecklist(bateria) {
+  const container = document.getElementById('val-checklist');
+  if(!container) return;
+  const grupos = {};
+  bateria.forEach(i => {
+    if(!grupos[i.clas]) grupos[i.clas] = [];
+    grupos[i.clas].push(i);
+  });
+  container.innerHTML = Object.entries(grupos).map(([clas, inds]) => {
+    const gid = 'grupo-' + clas.replace(/\s/g,'-').replace(/[^a-zA-Z0-9-]/g,'');
+    return `<div style="border-bottom:1px solid var(--border);padding:8px 12px">
+      <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);font-weight:600;margin-bottom:6px;cursor:pointer"
+           onclick="var e=document.getElementById('${gid}');e.style.display=e.style.display==='none'?'':'none'">
+        ▾ ${clas} <span style="font-weight:400">(${inds.length})</span>
+      </div>
+      <div id="${gid}">
+        ${inds.map((i,idx) => {
+          const id = `chk-${idx}-${gid}`;
+          const sanBadge = i.san&&i.san!=='NA'
+            ? `<span style="font-size:9.5px;color:var(--red);margin-left:6px">⚠ Sancionable</span>` : '';
+          return `<label style="display:flex;align-items:flex-start;gap:10px;padding:6px 8px;border-radius:6px;cursor:pointer;margin-bottom:2px"
+                         onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+            <input type="checkbox" id="${id}" data-ind="${i.ind.replace(/"/g,'&quot;')}"
+                   onchange="actualizarConteoChecklist()"
+                   style="margin-top:2px;flex-shrink:0;width:14px;height:14px;accent-color:var(--green)">
+            <div style="flex:1">
+              <div style="font-size:12px;color:var(--text)">${i.ind}${sanBadge}</div>
+              <div style="font-size:10.5px;color:var(--text2);margin-top:1px">${i.atr} · Meta: ${i.meta||'—'} · ${i.frec||'—'} · ${i.modelo}</div>
+            </div>
+          </label>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  actualizarConteoChecklist();
+}
+
+function marcarTodos(estado) {
+  document.querySelectorAll('#val-checklist input[type=checkbox]').forEach(chk => { chk.checked = estado; });
+  actualizarConteoChecklist();
+}
+
+function actualizarConteoChecklist() {
+  const total = document.querySelectorAll('#val-checklist input[type=checkbox]').length;
+  const marcados = document.querySelectorAll('#val-checklist input[type=checkbox]:checked').length;
+  const cnt = document.getElementById('val-checklist-count');
+  if(cnt) {
+    cnt.textContent = `${marcados} de ${total} marcados`;
+    cnt.style.color = marcados===total?'var(--green)':marcados>total*0.8?'var(--amber)':'var(--text2)';
+  }
+  valIndicadoresContrato = [...document.querySelectorAll('#val-checklist input[type=checkbox]:checked')]
+    .map(chk => chk.dataset.ind);
+}
+
+function mostrarNombrePdf(input) {
+  const fn = document.getElementById('val-filename');
+  if(fn && input.files[0]) { fn.textContent = '📄 '+input.files[0].name; fn.style.color='var(--green)'; }
 }
 
 function valGoStep3() {
