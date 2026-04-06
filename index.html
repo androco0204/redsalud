@@ -1000,17 +1000,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- ══ PRESTADORES ══ -->
 <div class="screen" id="screen-prestadores">
   <div class="kpi-strip cols-5">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total habilitados</div><div class="kpi-value" style="color:var(--green)" id="kpi-prest-hab">1,194</div><div class="kpi-delta up">↑ 14 este mes</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">En observación</div><div class="kpi-value" style="color:var(--amber)">38</div><div class="kpi-delta warn">↑ 5 nuevos</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total prestadores</div><div class="kpi-value" style="color:var(--blue)" id="kpi-prest-total">1,248</div><div class="kpi-delta neu">Red nacional</div></div>
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Con contrato activo</div><div class="kpi-value" style="color:var(--teal)" id="kpi-prest-contrato">1,194</div><div class="kpi-delta up">Legalizados</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Regionales</div><div class="kpi-value" style="color:var(--purple)" id="kpi-prest-regionales">10</div><div class="kpi-delta neu">Cobertura nacional</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total habilitados</div><div class="kpi-value" style="color:var(--green)" id="kpi-prest-hab">—</div><div class="kpi-delta up" id="kpi-prest-hab-delta">% de la red</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Sin contrato / gestión</div><div class="kpi-value" style="color:var(--amber)" id="kpi-prest-sincontrato">—</div><div class="kpi-delta warn" id="kpi-prest-sincontrato-delta">Requieren seguimiento</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total prestadores</div><div class="kpi-value" style="color:var(--blue)" id="kpi-prest-total">—</div><div class="kpi-delta neu">Red nacional</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Con contrato activo</div><div class="kpi-value" style="color:var(--teal)" id="kpi-prest-contrato">—</div><div class="kpi-delta up" id="kpi-prest-contrato-delta">Legalizados</div></div>
+    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Regionales</div><div class="kpi-value" style="color:var(--purple)" id="kpi-prest-regionales">—</div><div class="kpi-delta neu">Cobertura nacional</div></div>
   </div>
   <div class="grid-21">
     <div class="card" style="margin-bottom:0">
       <div class="card-head">
         <div><div class="card-title">Directorio de prestadores</div><div class="card-sub" id="cnt-prestadores">Habilitación + estado financiero integrado</div></div>
-        <div class="card-act">Exportar</div>
+        <div class="card-act" onclick="exportarPrestadoresExcel()" style="cursor:pointer;color:var(--green)">⬇ Exportar Excel</div>
       </div>
       <div class="tabs">
         <div class="tab active" onclick="filtrarTablaPrestadores('todos',this)">Todos</div>
@@ -1022,30 +1022,27 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
         <table class="table">
           <thead><tr><th>Prestador</th><th>NIT</th><th>Ciudad</th><th>Regional</th><th>Modelo</th><th>Fact. 2025</th><th>Fact. Mar 2026</th><th>Habilitación</th><th>Estado tarifas</th></tr></thead>
           <tbody id="tabla-prestadores-body">
-            <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2);font-size:13px">📂 Carga el archivo <strong>Base_Prestadores_Nacionales</strong> para ver los datos reales</td></tr>
+            <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2);font-size:13px">⏳ Cargando datos desde Google Drive...</td></tr>
           </tbody>
         </table>
       </div></div>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px">
       <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Facturación por modelo</div><div class="card-sub">2025 · COP</div></div></div>
+        <div class="card-head"><div><div class="card-title">Facturación por modelo</div><div class="card-sub">2025 · COP real</div></div></div>
         <div class="card-body" style="padding:10px 16px">
           <div id="grafico-por-modelo">
-            <div class="hist-bar-row"><span class="hist-bar-lbl">Evento</span><div class="hist-bar-track"><div class="hist-bar-fill" style="width:85%;background:var(--green)"></div></div><span class="hist-bar-val" style="color:var(--green)">$682M</span></div>
-            <div class="hist-bar-row"><span class="hist-bar-lbl">MRC</span><div class="hist-bar-track"><div class="hist-bar-fill" style="width:62%;background:var(--purple)"></div></div><span class="hist-bar-val" style="color:var(--purple)">$312M</span></div>
-            <div class="hist-bar-row"><span class="hist-bar-lbl">PGP</span><div class="hist-bar-track"><div class="hist-bar-fill" style="width:45%;background:var(--teal)"></div></div><span class="hist-bar-val" style="color:var(--teal)">$198M</span></div>
-            <div class="hist-bar-row"><span class="hist-bar-lbl">Capita</span><div class="hist-bar-track"><div class="hist-bar-fill" style="width:20%;background:var(--amber)"></div></div><span class="hist-bar-val" style="color:var(--amber)">$56M</span></div>
+            <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">⏳ Cargando...</div>
           </div>
         </div>
       </div>
       <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Estado financiero</div></div></div>
-        <div class="card-body" style="padding:10px 16px">
-          <div class="stat-row"><span style="font-size:12px;color:var(--text)">Al día</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)">1,194 · 95.7%</span></div>
-          <div class="stat-row"><span style="font-size:12px;color:var(--text)">Pagos pendientes</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">38 · $440 M</span></div>
-          <div class="stat-row"><span style="font-size:12px;color:var(--text)">Cartera vencida</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)">16 · $2,098 M</span></div>
-          <div class="stat-row" style="border-bottom:none"><span style="font-size:12px;color:var(--text)">Renovaciones pendientes</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--purple)">47 prestadores</span></div>
+        <div class="card-head"><div><div class="card-title">Estado contractual</div><div class="card-sub">Tarifas 2026 · Red completa</div></div></div>
+        <div class="card-body" style="padding:10px 16px" id="card-estado-financiero">
+          <div class="stat-row"><span style="font-size:12px;color:var(--text)">Tarifas finalizadas</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)" id="fin-finalizados">—</span></div>
+          <div class="stat-row"><span style="font-size:12px;color:var(--text)">En negociación</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)" id="fin-negociacion">—</span></div>
+          <div class="stat-row"><span style="font-size:12px;color:var(--text)">Sin iniciar</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)" id="fin-sin-iniciar">—</span></div>
+          <div class="stat-row" style="border-bottom:none"><span style="font-size:12px;color:var(--text)">Facturación total 2025</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)" id="fin-fact-total">—</span></div>
         </div>
       </div>
     </div>
@@ -5352,10 +5349,25 @@ function aplicarPrestadores() {
   actualizarKPI('kpi-modelos-prest', fmtN(total));
 
   // ══ RED DE PRESTADORES ══════════════════════════════════════════════
-  actualizarKPI('kpi-prest-total', fmtN(total));
-  actualizarKPI('kpi-prest-hab', pctHab+'%');
-  actualizarKPI('kpi-prest-contrato', fmtN(conContrato));
-  actualizarKPI('kpi-prest-regionales', regionales.length);
+  const sinContrato   = total - conContrato;
+  pctContrato   = total>0 ? Math.round(conContrato/total*100) : 0;
+  actualizarKPI('kpi-prest-total',           fmtN(total));
+  actualizarKPI('kpi-prest-hab',             fmtN(habilitados));
+  actualizarKPI('kpi-prest-hab-delta',       `${pctHab}% de la red · ${regionales.length} regionales`);
+  actualizarKPI('kpi-prest-contrato',        fmtN(conContrato));
+  actualizarKPI('kpi-prest-contrato-delta',  `${pctContrato}% legalizados`);
+  actualizarKPI('kpi-prest-sincontrato',     fmtN(sinContrato));
+  actualizarKPI('kpi-prest-sincontrato-delta', `${Math.round(sinContrato/total*100)}% requieren gestión`);
+  actualizarKPI('kpi-prest-regionales',      regionales.length);
+
+  // Estado contractual tarifas 2026
+  const finalizados = prest.filter(p=>(p.estado_tarifas||'').toLowerCase().includes('finalizado')).length;
+  const enNegoc     = prest.filter(p=>{const e=(p.estado_tarifas||'').toLowerCase(); return e.includes('negociaci')||e.includes('análisis')||e.includes('anali');}).length;
+  const sinIniciar  = prest.filter(p=>(p.estado_tarifas||'').toLowerCase().includes('sin iniciar')).length;
+  actualizarKPI('fin-finalizados', `${fmtN(finalizados)} · ${Math.round(finalizados/total*100)}%`);
+  actualizarKPI('fin-negociacion', `${fmtN(enNegoc)} · ${Math.round(enNegoc/total*100)}%`);
+  actualizarKPI('fin-sin-iniciar', `${fmtN(sinIniciar)} · ${Math.round(sinIniciar/total*100)}%`);
+  actualizarKPI('fin-fact-total',  fmtM(fact2025));
 
   // Contador subtitle
   const cnt = document.getElementById('cnt-prestadores');
@@ -5605,7 +5617,7 @@ function aplicarFiltrosGlobales() {
   const fact2025     = filtrados.reduce((a,p)=>a+p.fact_2025,0);
   const factMar26    = filtrados.reduce((a,p)=>a+p.fact_mar26,0);
   const pctHab       = total>0?Math.round(habilitados/total*100):0;
-  const pctContrato  = total>0?Math.round(conContrato/total*100):0;
+  pctContrato  = total>0?Math.round(conContrato/total*100):0;
 
   // ── Resumen ejecutivo ─────────────────────────────────────────────
   actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
@@ -5615,15 +5627,52 @@ function aplicarFiltrosGlobales() {
   actualizarKPI('kpi-fin-fact2025', fmtM(fact2025));
 
   // ── KPIs Red de prestadores ───────────────────────────────────────
-  actualizarKPI('kpi-prest-total', fmtN(total));
-  actualizarKPI('kpi-prest-hab', pctHab+'%');
-  actualizarKPI('kpi-prest-contrato', fmtN(conContrato));
-  actualizarKPI('kpi-prest-regionales', regionales.length);
+  const sinContrato2  = total - conContrato;
+  actualizarKPI('kpi-prest-total',             fmtN(total));
+  actualizarKPI('kpi-prest-hab',               fmtN(habilitados));
+  actualizarKPI('kpi-prest-hab-delta',         `${pctHab}% de la red · ${regionales.length} regionales`);
+  actualizarKPI('kpi-prest-contrato',          fmtN(conContrato));
+  actualizarKPI('kpi-prest-contrato-delta',    `${pctContrato}% legalizados`);
+  actualizarKPI('kpi-prest-sincontrato',       fmtN(sinContrato2));
+  actualizarKPI('kpi-prest-sincontrato-delta', `${total>0?Math.round(sinContrato2/total*100):0}% requieren gestión`);
+  actualizarKPI('kpi-prest-regionales',        regionales.length);
+
+  // Estado contractual tarifas 2026
+  const fin2 = filtrados.filter(p=>(p.estado_tarifas||'').toLowerCase().includes('finalizado')).length;
+  const neg2 = filtrados.filter(p=>{const e=(p.estado_tarifas||'').toLowerCase(); return e.includes('negociaci')||e.includes('análisis')||e.includes('anali');}).length;
+  const sin2 = filtrados.filter(p=>(p.estado_tarifas||'').toLowerCase().includes('sin iniciar')).length;
+  actualizarKPI('fin-finalizados', `${fmtN(fin2)} · ${total>0?Math.round(fin2/total*100):0}%`);
+  actualizarKPI('fin-negociacion', `${fmtN(neg2)} · ${total>0?Math.round(neg2/total*100):0}%`);
+  actualizarKPI('fin-sin-iniciar', `${fmtN(sin2)} · ${total>0?Math.round(sin2/total*100):0}%`);
+  actualizarKPI('fin-fact-total',  fmtM(fact2025));
+
+  // Facturación por modelo — gráfico dinámico
+  const grafMod = document.getElementById('grafico-por-modelo');
+  if(grafMod) {
+    const porMod = {};
+    filtrados.forEach(p => {
+      const k = p.modelo?.split(' ')[0] || 'OTRO';
+      if(!porMod[k]) porMod[k] = { fact:0, count:0 };
+      porMod[k].fact  += p.fact_2025;
+      porMod[k].count++;
+    });
+    const COLORES = {EVENTO:'var(--green)',CAPITA:'var(--teal)',PGP:'var(--blue)',MRC:'var(--purple)',TECHO:'var(--amber)',LIBRO:'var(--red)',OTRO:'var(--text2)'};
+    const sorted = Object.entries(porMod).sort((a,b)=>b[1].fact-a[1].fact);
+    const maxFact = sorted[0]?.[1]?.fact || 1;
+    grafMod.innerHTML = sorted.map(([mod, v]) => {
+      const pct = Math.round(v.fact/maxFact*100);
+      const col = COLORES[mod] || 'var(--text2)';
+      return `<div class="hist-bar-row">
+        <span class="hist-bar-lbl" style="width:65px;font-size:10.5px">${mod}</span>
+        <div class="hist-bar-track" style="flex:1"><div class="hist-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+        <span class="hist-bar-val" style="color:${col};font-size:10.5px;width:110px;text-align:right">${fmtM(v.fact)} · ${v.count}</span>
+      </div>`;
+    }).join('');
+  }
+
   const cnt = document.getElementById('cnt-prestadores');
   if(cnt) {
-    const filtroTexto = [
-      FILTROS.departamento, FILTROS.regional, FILTROS.modelo
-    ].filter(Boolean).join(' · ');
+    const filtroTexto = [FILTROS.departamento, FILTROS.regional, FILTROS.modelo].filter(Boolean).join(' · ');
     cnt.textContent = `${fmtN(total)} prestadores${filtroTexto?' · Filtro: '+filtroTexto:''} · ${fmtN(conContrato)} con contrato`;
   }
 
