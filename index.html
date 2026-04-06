@@ -5350,12 +5350,12 @@ function aplicarPrestadores() {
 
   // ══ RED DE PRESTADORES ══════════════════════════════════════════════
   const sinContrato   = total - conContrato;
-  pctContrato   = total>0 ? Math.round(conContrato/total*100) : 0;
+  pctContrato2   = total>0 ? Math.round(conContrato/total*100) : 0;
   actualizarKPI('kpi-prest-total',           fmtN(total));
   actualizarKPI('kpi-prest-hab',             fmtN(habilitados));
   actualizarKPI('kpi-prest-hab-delta',       `${pctHab}% de la red · ${regionales.length} regionales`);
   actualizarKPI('kpi-prest-contrato',        fmtN(conContrato));
-  actualizarKPI('kpi-prest-contrato-delta',  `${pctContrato}% legalizados`);
+  actualizarKPI('kpi-prest-contrato-delta',  `${pctContrato2}% legalizados`);
   actualizarKPI('kpi-prest-sincontrato',     fmtN(sinContrato));
   actualizarKPI('kpi-prest-sincontrato-delta', `${Math.round(sinContrato/total*100)}% requieren gestión`);
   actualizarKPI('kpi-prest-regionales',      regionales.length);
@@ -5617,7 +5617,7 @@ function aplicarFiltrosGlobales() {
   const fact2025     = filtrados.reduce((a,p)=>a+p.fact_2025,0);
   const factMar26    = filtrados.reduce((a,p)=>a+p.fact_mar26,0);
   const pctHab       = total>0?Math.round(habilitados/total*100):0;
-  pctContrato  = total>0?Math.round(conContrato/total*100):0;
+  pctContrato2  = total>0?Math.round(conContrato/total*100):0;
 
   // ── Resumen ejecutivo ─────────────────────────────────────────────
   actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
@@ -5632,7 +5632,7 @@ function aplicarFiltrosGlobales() {
   actualizarKPI('kpi-prest-hab',               fmtN(habilitados));
   actualizarKPI('kpi-prest-hab-delta',         `${pctHab}% de la red · ${regionales.length} regionales`);
   actualizarKPI('kpi-prest-contrato',          fmtN(conContrato));
-  actualizarKPI('kpi-prest-contrato-delta',    `${pctContrato}% legalizados`);
+  actualizarKPI('kpi-prest-contrato-delta',    `${pctContrato2}% legalizados`);
   actualizarKPI('kpi-prest-sincontrato',       fmtN(sinContrato2));
   actualizarKPI('kpi-prest-sincontrato-delta', `${total>0?Math.round(sinContrato2/total*100):0}% requieren gestión`);
   actualizarKPI('kpi-prest-regionales',        regionales.length);
