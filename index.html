@@ -2476,15 +2476,50 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- ══ VALIDADOR DE CONTRATOS ══ -->
 <div class="screen" id="screen-validador">
   <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Contratos validados</div><div class="kpi-value" style="color:var(--blue)" id="kpi-val-total">0</div><div class="kpi-delta up">Este período</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Contratos validados</div><div class="kpi-value" style="color:var(--blue)" id="kpi-val-total">0</div><div class="kpi-delta up" id="kpi-val-total-delta">Este período</div></div>
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplen batería oficial</div><div class="kpi-value" style="color:var(--green)" id="kpi-val-cumplen">0</div><div class="kpi-delta up">≥90% cobertura</div></div>
     <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Con indicadores faltantes</div><div class="kpi-value" style="color:var(--red)" id="kpi-val-faltantes">0</div><div class="kpi-delta warn">Requieren ajuste</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Indicadores adicionales</div><div class="kpi-value" style="color:var(--amber)" id="kpi-val-extras">0</div><div class="kpi-delta neu">No estándar detectados</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Cumplimiento promedio</div><div class="kpi-value" style="color:var(--amber)" id="kpi-val-prom-pct">—</div><div class="kpi-delta neu">Sobre todos los contratos</div></div>
+  </div>
+
+  <!-- Repositorio de validaciones -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-head">
+      <div><div class="card-title">📁 Repositorio de validaciones</div><div class="card-sub" id="repo-sub">Historial de contratos validados en esta sesión</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="exportarRepositorio()" style="font-size:11px">⬇ Exportar Excel</button>
+        <button class="btn" onclick="limpiarRepositorio()" style="font-size:11px;color:var(--red)">🗑 Limpiar historial</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0 20px">
+      <div class="scroll" style="max-height:220px">
+        <table class="table" id="tabla-repo">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Prestador / Contrato</th>
+              <th>NIT</th>
+              <th>Tipo contrato</th>
+              <th>Cumplimiento</th>
+              <th>Presentes</th>
+              <th>Faltantes</th>
+              <th>Adicionales</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-repo-body">
+            <tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text2);font-size:12px">
+              Aún no hay validaciones registradas. Completa el validador y guarda el resultado.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div class="card">
     <div class="card-head">
-      <div><div class="card-title">Validador de contratos vs. batería oficial</div><div class="card-sub">Carga el PDF del contrato o anexo de indicadores y compáralo automáticamente con los lineamientos de la batería oficial según el modelo de contratación</div></div>
+      <div><div class="card-title">Validador de contratos vs. batería oficial</div><div class="card-sub">Selecciona el tipo de contrato, marca los indicadores presentes y obtén el análisis de cumplimiento</div></div>
       <button class="btn" onclick="limpiarValidador()">↺ Limpiar</button>
     </div>
     <div class="card-body">
@@ -2550,6 +2585,39 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
       <!-- PASO 3: Resultados -->
       <div id="val-step3" style="display:none">
+        <!-- Datos del prestador para el repositorio -->
+        <div style="background:var(--bg3);border-radius:10px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--border2)">
+          <div style="font-size:11.5px;font-weight:600;color:var(--text);margin-bottom:10px">📋 Datos del contrato — para guardar en repositorio</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div>
+              <div style="font-size:10.5px;color:var(--text2);margin-bottom:3px">NIT Prestador</div>
+              <input id="repo-nit" type="text" placeholder="890.123.456-7" style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:10.5px;color:var(--text2);margin-bottom:3px">Nombre Prestador / IPS</div>
+              <input id="repo-nombre" type="text" placeholder="Nombre de la IPS o prestador" style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:10.5px;color:var(--text2);margin-bottom:3px">No. Contrato</div>
+              <input id="repo-contrato" type="text" placeholder="COMN3-0244" style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:10.5px;color:var(--text2);margin-bottom:3px">Regional</div>
+              <input id="repo-regional" type="text" placeholder="Ej: Boyacá" style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:10.5px;color:var(--text2);margin-bottom:3px">Ciudad</div>
+              <input id="repo-ciudad" type="text" placeholder="Ej: Tunja" style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:10.5px;color:var(--text2);margin-bottom:3px">Vigencia</div>
+              <input id="repo-vigencia" type="text" placeholder="Ej: 2025" style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none">
+            </div>
+          </div>
+          <button class="btn pri" onclick="guardarEnRepositorio()" style="margin-top:12px;font-size:12px">💾 Guardar en repositorio</button>
+          <span id="repo-saved-msg" style="margin-left:10px;font-size:11.5px;color:var(--green);display:none">✓ Guardado correctamente</span>
+        </div>
+
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:13px;font-weight:500;color:var(--text)">3. Resultado de la validación</div>
           <div style="display:flex;gap:8px">
@@ -3895,6 +3963,8 @@ function inicializarValidador() {
       <div class="sel-card-meta">${n} indicadores · ${conSan} con sanción</div>
     </div>`;
   }).join('');
+  renderizarRepositorio();
+  actualizarKPIsRepositorio();
 }
 
 function valToggleModelo(el, modelo) {
@@ -4310,32 +4380,33 @@ function actualizarGraficasResumen() {
 
   // ── Proyección gasto vs presupuesto ────────────────────────────────
   const grafProy = document.getElementById('graf-proyeccion');
-  if(grafProy) {
+  if(grafProy && filtrados.length > 0) {
     const porModelo = {};
     filtrados.forEach(p => {
       const mod = p.modelo?.split(' ')[0] || 'OTRO';
-      if(!porModelo[mod]) porModelo[mod] = { fact25:0, fact26:0, count:0 };
-      porModelo[mod].fact25  += p.fact_2025;
-      porModelo[mod].fact26  += p.fact_2026 || p.fact_mar26 * 12;
+      if(!porModelo[mod]) porModelo[mod] = { fact25:0, count:0 };
+      porModelo[mod].fact25 += p.fact_2025;
       porModelo[mod].count++;
     });
-    const colors = {CAPITA:'var(--teal)',EVENTO:'var(--green)',MRC:'var(--amber)',PGP:'var(--blue)',TECHO:'var(--purple)',LIBRO:'var(--red)'};
-    grafProy.innerHTML = Object.entries(porModelo)
-      .sort((a,b)=>b[1].fact25-a[1].fact25)
-      .map(([mod,v]) => {
-        const presupuesto = v.fact25 * 1.05; // estimado +5% año anterior
-        const ejecutado   = v.fact26 > 0 ? v.fact26 : v.fact25;
-        const pct = Math.min(Math.round(ejecutado/presupuesto*100), 120);
-        const color = colors[mod] || 'var(--text2)';
-        const barColor = pct>100?'var(--red)':pct>90?'var(--amber)':color;
-        return `<div style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:11px;color:var(--text2)">${mod}</span>
-            <span style="font-family:'DM Mono',monospace;font-size:11px;color:${barColor}">${fmtM(ejecutado)} / ${fmtM(presupuesto)}</span>
-          </div>
-          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div></div>
-        </div>`;
-      }).join('');
+    const COLORS = {CAPITA:'var(--teal)',EVENTO:'var(--green)',MRC:'var(--amber)',PGP:'var(--blue)',TECHO:'var(--purple)',LIBRO:'var(--red)',OTRO:'var(--text2)'};
+    const entries = Object.entries(porModelo).sort((a,b)=>b[1].fact25-a[1].fact25);
+    const maxFact = entries[0]?.[1]?.fact25 || 1;
+    grafProy.innerHTML = entries.map(([mod,v]) => {
+      const presupuesto = v.fact25 * 1.05;
+      const pct = Math.min(Math.round(v.fact25/maxFact*100), 100);
+      const color = COLORS[mod] || 'var(--text2)';
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;align-items:center">
+          <span style="font-size:11px;color:var(--text2);font-weight:500">${mod} <span style="color:var(--text2);font-weight:400">(${v.count})</span></span>
+          <span style="font-family:'DM Mono',monospace;font-size:10.5px;color:${color}">${fmtM(v.fact25)} → ${fmtM(presupuesto)}</span>
+        </div>
+        <div style="height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width .5s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  } else if(grafProy) {
+    grafProy.innerHTML = '<div style="color:var(--text2);font-size:12px;padding:20px 0;text-align:center">Sin datos de facturación disponibles</div>';
   }
 
   // ── Ranking rápido prestadores (top 5 por facturación) ──────────────
@@ -4393,7 +4464,166 @@ function actualizarGraficasResumen() {
   }
 }
 
-// ─── CONSTRUCTOR ────────────────────────────────────────────────────
+// ─── REPOSITORIO DE VALIDACIONES ─────────────────────────────────────
+let REPO_VALIDACIONES = JSON.parse(localStorage.getItem('redsalud_repo_val') || '[]');
+
+function guardarEnRepositorio() {
+  const bateria = getBateriaConsolidada([...valModelos]);
+  if(!bateria.length) return;
+
+  const enContrato = new Set(valIndicadoresContrato);
+  const presentes  = bateria.filter(i => enContrato.has(i.ind));
+  const faltantes  = bateria.filter(i => !enContrato.has(i.ind));
+  const extras     = valIndicadoresContrato.filter(i => !new Set(bateria.map(b=>b.ind)).has(i));
+  const pct        = Math.round(presentes.length/bateria.length*100);
+
+  const registro = {
+    id:        Date.now(),
+    fecha:     new Date().toLocaleDateString('es-CO'),
+    hora:      new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
+    nit:       document.getElementById('repo-nit')?.value?.trim()    || '—',
+    nombre:    document.getElementById('repo-nombre')?.value?.trim() || '—',
+    contrato:  document.getElementById('repo-contrato')?.value?.trim()|| '—',
+    regional:  document.getElementById('repo-regional')?.value?.trim()|| '—',
+    ciudad:    document.getElementById('repo-ciudad')?.value?.trim() || '—',
+    vigencia:  document.getElementById('repo-vigencia')?.value?.trim()|| new Date().getFullYear().toString(),
+    tipos:     [...valModelos].join(' + '),
+    total_bat: bateria.length,
+    presentes: presentes.length,
+    faltantes: faltantes.length,
+    extras:    extras.length,
+    pct:       pct,
+    cumple:    pct >= 90,
+    detalle_presentes: presentes.map(i=>i.ind),
+    detalle_faltantes: faltantes.map(i=>({ ind:i.ind, clas:i.clas, atr:i.atr, meta:i.meta, san:i.san, modelo:i.modelo })),
+    detalle_extras:    extras,
+  };
+
+  REPO_VALIDACIONES.unshift(registro); // más reciente primero
+  try { localStorage.setItem('redsalud_repo_val', JSON.stringify(REPO_VALIDACIONES)); } catch(e) {}
+
+  renderizarRepositorio();
+  actualizarKPIsRepositorio();
+
+  const msg = document.getElementById('repo-saved-msg');
+  if(msg) { msg.style.display='inline'; setTimeout(()=>{ msg.style.display='none'; },3000); }
+}
+
+function renderizarRepositorio() {
+  const tbody = document.getElementById('tabla-repo-body');
+  const sub   = document.getElementById('repo-sub');
+  if(!tbody) return;
+
+  if(!REPO_VALIDACIONES.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text2);font-size:12px">Aún no hay validaciones registradas.</td></tr>';
+    if(sub) sub.textContent = 'Historial de contratos validados';
+    return;
+  }
+
+  if(sub) sub.textContent = `${REPO_VALIDACIONES.length} validación(es) guardada(s) · ${REPO_VALIDACIONES.filter(r=>r.cumple).length} cumplen ≥90%`;
+
+  tbody.innerHTML = REPO_VALIDACIONES.map(r => {
+    const pctColor = r.pct>=90?'var(--green)':r.pct>=70?'var(--amber)':'var(--red)';
+    const badge    = r.cumple
+      ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--gdim);color:var(--green)">✓ Cumple</span>'
+      : '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--rdim);color:var(--red)">✗ Ajustar</span>';
+    return `<tr>
+      <td style="font-size:11px;color:var(--text2)">${r.fecha} ${r.hora}</td>
+      <td>
+        <div style="font-size:11.5px;font-weight:500;color:var(--text)">${r.nombre}</div>
+        <div style="font-size:10.5px;color:var(--text2)">${r.contrato} · ${r.regional} · ${r.ciudad}</div>
+      </td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit}</td>
+      <td style="font-size:11px;color:var(--text2)">${r.tipos}</td>
+      <td>
+        <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:${pctColor}">${r.pct}%</span>
+        ${badge}
+      </td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">${r.presentes}/${r.total_bat}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">${r.faltantes}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">${r.extras}</td>
+      <td>
+        <button class="btn" style="font-size:10px;padding:3px 8px" onclick="verDetalleRepo(${r.id})">Ver detalle</button>
+        <button class="btn" style="font-size:10px;padding:3px 8px;color:var(--red)" onclick="eliminarDeRepo(${r.id})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function actualizarKPIsRepositorio() {
+  const total   = REPO_VALIDACIONES.length;
+  const cumplen = REPO_VALIDACIONES.filter(r=>r.cumple).length;
+  const faltan  = total - cumplen;
+  const promPct = total > 0 ? Math.round(REPO_VALIDACIONES.reduce((a,r)=>a+r.pct,0)/total) : 0;
+  actualizarKPI('kpi-val-total',    total);
+  actualizarKPI('kpi-val-total-delta', `${total} contrato(s) en historial`);
+  actualizarKPI('kpi-val-cumplen',  cumplen);
+  actualizarKPI('kpi-val-faltantes',faltan);
+  actualizarKPI('kpi-val-prom-pct', total>0 ? promPct+'%' : '—');
+}
+
+function verDetalleRepo(id) {
+  const r = REPO_VALIDACIONES.find(x=>x.id===id);
+  if(!r) return;
+  const faltantesTexto = r.detalle_faltantes.map(i=>`• [${i.modelo}] ${i.ind} | ${i.atr} | Meta: ${i.meta||'—'} | Sanción: ${i.san||'NA'}`).join('\n');
+  const presentesTexto = r.detalle_presentes.map(i=>`• ${i}`).join('\n');
+  const txt = `DETALLE VALIDACIÓN — ${r.fecha}
+Prestador: ${r.nombre} (NIT ${r.nit})
+Contrato: ${r.contrato} · ${r.regional} · ${r.ciudad} · Vigencia ${r.vigencia}
+Tipo: ${r.tipos}
+Cumplimiento: ${r.pct}% (${r.presentes}/${r.total_bat} indicadores)
+
+FALTANTES (${r.faltantes}):
+${faltantesTexto||'Ninguno'}
+
+PRESENTES (${r.presentes}):
+${presentesTexto}`;
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
+  a.download = `Detalle_${r.nit}_${r.fecha.replace(/\//g,'-')}.txt`;
+  a.click();
+}
+
+function eliminarDeRepo(id) {
+  REPO_VALIDACIONES = REPO_VALIDACIONES.filter(r=>r.id!==id);
+  try { localStorage.setItem('redsalud_repo_val', JSON.stringify(REPO_VALIDACIONES)); } catch(e) {}
+  renderizarRepositorio();
+  actualizarKPIsRepositorio();
+}
+
+function limpiarRepositorio() {
+  if(!confirm('¿Eliminar todo el historial de validaciones? Esta acción no se puede deshacer.')) return;
+  REPO_VALIDACIONES = [];
+  try { localStorage.removeItem('redsalud_repo_val'); } catch(e) {}
+  renderizarRepositorio();
+  actualizarKPIsRepositorio();
+}
+
+function exportarRepositorio() {
+  if(!REPO_VALIDACIONES.length) return;
+  const bom = '\uFEFF';
+  const headers = ['Fecha','Hora','NIT','Prestador','Contrato','Regional','Ciudad','Vigencia',
+    'Tipos contrato','Total batería','Presentes','Faltantes','Adicionales','% Cumplimiento','¿Cumple ≥90%?',
+    'Indicadores faltantes'];
+  const rows = REPO_VALIDACIONES.map(r => [
+    r.fecha, r.hora, r.nit, r.nombre, r.contrato, r.regional, r.ciudad, r.vigencia,
+    r.tipos, r.total_bat, r.presentes, r.faltantes, r.extras, r.pct+'%', r.cumple?'SÍ':'NO',
+    r.detalle_faltantes.map(i=>i.ind).join(' | ')
+  ]);
+  const csv = bom + [headers, ...rows]
+    .map(r => r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(';'))
+    .join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = `Repositorio_Validaciones_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// Inicializar repositorio al cargar
+document.addEventListener('DOMContentLoaded', () => {
+  renderizarRepositorio();
+  actualizarKPIsRepositorio();
+});
 function constToggleRegional(el, reg){
   document.querySelectorAll('.reg-chip').forEach(c=>c.classList.remove('sel'));
   if(constRegional===reg){
