@@ -5610,7 +5610,7 @@ function aplicarPrestadores() {
 
   // ══ RED DE PRESTADORES ══════════════════════════════════════════════
   const sinContrato   = total - conContrato;
-  pctContrato2   = total>0 ? Math.round(conContrato/total*100) : 0;
+  const pctContrato2 = total>0 ? Math.round(conContrato/total*100) : 0;
   actualizarKPI('kpi-prest-total',           fmtN(total));
   actualizarKPI('kpi-prest-hab',             fmtN(habilitados));
   actualizarKPI('kpi-prest-hab-delta',       `${pctHab}% de la red · ${regionales.length} regionales`);
@@ -5877,12 +5877,12 @@ function aplicarFiltrosGlobales() {
   const fact2025     = filtrados.reduce((a,p)=>a+p.fact_2025,0);
   const factMar26    = filtrados.reduce((a,p)=>a+p.fact_mar26,0);
   const pctHab       = total>0?Math.round(habilitados/total*100):0;
-  pctContrato2  = total>0?Math.round(conContrato/total*100):0;
+  const pctContrato2 = total>0?Math.round(conContrato/total*100):0;
 
   // ── Resumen ejecutivo ─────────────────────────────────────────────
   actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
   actualizarKPI('kpi-resumen-prestadores-delta', `${pctHab}% habilitados · ${regionales.length} regionales`);
-  actualizarKPI('kpi-resumen-cobertura', pctContrato+'%');
+  actualizarKPI('kpi-resumen-cobertura', pctContrato2+'%');
   actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(conContrato)} con contrato activo`);
   actualizarKPI('kpi-fin-fact2025', fmtM(fact2025));
 
