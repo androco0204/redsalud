@@ -4629,56 +4629,76 @@ async function cargarDesdeDrive() {
   const btn = document.getElementById('btn-drive');
   if(btn){ btn.disabled=true; btn.innerHTML='<span style="font-size:18px">⏳</span> Cargando datos...'; }
 
+  actualizarEstadoFuente('prestadores',   '⏳ Cargando...','var(--bdim)','var(--blue)');
+  actualizarEstadoFuente('medicamentos',  '⏳ Cargando...','var(--bdim)','var(--blue)');
+  actualizarEstadoFuente('reclamaciones', '⏳ Cargando...','var(--bdim)','var(--blue)');
+
+  // ── Cargar las 4 fuentes EN PARALELO ─────────────────────────────────
+  const [resPrest, resNIT, resDANE, resRec] = await Promise.allSettled([
+    fetchViaAppsScript(DRIVE_CONFIG.prestadores.id,       DRIVE_CONFIG.prestadores.hoja),
+    fetchViaAppsScript(DRIVE_CONFIG.medicamentos_nit.id,  DRIVE_CONFIG.medicamentos_nit.hoja),
+    fetchViaAppsScript(DRIVE_CONFIG.medicamentos_dane.id, DRIVE_CONFIG.medicamentos_dane.hoja),
+    fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
+  ]);
+
   const resultados = [];
 
-  // ── 1. Prestadores ─────────────────────────────────────────────────
-  actualizarEstadoFuente('prestadores','⏳ Cargando...','var(--bdim)','var(--blue)');
-  try {
-    const raw = await fetchViaAppsScript(DRIVE_CONFIG.prestadores.id, DRIVE_CONFIG.prestadores.hoja);
-    const prest = parsearArrayPrestadores(raw);
-    DATOS_CARGADOS.prestadores = prest;
-    actualizarEstadoFuente('prestadores',`✓ ${prest.length.toLocaleString('es-CO')} prestadores`,'var(--gdim)','var(--green)');
-    resultados.push(`${prest.length.toLocaleString('es-CO')} prestadores`);
-  } catch(e) {
-    actualizarEstadoFuente('prestadores',`⚠ Error: ${e.message}`,'var(--adim)','var(--amber)');
-    console.error('Prestadores:', e);
+  // ── Procesar Prestadores ─────────────────────────────────────────────
+  if(resPrest.status === 'fulfilled') {
+    try {
+      const prest = parsearArrayPrestadores(resPrest.value);
+      DATOS_CARGADOS.prestadores = prest;
+      actualizarEstadoFuente('prestadores',`✓ ${prest.length.toLocaleString('es-CO')} prestadores`,'var(--gdim)','var(--green)');
+      resultados.push(`${prest.length.toLocaleString('es-CO')} prestadores`);
+    } catch(e) {
+      actualizarEstadoFuente('prestadores',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
+      console.error('Prestadores parser:', e);
+    }
+  } else {
+    actualizarEstadoFuente('prestadores',`⚠ Error: ${resPrest.reason?.message||'Sin respuesta'}`,'var(--adim)','var(--amber)');
   }
 
-  // ── 2. Gestores ────────────────────────────────────────────────────
-  actualizarEstadoFuente('medicamentos','⏳ Cargando...','var(--bdim)','var(--blue)');
-  try {
-    const rawNIT  = await fetchViaAppsScript(DRIVE_CONFIG.medicamentos_nit.id,  DRIVE_CONFIG.medicamentos_nit.hoja);
-    const rawDANE = await fetchViaAppsScript(DRIVE_CONFIG.medicamentos_dane.id, DRIVE_CONFIG.medicamentos_dane.hoja);
-    const {gestores, cobertura} = parsearArrayGestores(rawNIT, rawDANE);
-    DATOS_CARGADOS.gestores = { gestores, cobertura };
-    actualizarEstadoFuente('medicamentos',`✓ ${gestores.length} gestores · ${cobertura.length.toLocaleString()} municipios`,'var(--gdim)','var(--green)');
-    resultados.push(`${gestores.length} gestores`);
-  } catch(e) {
-    actualizarEstadoFuente('medicamentos',`⚠ Error: ${e.message}`,'var(--adim)','var(--amber)');
-    console.error('Gestores:', e);
+  // ── Procesar Gestores ────────────────────────────────────────────────
+  if(resNIT.status === 'fulfilled' && resDANE.status === 'fulfilled') {
+    try {
+      const {gestores, cobertura} = parsearArrayGestores(resNIT.value, resDANE.value);
+      DATOS_CARGADOS.gestores = { gestores, cobertura };
+      actualizarEstadoFuente('medicamentos',`✓ ${gestores.length} gestores · ${cobertura.length.toLocaleString()} municipios`,'var(--gdim)','var(--green)');
+      resultados.push(`${gestores.length} gestores`);
+    } catch(e) {
+      actualizarEstadoFuente('medicamentos',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
+      console.error('Gestores parser:', e);
+    }
+  } else {
+    actualizarEstadoFuente('medicamentos','⚠ Error al cargar gestores','var(--adim)','var(--amber)');
   }
 
-  // ── 3. Reclamaciones ───────────────────────────────────────────────
-  actualizarEstadoFuente('reclamaciones','⏳ Cargando...','var(--bdim)','var(--blue)');
-  try {
-    const rawRec = await fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id, DRIVE_CONFIG.reclamaciones.hoja);
-    const rec = parsearArrayReclamaciones(rawRec);
-    DATOS_CARGADOS.reclamaciones = rec;
-    const totalCartera = rec.reduce((a,r)=>a+r.vr_cartera,0);
-    const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$0';
-    actualizarEstadoFuente('reclamaciones',`✓ ${rec.length.toLocaleString()} registros · Cartera: ${fmtM(totalCartera)}`,'var(--gdim)','var(--green)');
-    resultados.push(`${rec.length.toLocaleString()} reclamaciones`);
-  } catch(e) {
-    actualizarEstadoFuente('reclamaciones',`⚠ Error: ${e.message}`,'var(--adim)','var(--amber)');
-    console.error('Reclamaciones:', e);
+  // ── Procesar Reclamaciones ───────────────────────────────────────────
+  if(resRec.status === 'fulfilled') {
+    try {
+      const rec = parsearArrayReclamaciones(resRec.value);
+      DATOS_CARGADOS.reclamaciones = rec;
+      // Cartera = solo registros con valor numérico válido y razonable (< 100B COP)
+      const MAX_RAZONABLE = 100_000_000_000; // 100B COP
+      const totalCartera = rec.reduce((a,r) => {
+        const v = r.vr_cartera;
+        return a + (v > 0 && v < MAX_RAZONABLE ? v : 0);
+      }, 0);
+      const fmtM = v=>v>=1e12?'$'+(v/1e12).toFixed(1)+'B':v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$0';
+      actualizarEstadoFuente('reclamaciones',`✓ ${rec.length.toLocaleString()} registros · Cartera: ${fmtM(totalCartera)}`,'var(--gdim)','var(--green)');
+      resultados.push(`${rec.length.toLocaleString()} reclamaciones`);
+    } catch(e) {
+      actualizarEstadoFuente('reclamaciones',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
+      console.error('Reclamaciones parser:', e);
+    }
+  } else {
+    actualizarEstadoFuente('reclamaciones',`⚠ Error: ${resRec.reason?.message||'Sin respuesta'}`,'var(--adim)','var(--amber)');
   }
 
   // ── Aplicar al tablero ─────────────────────────────────────────────
-  if(DATOS_CARGADOS.prestadores) aplicarPrestadores();
-  if(DATOS_CARGADOS.gestores)    aplicarGestores();
-  if(DATOS_CARGADOS.reclamaciones) aplicarReclamaciones();
-
-  // Construir filtros con datos reales y aplicar estado inicial
+  if(DATOS_CARGADOS.prestadores)    aplicarPrestadores();
+  if(DATOS_CARGADOS.gestores)       aplicarGestores();
+  if(DATOS_CARGADOS.reclamaciones)  aplicarReclamaciones();
   construirFiltros();
   aplicarFiltrosGlobales();
   actualizarGraficasResumen();
@@ -4883,8 +4903,18 @@ function parsearArrayReclamaciones(data) {
 
   const get    = (row,col) => col>=0&&col<row.length ? String(row[col]||'').trim() : '';
   const getNum = (row,col) => {
-    const v = get(row,col);
-    return parseFloat(v.replace(/[$. ]/g,'').replace(',','.')) || 0;
+    if(col < 0) return 0;
+    const raw = get(row, col);
+    if(!raw || raw === '' || raw === '#N/A' || raw === 'null') return 0;
+    // Handle Colombian number format: 1.234.567,89 or 1234567.89 or 1234567
+    const cleaned = raw
+      .replace(/\$/g,'')
+      .replace(/\s/g,'')
+      .replace(/,(\d{2})$/, '.__DECIMAL__$1') // protect last comma as decimal
+      .replace(/[.,]/g,'')                     // remove all dots and commas
+      .replace('__DECIMAL__', '.');            // restore decimal
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? 0 : n;
   };
 
   const result = data.slice(headerRowIdx + 1).map(row=>{
