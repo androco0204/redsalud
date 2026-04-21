@@ -476,7 +476,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="nav-item" data-screen="contratacion"><svg viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 5h4M5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Modelos de contratación</div>
     <div class="nav-item" data-screen="indicadores"><svg viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Indicadores</div>
     <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
-    <div class="nav-item" data-screen="cobertura"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 1c-1.7 1.6-2.7 3.7-2.7 6s1 4.4 2.7 6M7 1c1.7 1.6 2.7 3.7 2.7 6s-1 4.4-2.7 6M1 7h12" stroke="currentColor" stroke-width="1.2"/></svg>Cobertura geográfica</div>
+    <div class="nav-item" data-screen="cobertura"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 5.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Fallas y Requerimientos</div>
     <div class="nav-item" data-screen="pqrs"><svg viewBox="0 0 14 14" fill="none"><path d="M12 2H2a1 1 0 00-1 1v7a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.2"/></svg>PQRS y Tutelas <span class="nav-badge">38</span></div>
     <div class="nav-sec">Auditoría</div>
     <div class="nav-item" data-screen="seguimiento"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12M5 2V1M9 2V1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="9" r="1" fill="currentColor"/><circle cx="7" cy="9" r="1" fill="currentColor"/><circle cx="10" cy="9" r="1" fill="currentColor"/></svg>Seguimiento y notif.</div>
@@ -1214,41 +1214,102 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 </div>
 
 <div class="screen" id="screen-cobertura">
+
+  <!-- KPIs superiores -->
   <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Departamentos cubiertos</div><div class="kpi-value" style="color:var(--blue)">28/33</div><div class="kpi-delta warn">5 sin cobertura mínima</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Municipios con prestador</div><div class="kpi-value" style="color:var(--green)">845</div><div class="kpi-delta up">78.4% del total</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Zonas rurales sin cobertura</div><div class="kpi-value" style="color:var(--amber)">12</div><div class="kpi-delta warn">sin prestador activo</div></div>
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Puntos dispensación</div><div class="kpi-value" style="color:var(--teal)">46</div><div class="kpi-delta neu">de 54 contratados</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total requerimientos</div><div class="kpi-value" style="color:var(--blue)" id="kpi-req-total">—</div><div class="kpi-delta neu" id="kpi-req-mes">Mes activo</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Efectividad gestión</div><div class="kpi-value" style="color:var(--green)" id="kpi-req-efectividad">—</div><div class="kpi-delta up">Resueltos / Total</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">En trámite</div><div class="kpi-value" style="color:var(--amber)" id="kpi-req-tramite">—</div><div class="kpi-delta warn">Sin cerrar</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cerrados sin solución</div><div class="kpi-value" style="color:var(--red)" id="kpi-req-sin-sol">—</div><div class="kpi-delta dn">Requieren revisión</div></div>
   </div>
-  <div class="grid-12">
-    <div class="card" style="margin-bottom:0"><div class="card-head"><div><div class="card-title">Cobertura por dpto.</div></div></div><div class="card-body" style="padding:10px 16px"><div class="scroll">
-      <div class="dep-row"><div class="dep-name">Bogotá D.C.</div><div class="dep-bar"><div class="dep-fill" style="width:97%;background:var(--green)"></div></div><div class="dep-val" style="color:var(--green)">97%</div></div>
-      <div class="dep-row"><div class="dep-name">Antioquia</div><div class="dep-bar"><div class="dep-fill" style="width:92%;background:var(--green)"></div></div><div class="dep-val" style="color:var(--green)">92%</div></div>
-      <div class="dep-row"><div class="dep-name">Valle del Cauca</div><div class="dep-bar"><div class="dep-fill" style="width:88%;background:var(--green)"></div></div><div class="dep-val" style="color:var(--green)">88%</div></div>
-      <div class="dep-row"><div class="dep-name">Atlántico</div><div class="dep-bar"><div class="dep-fill" style="width:81%;background:var(--teal)"></div></div><div class="dep-val" style="color:var(--teal)">81%</div></div>
-      <div class="dep-row"><div class="dep-name">Santander</div><div class="dep-bar"><div class="dep-fill" style="width:76%;background:var(--teal)"></div></div><div class="dep-val" style="color:var(--teal)">76%</div></div>
-      <div class="dep-row"><div class="dep-name">Bolívar</div><div class="dep-bar"><div class="dep-fill" style="width:68%;background:var(--amber)"></div></div><div class="dep-val" style="color:var(--amber)">68%</div></div>
-      <div class="dep-row"><div class="dep-name">Nariño</div><div class="dep-bar"><div class="dep-fill" style="width:62%;background:var(--amber)"></div></div><div class="dep-val" style="color:var(--amber)">62%</div></div>
-      <div class="dep-row"><div class="dep-name">Chocó</div><div class="dep-bar"><div class="dep-fill" style="width:38%;background:var(--red)"></div></div><div class="dep-val" style="color:var(--red)">38%</div></div>
-      <div class="dep-row"><div class="dep-name">Vichada</div><div class="dep-bar"><div class="dep-fill" style="width:12%;background:var(--red)"></div></div><div class="dep-val" style="color:var(--red)">12%</div></div>
-    </div></div></div>
-    <div class="card" style="margin-bottom:0"><div class="card-head"><div><div class="card-title">Mapa de cobertura · Colombia</div></div><div class="card-act">Ver mapa completo →</div></div><div class="card-body" style="padding:12px">
-      <div class="map-wrap" style="min-height:360px"><div class="map-grid-bg"></div>
-        <div class="map-dot" style="width:44px;height:44px;background:var(--gdim);border:2px solid var(--green);color:var(--green);top:28%;left:42%">48</div>
-        <div class="map-dot" style="width:36px;height:36px;background:var(--gdim);border:2px solid var(--green);color:var(--green);top:38%;left:26%">22</div>
-        <div class="map-dot" style="width:32px;height:32px;background:var(--tdim);border:2px solid var(--teal);color:var(--teal);top:55%;left:26%">18</div>
-        <div class="map-dot" style="width:28px;height:28px;background:var(--adim);border:2px solid var(--amber);color:var(--amber);top:50%;left:52%">8</div>
-        <div class="map-dot" style="width:20px;height:20px;background:var(--rdim);border:2px solid var(--red);color:var(--red);top:20%;left:68%">1</div>
-        <div class="map-dot" style="width:26px;height:26px;background:var(--tdim);border:2px solid var(--teal);color:var(--teal);top:68%;left:36%">15</div>
-        <div class="map-lbl" style="top:26%;left:42%;transform:translate(24px,-4px)">Bogotá</div>
-        <div class="map-lbl" style="top:36%;left:26%;transform:translate(20px,-4px)">Medellín</div>
-        <div class="map-lbl" style="top:53%;left:52%;transform:translate(16px,-4px)">Cali</div>
-        <div class="map-lbl" style="top:18%;left:68%;transform:translate(12px,-4px);color:var(--red)">Vichada ⚠</div>
-        <div class="map-lbl" style="top:66%;left:36%;transform:translate(16px,-4px)">Barranquilla</div>
+
+  <!-- Filtros propios -->
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+    <select id="req-filtro-mes" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los meses</option>
+    </select>
+    <select id="req-filtro-gestor" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los gestores</option>
+    </select>
+    <select id="req-filtro-tipo" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los tipos</option>
+    </select>
+    <button class="btn" onclick="cargarRequerimientos()" style="font-size:11.5px">↺ Recargar datos</button>
+    <span id="req-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
+  </div>
+
+  <div class="grid-21" style="gap:14px">
+
+    <!-- Tabla por gestor -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head">
+        <div><div class="card-title">Requerimientos por gestor</div><div class="card-sub">Conteo · efectividad · distribución de estados</div></div>
+        <button class="btn" onclick="exportarTablaGestores()" style="font-size:11px">⬇ Exportar</button>
       </div>
-    </div></div>
+      <div class="card-body" style="padding:0 20px">
+        <div class="scroll" style="max-height:340px">
+          <table class="table" id="tabla-req-gestores">
+            <thead>
+              <tr>
+                <th>Gestor farmacéutico</th>
+                <th>Total</th>
+                <th>Resueltos</th>
+                <th>En trámite</th>
+                <th>Sin solución</th>
+                <th>Devueltos</th>
+                <th>Efectividad</th>
+                <th>Semáforo</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-req-gestores-body">
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando datos de requerimientos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho: distribución + top tipos -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Distribución por estado -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Distribución por estado</div><div class="card-sub" id="req-dist-sub">Todos los gestores</div></div></div>
+        <div class="card-body" style="padding:10px 16px" id="req-dist-estados">
+          <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
+        </div>
+      </div>
+
+      <!-- Top tipos de caso -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Top tipos de requerimiento</div><div class="card-sub">Por volumen · mes seleccionado</div></div></div>
+        <div class="card-body" style="padding:10px 16px" id="req-top-tipos">
+          <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
+        </div>
+      </div>
+
+    </div>
   </div>
+
+  <!-- Detalle de casos -->
+  <div class="card" style="margin-top:14px">
+    <div class="card-head">
+      <div><div class="card-title">Detalle de casos</div><div class="card-sub" id="req-detalle-sub">Filtrado por gestor y mes</div></div>
+    </div>
+    <div class="card-body" style="padding:0 20px">
+      <div class="scroll" style="max-height:260px">
+        <table class="table">
+          <thead><tr><th>Fecha</th><th>Tipo de caso</th><th>Gestor</th><th>Estado</th></tr></thead>
+          <tbody id="tabla-req-detalle-body">
+            <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text2)">Selecciona un gestor para ver el detalle</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
+
 
 <div class="screen" id="screen-pqrs">
   <div class="kpi-strip cols-5">
@@ -2801,7 +2862,7 @@ const titles = {
   contratacion:['Modelos de contratación','Capita · Evento · MRC · PGP · techos presupuestales'],
   indicadores:['Indicadores','Medición y seguimiento · 34 indicadores activos'],
   alertas:['Alertas','Centro de alertas · 7 activas · 3 críticas'],
-  cobertura:['Cobertura geográfica','Distribución territorial · Colombia'],
+  cobertura:['Fallas y Requerimientos','Gestores farmacéuticos · Seguimiento mensual'],
   pqrs:['PQRS y Tutelas','Gestión de reclamaciones · 38 activas'],
   seguimiento:['Seguimiento y notificaciones','Cronograma · informes por contrato · notificación de hallazgos'],
   trazabilidad:['Trazabilidad','Cadena EPS → Gestor → Paciente'],
@@ -2822,6 +2883,10 @@ function navigate(screen){
   if(titles[screen]){
     document.getElementById('tb-title').textContent=titles[screen][0];
     document.getElementById('tb-sub').textContent=titles[screen][1];
+  }
+  // Auto-cargar datos al navegar a Fallas y Requerimientos
+  if(screen === 'cobertura' && DATOS_REQS.length === 0) {
+    cargarRequerimientos();
   }
 }
 
@@ -6160,6 +6225,224 @@ function filtrarTablaPrestadores(tipo, tabEl) {
     }).join('');
   }
   if(cnt) cnt.textContent = `${subset.length.toLocaleString('es-CO')} prestadores · categoría: ${tipo==='mora'?'con gestión pendiente':tipo}`;
+}
+
+// ─── FALLAS Y REQUERIMIENTOS ──────────────────────────────────────────
+const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec';
+const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
+
+let DATOS_REQS   = [];
+let DATOS_FALLAS = [];
+
+const COL_REQ = { fecha:0, tipo:3, gestor:22, estado:51 };
+
+function semaforo(pct, umbrales) {
+  if(pct >= umbrales.verde)    return { color:'var(--green)', bg:'var(--gdim)', label:'● Verde' };
+  if(pct >= umbrales.amarillo) return { color:'var(--amber)', bg:'var(--adim)', label:'● Amarillo' };
+  return { color:'var(--red)', bg:'var(--rdim)', label:'● Rojo' };
+}
+
+function parseFechaReq(val) {
+  if(!val) return null;
+  const s = String(val).trim();
+  if(s.includes('/')) { const [d,m,y]=s.split('/'); return new Date(+y,+m-1,+d); }
+  if(s.includes('-')) return new Date(s);
+  const n = parseInt(s);
+  if(!isNaN(n) && n > 40000) return new Date((n-25569)*86400*1000);
+  return null;
+}
+
+function getMesKey(f)   { return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''; }
+function getMesLabel(f) {
+  const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return f?`${M[f.getMonth()]} ${f.getFullYear()}`:'';
+}
+
+async function cargarRequerimientos() {
+  const el = document.getElementById('req-estado-carga');
+  if(el){ el.textContent='⏳ Cargando...'; el.style.color='var(--blue)'; }
+  try {
+    const resp = await fetch(REQS_SCRIPT);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if(!Array.isArray(data)||data.length<2) throw new Error('Sin datos');
+    DATOS_REQS = data.slice(1).filter(r=>r[COL_REQ.gestor]&&String(r[COL_REQ.gestor]).trim());
+    if(el){ el.textContent=`✓ ${DATOS_REQS.length.toLocaleString('es-CO')} requerimientos`; el.style.color='var(--green)'; }
+    poblarFiltrosReq();
+    aplicarFiltrosReq();
+  } catch(e) {
+    if(el){ el.textContent=`⚠ ${e.message}`; el.style.color='var(--red)'; }
+    console.error('Requerimientos:', e);
+  }
+}
+
+function poblarFiltrosReq() {
+  const meses=new Map(), gestores=new Set(), tipos=new Set();
+  DATOS_REQS.forEach(r=>{
+    const f=parseFechaReq(r[COL_REQ.fecha]);
+    if(f){const k=getMesKey(f); if(!meses.has(k)) meses.set(k,getMesLabel(f));}
+    if(r[COL_REQ.gestor]) gestores.add(String(r[COL_REQ.gestor]).trim());
+    if(r[COL_REQ.tipo])   tipos.add(String(r[COL_REQ.tipo]).trim());
+  });
+  const selM=document.getElementById('req-filtro-mes');
+  const selG=document.getElementById('req-filtro-gestor');
+  const selT=document.getElementById('req-filtro-tipo');
+  const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  if(selM){ selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); if(sortM.length) selM.value=sortM[0][0]; }
+  if(selG){ selG.innerHTML='<option value="">Todos los gestores</option>'+[...gestores].sort().map(g=>`<option value="${g}">${g}</option>`).join(''); }
+  if(selT){ selT.innerHTML='<option value="">Todos los tipos</option>'+[...tipos].sort().map(t=>`<option value="${t}">${t}</option>`).join(''); }
+}
+
+function aplicarFiltrosReq() {
+  const mes    = document.getElementById('req-filtro-mes')?.value    || '';
+  const gestor = document.getElementById('req-filtro-gestor')?.value || '';
+  const tipo   = document.getElementById('req-filtro-tipo')?.value   || '';
+  let d = DATOS_REQS;
+  if(mes)    d=d.filter(r=>{const f=parseFechaReq(r[COL_REQ.fecha]); return f&&getMesKey(f)===mes;});
+  if(gestor) d=d.filter(r=>String(r[COL_REQ.gestor]).trim()===gestor);
+  if(tipo)   d=d.filter(r=>String(r[COL_REQ.tipo]).trim()===tipo);
+  renderRequerimientos(d);
+}
+
+function renderRequerimientos(datos) {
+  const fmtN = n=>n.toLocaleString('es-CO');
+  if(!datos.length){
+    ['tabla-req-gestores-body','tabla-req-detalle-body'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos para los filtros seleccionados</td></tr>`;
+    });
+    return;
+  }
+
+  // Agrupar por gestor
+  const pg={};
+  datos.forEach(r=>{
+    const g=String(r[COL_REQ.gestor]).trim();
+    const e=String(r[COL_REQ.estado]||'').trim().toLowerCase();
+    if(!pg[g]) pg[g]={total:0,resuelto:0,tramite:0,sin_sol:0,devuelto:0};
+    pg[g].total++;
+    if(e.includes('resuelto'))                          pg[g].resuelto++;
+    else if(e.includes('tr'+'á'+'mite')||e.includes('tramite')||e.includes('proceso')) pg[g].tramite++;
+    else if(e.includes('sin sol'))                      pg[g].sin_sol++;
+    else if(e.includes('devuelto'))                     pg[g].devuelto++;
+  });
+
+  // KPIs globales
+  const total=datos.length;
+  const res=datos.filter(r=>String(r[COL_REQ.estado]||'').toLowerCase().includes('resuelto')).length;
+  const tram=Object.values(pg).reduce((a,v)=>a+v.tramite,0);
+  const sinS=Object.values(pg).reduce((a,v)=>a+v.sin_sol,0);
+  const efec=total>0?Math.round(res/total*100):0;
+  actualizarKPI('kpi-req-total',       fmtN(total));
+  actualizarKPI('kpi-req-efectividad', efec+'%');
+  actualizarKPI('kpi-req-tramite',     fmtN(tram));
+  actualizarKPI('kpi-req-sin-sol',     fmtN(sinS));
+  const efEl=document.getElementById('kpi-req-efectividad');
+  if(efEl) efEl.style.color=efec>=80?'var(--green)':efec>=60?'var(--amber)':'var(--red)';
+
+  // Tabla gestores
+  const tb=document.getElementById('tabla-req-gestores-body');
+  if(tb) tb.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
+    const ef=v.total>0?Math.round(v.resuelto/v.total*100):0;
+    const s=semaforo(ef,{verde:80,amarillo:60});
+    return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+      <td style="font-size:12px;font-weight:500">${g}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
+      <td style="color:var(--green);font-family:'DM Mono',monospace">${v.resuelto}</td>
+      <td style="color:var(--amber);font-family:'DM Mono',monospace">${v.tramite}</td>
+      <td style="color:var(--red);font-family:'DM Mono',monospace">${v.sin_sol}</td>
+      <td style="color:var(--text2);font-family:'DM Mono',monospace">${v.devuelto}</td>
+      <td><span style="font-weight:600;color:${s.color}">${ef}%</span></td>
+      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:${s.bg};color:${s.color}">${s.label}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Distribución estados
+  const est={};
+  datos.forEach(r=>{ const e=String(r[COL_REQ.estado]||'Sin estado').trim(); est[e]=(est[e]||0)+1; });
+  const dEl=document.getElementById('req-dist-estados');
+  if(dEl){
+    const COLS={'resuelto':'var(--green)','trámite':'var(--amber)','tramite':'var(--amber)','sin sol':'var(--red)','devuelto':'var(--blue)'};
+    const sorted=Object.entries(est).sort((a,b)=>b[1]-a[1]);
+    const mx=sorted[0]?.[1]||1;
+    dEl.innerHTML=sorted.map(([e,n])=>{
+      const pct=Math.round(n/total*100);
+      const col=Object.entries(COLS).find(([k])=>e.toLowerCase().includes(k))?.[1]||'var(--text2)';
+      return `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2)">${e}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col}">${n} · ${pct}%</span>
+        </div>
+        <div style="height:5px;background:var(--bg4);border-radius:3px"><div style="height:100%;width:${Math.round(n/mx*100)}%;background:${col};border-radius:3px"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Top 5 tipos
+  const tip={};
+  datos.forEach(r=>{ const t=String(r[COL_REQ.tipo]||'Sin tipo').trim(); tip[t]=(tip[t]||0)+1; });
+  const tEl=document.getElementById('req-top-tipos');
+  if(tEl){
+    const top5=Object.entries(tip).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const mx=top5[0]?.[1]||1;
+    const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)'];
+    tEl.innerHTML=top5.map(([t,n],i)=>`<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;color:var(--text2)">${i+1}. ${t.substring(0,42)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${COLS[i]}">${n}</span>
+      </div>
+      <div style="height:5px;background:var(--bg4);border-radius:3px"><div style="height:100%;width:${Math.round(n/mx*100)}%;background:${COLS[i]};border-radius:3px"></div></div>
+    </div>`).join('');
+  }
+
+  // Detalle
+  renderDetalleReq(datos.slice(0,100));
+}
+
+function renderDetalleReq(filas){
+  const tb=document.getElementById('tabla-req-detalle-body');
+  const sb=document.getElementById('req-detalle-sub');
+  if(!tb) return;
+  if(sb) sb.textContent=`${filas.length} casos`;
+  const COLS_E={'resuelto':'var(--green)','trámite':'var(--amber)','tramite':'var(--amber)','sin sol':'var(--red)','devuelto':'var(--blue)'};
+  tb.innerHTML=filas.map(r=>{
+    const f=parseFechaReq(r[COL_REQ.fecha]);
+    const fecha=f?f.toLocaleDateString('es-CO'):'—';
+    const tipo=String(r[COL_REQ.tipo]||'—').trim();
+    const gst=String(r[COL_REQ.gestor]||'—').trim();
+    const est=String(r[COL_REQ.estado]||'—').trim();
+    const col=Object.entries(COLS_E).find(([k])=>est.toLowerCase().includes(k))?.[1]||'var(--text2)';
+    return `<tr>
+      <td style="font-size:11px;color:var(--text2)">${fecha}</td>
+      <td style="font-size:11.5px">${tipo}</td>
+      <td style="font-size:11px;color:var(--text2)">${gst}</td>
+      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${col}">${est}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function verDetalleGestor(gestor){
+  const mes=document.getElementById('req-filtro-mes')?.value||'';
+  let d=DATOS_REQS.filter(r=>String(r[COL_REQ.gestor]).trim()===gestor);
+  if(mes) d=d.filter(r=>{const f=parseFechaReq(r[COL_REQ.fecha]); return f&&getMesKey(f)===mes;});
+  const sb=document.getElementById('req-detalle-sub');
+  if(sb) sb.textContent=`Gestor: ${gestor} · ${d.length} casos`;
+  renderDetalleReq(d);
+}
+
+function exportarTablaGestores(){
+  const bom='\uFEFF';
+  const headers=['Gestor','Total','Resueltos','En Trámite','Sin Solución','Devueltos','Efectividad %'];
+  const rows=[];
+  document.querySelectorAll('#tabla-req-gestores-body tr').forEach(tr=>{
+    const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+    if(cells.length>=7) rows.push(cells.slice(0,7));
+  });
+  const csv=bom+[headers,...rows].map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`Requerimientos_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
 
 // ─── ADMINISTRACIÓN ──────────────────────────────────────────────────
