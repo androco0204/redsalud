@@ -6241,15 +6241,15 @@ const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoIL
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
 
-// Columnas BASE GESTIÓN REQUERIMIENTOS
-const COL_REQ = {
+// Columnas BASE GESTIÓN REQUERIMIENTOS — se detectan dinámicamente
+let COL_REQ = {
   fecha:    0,   // A
   tipo:     3,   // D
   regional: 13,  // N
   depto:    14,  // O
   ciudad:   15,  // P
   gestor:   22,  // W
-  estado:   50,  // AY (índice 50 = columna AY)
+  estado:   50,  // AY — se ajusta dinámicamente
 };
 
 // Gestores válidos
@@ -6327,9 +6327,34 @@ async function cargarRequerimientos() {
     const data = await resp.json();
     if(!Array.isArray(data)||data.length<2) throw new Error('Sin datos');
 
-    console.log('[Requerimientos] Headers (primeros 55):', data[0].slice(0,55));
-    console.log('[Requerimientos] Col AY (50):', data[0][50], '| Col AX (49):', data[0][49]);
-    console.log('[Requerimientos] Fila 2 muestra:', data[1]);
+    console.log('[REQ] Total filas raw:', data.length);
+    console.log('[REQ] Headers completos:');
+    data[0].forEach((h,i)=>{ if(h&&String(h).trim()) console.log(`  idx ${i} (col ${i<26?String.fromCharCode(65+i):i<52?'A'+String.fromCharCode(65+i-26):'B'+String.fromCharCode(65+i-52)}): "${h}"`); });
+    
+    // Buscar columnas por nombre en lugar de índice fijo
+    const hdrs = data[0].map(h=>String(h||'').trim().toUpperCase());
+    
+    // Detectar columnas dinámicamente
+    const findCol = (keywords) => {
+      for(const kw of keywords) {
+        const idx = hdrs.findIndex(h=>h.includes(kw));
+        if(idx >= 0) return idx;
+      }
+      return -1;
+    };
+    
+    COL_REQ.fecha    = findCol(['FECHA','DATE']) !== -1 ? findCol(['FECHA','DATE']) : 0;
+    COL_REQ.tipo     = findCol(['TIPO DE CASO','TIPO CASO','TIPO DE REQUER']) !== -1 ? findCol(['TIPO DE CASO','TIPO CASO','TIPO DE REQUER']) : 3;
+    COL_REQ.regional = findCol(['REGIONAL']) !== -1 ? findCol(['REGIONAL']) : 13;
+    COL_REQ.depto    = findCol(['DEPARTAMENTO']) !== -1 ? findCol(['DEPARTAMENTO']) : 14;
+    COL_REQ.ciudad   = findCol(['MUNICIPIO','CIUDAD']) !== -1 ? findCol(['MUNICIPIO','CIUDAD']) : 15;
+    COL_REQ.gestor   = findCol(['GESTOR FARMAC','GESTOR FAR']) !== -1 ? findCol(['GESTOR FARMAC','GESTOR FAR']) : 22;
+    COL_REQ.estado   = findCol(['ESTADO']) !== -1 ? findCol(['ESTADO']) : 50;
+    
+    console.log('[REQ] Columnas detectadas:', JSON.stringify(COL_REQ));
+    console.log('[REQ] Fila 2 completa:', data[1]);
+    console.log('[REQ] Estado fila 2:', data[1]?.[COL_REQ.estado]);
+    console.log('[REQ] Gestor fila 2:', data[1]?.[COL_REQ.gestor]);
 
     // Filtro: gestor válido, no vacío/NA, año 2025-2026
     DATOS_REQS = data.slice(1).filter(r => {
