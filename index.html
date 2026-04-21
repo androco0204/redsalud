@@ -1231,8 +1231,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <select id="req-filtro-gestor" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los gestores</option>
     </select>
-    <select id="req-filtro-tipo" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
-      <option value="">Todos los tipos</option>
+    <select id="req-filtro-regional" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todas las regionales</option>
+    </select>
+    <select id="req-filtro-depto" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los departamentos</option>
+    </select>
+    <select id="req-filtro-ciudad" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todas las ciudades</option>
     </select>
     <button class="btn" onclick="cargarRequerimientos()" style="font-size:11.5px">↺ Recargar datos</button>
     <span id="req-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
@@ -1269,20 +1275,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       </div>
     </div>
 
-    <!-- Panel derecho: distribución + top tipos -->
+    <!-- Panel derecho: torta + barras tipo -->
     <div style="display:flex;flex-direction:column;gap:14px">
 
-      <!-- Distribución por estado -->
+      <!-- Fórmula 2: Gráfica torta distribución estados por gestor -->
       <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Distribución por estado</div><div class="card-sub" id="req-dist-sub">Todos los gestores</div></div></div>
-        <div class="card-body" style="padding:10px 16px" id="req-dist-estados">
-          <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
+        <div class="card-head"><div><div class="card-title">Distribución por estado</div><div class="card-sub" id="req-dist-sub">Selecciona un gestor o ve el total</div></div></div>
+        <div class="card-body" style="padding:10px 16px">
+          <canvas id="req-chart-torta" width="220" height="220" style="display:block;margin:0 auto"></canvas>
+          <div id="req-torta-leyenda" style="margin-top:8px;font-size:11px"></div>
         </div>
       </div>
 
-      <!-- Top tipos de caso -->
+      <!-- Fórmula 1: Barras por tipo de caso -->
       <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Top tipos de requerimiento</div><div class="card-sub">Por volumen · mes seleccionado</div></div></div>
+        <div class="card-head"><div><div class="card-title">Tipos de requerimiento</div><div class="card-sub">Distribución por volumen</div></div></div>
         <div class="card-body" style="padding:10px 16px" id="req-top-tipos">
           <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
         </div>
@@ -1299,9 +1306,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="card-body" style="padding:0 20px">
       <div class="scroll" style="max-height:260px">
         <table class="table">
-          <thead><tr><th>Fecha</th><th>Tipo de caso</th><th>Gestor</th><th>Estado</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Tipo de caso</th><th>Gestor</th><th>Regional</th><th>Ciudad</th><th>Estado</th></tr></thead>
           <tbody id="tabla-req-detalle-body">
-            <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text2)">Selecciona un gestor para ver el detalle</td></tr>
+            <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text2)">Selecciona un gestor o aplica filtros para ver el detalle</td></tr>
           </tbody>
         </table>
       </div>
@@ -6234,7 +6241,373 @@ const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoIL
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
 
-const COL_REQ = { fecha:0, tipo:3, gestor:22, estado:51 };
+// Columnas BASE GESTIÓN REQUERIMIENTOS
+const COL_REQ = {
+  fecha: 0,    // A
+  tipo:  3,    // D
+  regional: 13, // N
+  depto:  14,   // O
+  ciudad: 15,   // P
+  gestor: 22,   // W
+  estado: 50,   // AY
+};
+
+// Gestores válidos — única fuente de verdad
+const GESTORES_VALIDOS = new Set([
+  'INSUMEDIC','PHARMASAN','GENHOSPI','COHAN','CRUZ VERDE',
+  'DISFARMA','MYT SALUD','DISCOLMETS','HUMSALUD','AUDIFARMA',
+  'MEDISFARMA','ÉTICOS SERRANO','ETICOS SERRANO','COLSUBSIDIO',
+  'CYA HOSPITALARIOS','DISTRIMEDV','MACROMED','INPHAPRO','GLOBAL','CAFAM'
+]);
+
+const AÑOS_VALIDOS = new Set(['2025','2026']);
+
+// Colores estados
+const ESTADOS_COLS = {
+  'resuelto':         { color:'#22c55e', label:'Resuelto' },
+  'cerrado sin':      { color:'#ef4444', label:'Cerrado sin solución' },
+  'sin solucion':     { color:'#ef4444', label:'Cerrado sin solución' },
+  'devuelto':         { color:'#3b82f6', label:'Devuelto' },
+  'en tramite':       { color:'#f59e0b', label:'En trámite' },
+  'tramite':          { color:'#f59e0b', label:'En trámite' },
+  'en proceso':       { color:'#f59e0b', label:'En trámite' },
+};
+
+function getEstadoColor(estado) {
+  const e = String(estado||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for(const [k,v] of Object.entries(ESTADOS_COLS)) {
+    if(e.includes(k)) return v;
+  }
+  return { color:'#6b7280', label: String(estado||'Otro').trim() };
+}
+
+function semaforo(pct, umbrales) {
+  if(pct >= umbrales.verde)    return { color:'var(--green)', bg:'var(--gdim)', label:'● Verde' };
+  if(pct >= umbrales.amarillo) return { color:'var(--amber)', bg:'var(--adim)', label:'● Amarillo' };
+  return { color:'var(--red)', bg:'var(--rdim)', label:'● Rojo' };
+}
+
+function parseFechaReq(val) {
+  if(!val) return null;
+  const s = String(val).trim();
+  if(s.includes('/')) {
+    const p = s.split('/');
+    if(p.length === 3) {
+      const [d,m,y] = p;
+      return new Date(+y, +m-1, +d);
+    }
+  }
+  if(s.includes('-')) {
+    const d = new Date(s);
+    if(!isNaN(d)) return d;
+  }
+  const n = parseInt(s);
+  if(!isNaN(n) && n > 40000) return new Date((n-25569)*86400*1000);
+  return null;
+}
+
+function getMesKey(f)   { return f ? `${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}` : ''; }
+function getMesLabel(f) {
+  const M = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return f ? `${M[f.getMonth()]} ${f.getFullYear()}` : '';
+}
+
+function normalizeGestor(g) {
+  return String(g||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace('ETICOS','ÉTICOS');
+}
+
+async function cargarRequerimientos() {
+  const el = document.getElementById('req-estado-carga');
+  if(el) { el.textContent='⏳ Cargando...'; el.style.color='var(--blue)'; }
+  try {
+    const resp = await fetch(REQS_SCRIPT);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if(!Array.isArray(data) || data.length < 2) throw new Error('Sin datos');
+
+    // Aplicar filtros duros: gestor válido, no vacío/NA, año 2025-2026
+    DATOS_REQS = data.slice(1).filter(r => {
+      const g = normalizeGestor(r[COL_REQ.gestor]);
+      if(!g || g === 'N/A' || g === '') return false;
+      if(!GESTORES_VALIDOS.has(g)) return false;
+      const f = parseFechaReq(r[COL_REQ.fecha]);
+      if(!f) return false;
+      if(!AÑOS_VALIDOS.has(String(f.getFullYear()))) return false;
+      return true;
+    });
+
+    if(el) { el.textContent=`✓ ${DATOS_REQS.length.toLocaleString('es-CO')} requerimientos cargados`; el.style.color='var(--green)'; }
+    poblarFiltrosReq();
+    aplicarFiltrosReq();
+  } catch(e) {
+    if(el) { el.textContent=`⚠ Error: ${e.message}`; el.style.color='var(--red)'; }
+    console.error('Requerimientos:', e);
+  }
+}
+
+function poblarFiltrosReq() {
+  const meses=new Map(), gestores=new Set(), regionales=new Set(), deptos=new Set(), ciudades=new Set();
+  DATOS_REQS.forEach(r => {
+    const f = parseFechaReq(r[COL_REQ.fecha]);
+    if(f) { const k=getMesKey(f); if(!meses.has(k)) meses.set(k, getMesLabel(f)); }
+    const g = normalizeGestor(r[COL_REQ.gestor]);
+    if(g) gestores.add(g);
+    const reg = String(r[COL_REQ.regional]||'').trim(); if(reg) regionales.add(reg);
+    const dep = String(r[COL_REQ.depto]  ||'').trim(); if(dep) deptos.add(dep);
+    const ciu = String(r[COL_REQ.ciudad] ||'').trim(); if(ciu) ciudades.add(ciu);
+  });
+
+  const sortM = [...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  const fill = (id, opts, allLabel) => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = `<option value="">${allLabel}</option>` + opts.map(o=>`<option value="${o}">${o}</option>`).join('');
+  };
+
+  fill('req-filtro-mes',      sortM.map(([k,v])=>v), 'Todos los meses');
+  // Fix: mes selector uses label as value — use key
+  const selM = document.getElementById('req-filtro-mes');
+  if(selM) { selM.innerHTML = '<option value="">Todos los meses</option>' + sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); if(sortM.length) selM.value = sortM[0][0]; }
+
+  fill('req-filtro-gestor',   [...gestores].sort(), 'Todos los gestores');
+  fill('req-filtro-regional', [...regionales].sort(), 'Todas las regionales');
+  fill('req-filtro-depto',    [...deptos].sort(), 'Todos los departamentos');
+  fill('req-filtro-ciudad',   [...ciudades].sort(), 'Todas las ciudades');
+}
+
+function aplicarFiltrosReq() {
+  const mes      = document.getElementById('req-filtro-mes')?.value      || '';
+  const gestor   = document.getElementById('req-filtro-gestor')?.value   || '';
+  const regional = document.getElementById('req-filtro-regional')?.value || '';
+  const depto    = document.getElementById('req-filtro-depto')?.value    || '';
+  const ciudad   = document.getElementById('req-filtro-ciudad')?.value   || '';
+
+  let d = DATOS_REQS;
+  if(mes)      d = d.filter(r => { const f=parseFechaReq(r[COL_REQ.fecha]); return f && getMesKey(f)===mes; });
+  if(gestor)   d = d.filter(r => normalizeGestor(r[COL_REQ.gestor]) === gestor);
+  if(regional) d = d.filter(r => String(r[COL_REQ.regional]||'').trim() === regional);
+  if(depto)    d = d.filter(r => String(r[COL_REQ.depto]   ||'').trim() === depto);
+  if(ciudad)   d = d.filter(r => String(r[COL_REQ.ciudad]  ||'').trim() === ciudad);
+
+  renderRequerimientos(d);
+}
+
+function renderRequerimientos(datos) {
+  if(!datos.length) {
+    const msg = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos para los filtros seleccionados</td></tr>';
+    ['tabla-req-gestores-body','tabla-req-detalle-body'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.innerHTML = msg;
+    });
+    return;
+  }
+
+  // ── Agrupar por gestor ─────────────────────────────────────────
+  const pg = {};
+  datos.forEach(r => {
+    const g = normalizeGestor(r[COL_REQ.gestor]);
+    const e = String(r[COL_REQ.estado]||'').trim();
+    if(!pg[g]) pg[g] = { total:0, estados:{} };
+    pg[g].total++;
+    pg[g].estados[e] = (pg[g].estados[e]||0) + 1;
+  });
+
+  // ── KPIs globales ──────────────────────────────────────────────
+  const total = datos.length;
+  const resueltos = datos.filter(r => getEstadoColor(r[COL_REQ.estado]).label === 'Resuelto').length;
+  const tramite   = datos.filter(r => getEstadoColor(r[COL_REQ.estado]).label === 'En trámite').length;
+  const sinSol    = datos.filter(r => getEstadoColor(r[COL_REQ.estado]).label === 'Cerrado sin solución').length;
+  const efec      = total > 0 ? Math.round(resueltos/total*100) : 0;
+
+  actualizarKPI('kpi-req-total',       total.toLocaleString('es-CO'));
+  actualizarKPI('kpi-req-efectividad', efec+'%');
+  actualizarKPI('kpi-req-tramite',     tramite.toLocaleString('es-CO'));
+  actualizarKPI('kpi-req-sin-sol',     sinSol.toLocaleString('es-CO'));
+  const efEl = document.getElementById('kpi-req-efectividad');
+  if(efEl) efEl.style.color = efec>=80?'var(--green)':efec>=60?'var(--amber)':'var(--red)';
+
+  // ── Tabla gestores ─────────────────────────────────────────────
+  const tb = document.getElementById('tabla-req-gestores-body');
+  if(tb) {
+    tb.innerHTML = Object.entries(pg)
+      .sort((a,b)=>b[1].total-a[1].total)
+      .map(([g,v]) => {
+        const res = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='Resuelto').reduce((a,[,n])=>a+n,0);
+        const tra = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='En trámite').reduce((a,[,n])=>a+n,0);
+        const ssi = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='Cerrado sin solución').reduce((a,[,n])=>a+n,0);
+        const dev = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='Devuelto').reduce((a,[,n])=>a+n,0);
+        const ef  = v.total>0 ? Math.round(res/v.total*100) : 0;
+        const sem = semaforo(ef, {verde:80, amarillo:60});
+        return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\\'")}')" title="Clic para ver detalle">
+          <td style="font-size:12px;font-weight:500">${g}</td>
+          <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
+          <td style="color:var(--green);font-family:'DM Mono',monospace">${res}</td>
+          <td style="color:var(--amber);font-family:'DM Mono',monospace">${tra}</td>
+          <td style="color:var(--red);font-family:'DM Mono',monospace">${ssi}</td>
+          <td style="color:var(--blue);font-family:'DM Mono',monospace">${dev}</td>
+          <td><span style="font-weight:600;color:${sem.color}">${ef}%</span></td>
+          <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:${sem.bg};color:${sem.color}">${sem.label}</span></td>
+        </tr>`;
+      }).join('');
+  }
+
+  // ── Gráfica torta (Fórmula 2) — distribución estados global ───
+  dibujarTorta(datos, 'Todos los gestores');
+
+  // ── Gráfica barras por tipo (Fórmula 1) ───────────────────────
+  const tipos = {};
+  datos.forEach(r => {
+    const t = String(r[COL_REQ.tipo]||'Sin tipo').trim();
+    tipos[t] = (tipos[t]||0)+1;
+  });
+  const tEl = document.getElementById('req-top-tipos');
+  if(tEl) {
+    const sorted = Object.entries(tipos).sort((a,b)=>b[1]-a[1]);
+    const mx = sorted[0]?.[1]||1;
+    const COLS = ['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)','var(--red)','var(--text2)'];
+    tEl.innerHTML = sorted.map(([t,n],i) => {
+      const pct = Math.round(n/total*100);
+      const w   = Math.round(n/mx*100);
+      const col = COLS[i % COLS.length];
+      return `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${t.substring(0,45)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col};flex-shrink:0">${n} · ${pct}%</span>
+        </div>
+        <div style="height:6px;background:var(--bg4);border-radius:3px">
+          <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Detalle ────────────────────────────────────────────────────
+  renderDetalleReq(datos.slice(0,150));
+}
+
+function dibujarTorta(datos, titulo) {
+  const sub = document.getElementById('req-dist-sub');
+  if(sub) sub.textContent = titulo;
+
+  // Agrupar estados
+  const grupos = {};
+  datos.forEach(r => {
+    const info = getEstadoColor(r[COL_REQ.estado]);
+    grupos[info.label] = (grupos[info.label]||0)+1;
+  });
+
+  const canvas = document.getElementById('req-chart-torta');
+  const leyEl  = document.getElementById('req-torta-leyenda');
+  if(!canvas) return;
+
+  const ctx  = canvas.getContext('2d');
+  const W    = canvas.width, H = canvas.height;
+  const cx   = W/2, cy = H/2, r = Math.min(W,H)/2 - 8;
+  const total = Object.values(grupos).reduce((a,n)=>a+n,0);
+
+  // Paleta por label
+  const PALETA = {
+    'Resuelto':              '#22c55e',
+    'En trámite':            '#f59e0b',
+    'Cerrado sin solución':  '#ef4444',
+    'Devuelto':              '#3b82f6',
+    'Otro':                  '#6b7280',
+  };
+
+  ctx.clearRect(0,0,W,H);
+  let ang = -Math.PI/2;
+
+  const entries = Object.entries(grupos).sort((a,b)=>b[1]-a[1]);
+  entries.forEach(([label, n]) => {
+    const slice = (n/total) * Math.PI * 2;
+    const col   = PALETA[label] || '#6b7280';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, ang, ang+slice);
+    ctx.closePath();
+    ctx.fillStyle = col;
+    ctx.fill();
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ang += slice;
+  });
+
+  // Círculo interior (donut)
+  ctx.beginPath();
+  ctx.arc(cx, cy, r*0.55, 0, Math.PI*2);
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg2').trim() || '#1a1a2e';
+  ctx.fill();
+
+  // Total en centro
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold 18px 'DM Mono', monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(total, cx, cy-8);
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = '#9ca3af';
+  ctx.fillText('casos', cx, cy+10);
+
+  // Leyenda
+  if(leyEl) {
+    leyEl.innerHTML = entries.map(([label, n]) => {
+      const col = PALETA[label] || '#6b7280';
+      const pct = Math.round(n/total*100);
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        <div style="width:10px;height:10px;border-radius:2px;background:${col};flex-shrink:0"></div>
+        <span style="font-size:11px;color:var(--text2);flex:1">${label}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col}">${n} · ${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderDetalleReq(filas) {
+  const tb = document.getElementById('tabla-req-detalle-body');
+  const sb = document.getElementById('req-detalle-sub');
+  if(!tb) return;
+  if(sb) sb.textContent = `${filas.length} casos mostrados`;
+
+  tb.innerHTML = filas.map(r => {
+    const f    = parseFechaReq(r[COL_REQ.fecha]);
+    const info = getEstadoColor(r[COL_REQ.estado]);
+    return `<tr>
+      <td style="font-size:11px;color:var(--text2)">${f?f.toLocaleDateString('es-CO'):'—'}</td>
+      <td style="font-size:11.5px">${String(r[COL_REQ.tipo]||'—').trim()}</td>
+      <td style="font-size:11px;color:var(--text2)">${normalizeGestor(r[COL_REQ.gestor])}</td>
+      <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.regional]||'—').trim()}</td>
+      <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.ciudad]||'—').trim()}</td>
+      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${info.color}">${info.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function verDetalleGestor(gestor) {
+  const mes = document.getElementById('req-filtro-mes')?.value || '';
+  let d = DATOS_REQS.filter(r => normalizeGestor(r[COL_REQ.gestor]) === gestor);
+  if(mes) d = d.filter(r => { const f=parseFechaReq(r[COL_REQ.fecha]); return f && getMesKey(f)===mes; });
+  const sb = document.getElementById('req-detalle-sub');
+  if(sb) sb.textContent = `Gestor: ${gestor} · ${d.length} casos`;
+  dibujarTorta(d, gestor);
+  renderDetalleReq(d);
+}
+
+function exportarTablaGestores() {
+  const bom = '\uFEFF';
+  const headers = ['Gestor','Total','Resueltos','En Trámite','Sin Solución','Devueltos','Efectividad %'];
+  const rows = [];
+  document.querySelectorAll('#tabla-req-gestores-body tr').forEach(tr => {
+    const cells = [...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+    if(cells.length >= 7) rows.push(cells.slice(0,7));
+  });
+  const csv = bom + [headers,...rows].map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = `Requerimientos_Gestores_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
 
 function semaforo(pct, umbrales) {
   if(pct >= umbrales.verde)    return { color:'var(--green)', bg:'var(--gdim)', label:'● Verde' };
