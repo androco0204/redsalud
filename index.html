@@ -6235,7 +6235,7 @@ function filtrarTablaPrestadores(tipo, tabEl) {
 }
 
 // ─── FALLAS Y REQUERIMIENTOS ──────────────────────────────────────────
-const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec';
+const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec?hoja=BASE%20GESTI%C3%93N';
 const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
 
 let DATOS_REQS   = [];
@@ -6243,16 +6243,16 @@ let DATOS_FALLAS = [];
 
 // Columnas BASE GESTIÓN REQUERIMIENTOS
 const COL_REQ = {
-  fecha: 0,    // A
-  tipo:  3,    // D
-  regional: 13, // N
-  depto:  14,   // O
-  ciudad: 15,   // P
-  gestor: 22,   // W
-  estado: 50,   // AY
+  fecha:    0,   // A
+  tipo:     3,   // D
+  regional: 13,  // N
+  depto:    14,  // O
+  ciudad:   15,  // P
+  gestor:   22,  // W
+  estado:   50,  // AY (índice 50 = columna AY)
 };
 
-// Gestores válidos — única fuente de verdad
+// Gestores válidos
 const GESTORES_VALIDOS = new Set([
   'INSUMEDIC','PHARMASAN','GENHOSPI','COHAN','CRUZ VERDE',
   'DISFARMA','MYT SALUD','DISCOLMETS','HUMSALUD','AUDIFARMA',
@@ -6262,25 +6262,314 @@ const GESTORES_VALIDOS = new Set([
 
 const AÑOS_VALIDOS = new Set(['2025','2026']);
 
-// Colores estados
-const ESTADOS_COLS = {
-  'resuelto':         { color:'#22c55e', label:'Resuelto' },
-  'cerrado sin':      { color:'#ef4444', label:'Cerrado sin solución' },
-  'sin solucion':     { color:'#ef4444', label:'Cerrado sin solución' },
-  'devuelto':         { color:'#3b82f6', label:'Devuelto' },
-  'en tramite':       { color:'#f59e0b', label:'En trámite' },
-  'tramite':          { color:'#f59e0b', label:'En trámite' },
-  'en proceso':       { color:'#f59e0b', label:'En trámite' },
-};
-
-function getEstadoColor(estado) {
-  const e = String(estado||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  for(const [k,v] of Object.entries(ESTADOS_COLS)) {
-    if(e.includes(k)) return v;
-  }
-  return { color:'#6b7280', label: String(estado||'Otro').trim() };
+// Estados reales del archivo — columna AY
+// CERRADO / CERRADO POR CORREO / DEVUELTO / GESTIÓN (+ posible 5to)
+// Mapeo a categorías para semáforo de efectividad
+// "Resuelto" = CERRADO + CERRADO POR CORREO
+// "En trámite" = GESTIÓN
+// "Devuelto" = DEVUELTO
+function getEstadoInfo(estado) {
+  const e = String(estado||'').trim().toUpperCase();
+  if(e === 'CERRADO')            return { label:'Cerrado',           categoria:'resuelto',  color:'#22c55e' };
+  if(e === 'CERRADO POR CORREO') return { label:'Cerrado por correo',categoria:'resuelto',  color:'#16a34a' };
+  if(e === 'DEVUELTO')           return { label:'Devuelto',          categoria:'devuelto',  color:'#3b82f6' };
+  if(e === 'GESTIÓN'||e==='GESTION') return { label:'En gestión',    categoria:'tramite',   color:'#f59e0b' };
+  if(e === '')                   return { label:'Sin estado',        categoria:'otro',      color:'#6b7280' };
+  return { label: String(estado||'').trim(), categoria:'otro', color:'#6b7280' };
 }
 
+// Paleta para gráfica torta
+const PALETA_ESTADOS = {
+  'Cerrado':           '#22c55e',
+  'Cerrado por correo':'#16a34a',
+  'Devuelto':          '#3b82f6',
+  'En gestión':        '#f59e0b',
+  'Sin estado':        '#6b7280',
+};
+
+function semaforo(pct, umbrales) {
+  if(pct >= umbrales.verde)    return { color:'var(--green)', bg:'var(--gdim)', label:'● Verde' };
+  if(pct >= umbrales.amarillo) return { color:'var(--amber)', bg:'var(--adim)', label:'● Amarillo' };
+  return { color:'var(--red)', bg:'var(--rdim)', label:'● Rojo' };
+}
+
+function parseFechaReq(val) {
+  if(!val) return null;
+  const s = String(val).trim();
+  if(s.includes('/')) {
+    const p = s.split('/');
+    if(p.length === 3) return new Date(+p[2], +p[1]-1, +p[0]);
+  }
+  if(s.includes('-')) { const d=new Date(s); if(!isNaN(d)) return d; }
+  const n = parseInt(s);
+  if(!isNaN(n) && n > 40000) return new Date((n-25569)*86400*1000);
+  return null;
+}
+
+function getMesKey(f)   { return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''; }
+function getMesLabel(f) {
+  const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return f?`${M[f.getMonth()]} ${f.getFullYear()}`:'';
+}
+
+function normalizeGestor(g) {
+  return String(g||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/^ETICOS /,'ÉTICOS ');
+}
+
+async function cargarRequerimientos() {
+  const el = document.getElementById('req-estado-carga');
+  if(el) { el.textContent='⏳ Cargando...'; el.style.color='var(--blue)'; }
+  try {
+    const resp = await fetch(REQS_SCRIPT);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if(!Array.isArray(data)||data.length<2) throw new Error('Sin datos');
+
+    console.log('[Requerimientos] Headers (primeros 55):', data[0].slice(0,55));
+    console.log('[Requerimientos] Col AY (50):', data[0][50], '| Col AX (49):', data[0][49]);
+    console.log('[Requerimientos] Fila 2 muestra:', data[1]);
+
+    // Filtro: gestor válido, no vacío/NA, año 2025-2026
+    DATOS_REQS = data.slice(1).filter(r => {
+      const g = normalizeGestor(r[COL_REQ.gestor]);
+      if(!g || g==='N/A' || g==='') return false;
+      if(!GESTORES_VALIDOS.has(g)) return false;
+      const f = parseFechaReq(r[COL_REQ.fecha]);
+      if(!f) return false;
+      if(!AÑOS_VALIDOS.has(String(f.getFullYear()))) return false;
+      return true;
+    });
+
+    // Log estados únicos para verificar
+    const estadosUnicos = [...new Set(DATOS_REQS.map(r=>String(r[COL_REQ.estado]||'').trim()))];
+    console.log('[Requerimientos] Estados únicos col AY:', estadosUnicos);
+    console.log('[Requerimientos] Total filtrado:', DATOS_REQS.length);
+
+    if(el) { el.textContent=`✓ ${DATOS_REQS.length.toLocaleString('es-CO')} requerimientos (${data.length-1} total en base)`; el.style.color='var(--green)'; }
+    poblarFiltrosReq();
+    aplicarFiltrosReq();
+  } catch(e) {
+    if(el) { el.textContent=`⚠ Error: ${e.message}`; el.style.color='var(--red)'; }
+    console.error('Requerimientos:', e);
+  }
+}
+
+function poblarFiltrosReq() {
+  const meses=new Map(), gestores=new Set(), regionales=new Set(), deptos=new Set(), ciudades=new Set();
+  DATOS_REQS.forEach(r=>{
+    const f=parseFechaReq(r[COL_REQ.fecha]);
+    if(f){const k=getMesKey(f); if(!meses.has(k)) meses.set(k,getMesLabel(f));}
+    const g=normalizeGestor(r[COL_REQ.gestor]); if(g) gestores.add(g);
+    const reg=String(r[COL_REQ.regional]||'').trim(); if(reg) regionales.add(reg);
+    const dep=String(r[COL_REQ.depto]||'').trim();    if(dep) deptos.add(dep);
+    const ciu=String(r[COL_REQ.ciudad]||'').trim();   if(ciu) ciudades.add(ciu);
+  });
+
+  const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  const selM=document.getElementById('req-filtro-mes');
+  if(selM){ selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); if(sortM.length) selM.value=sortM[0][0]; }
+
+  const fill=(id,arr,lbl)=>{ const el=document.getElementById(id); if(el) el.innerHTML=`<option value="">${lbl}</option>`+arr.sort().map(v=>`<option value="${v}">${v}</option>`).join(''); };
+  fill('req-filtro-gestor',   [...gestores],   'Todos los gestores');
+  fill('req-filtro-regional', [...regionales], 'Todas las regionales');
+  fill('req-filtro-depto',    [...deptos],     'Todos los departamentos');
+  fill('req-filtro-ciudad',   [...ciudades],   'Todas las ciudades');
+}
+
+function aplicarFiltrosReq() {
+  const mes      = document.getElementById('req-filtro-mes')?.value      || '';
+  const gestor   = document.getElementById('req-filtro-gestor')?.value   || '';
+  const regional = document.getElementById('req-filtro-regional')?.value || '';
+  const depto    = document.getElementById('req-filtro-depto')?.value    || '';
+  const ciudad   = document.getElementById('req-filtro-ciudad')?.value   || '';
+
+  let d = DATOS_REQS;
+  if(mes)      d=d.filter(r=>{const f=parseFechaReq(r[COL_REQ.fecha]);return f&&getMesKey(f)===mes;});
+  if(gestor)   d=d.filter(r=>normalizeGestor(r[COL_REQ.gestor])===gestor);
+  if(regional) d=d.filter(r=>String(r[COL_REQ.regional]||'').trim()===regional);
+  if(depto)    d=d.filter(r=>String(r[COL_REQ.depto]   ||'').trim()===depto);
+  if(ciudad)   d=d.filter(r=>String(r[COL_REQ.ciudad]  ||'').trim()===ciudad);
+  renderRequerimientos(d);
+}
+
+function renderRequerimientos(datos) {
+  if(!datos.length){
+    const msg='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos para los filtros seleccionados</td></tr>';
+    ['tabla-req-gestores-body','tabla-req-detalle-body'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=msg;});
+    ['kpi-req-total','kpi-req-efectividad','kpi-req-tramite','kpi-req-sin-sol'].forEach(id=>actualizarKPI(id,'0'));
+    return;
+  }
+
+  // Agrupar por gestor
+  const pg={};
+  datos.forEach(r=>{
+    const g=normalizeGestor(r[COL_REQ.gestor]);
+    const info=getEstadoInfo(r[COL_REQ.estado]);
+    if(!pg[g]) pg[g]={total:0,resuelto:0,tramite:0,devuelto:0,otro:0,estados:{}};
+    pg[g].total++;
+    pg[g][info.categoria]=(pg[g][info.categoria]||0)+1;
+    const lbl=info.label;
+    pg[g].estados[lbl]=(pg[g].estados[lbl]||0)+1;
+  });
+
+  // KPIs globales
+  const total    = datos.length;
+  const resueltos= datos.filter(r=>getEstadoInfo(r[COL_REQ.estado]).categoria==='resuelto').length;
+  const tramite  = datos.filter(r=>getEstadoInfo(r[COL_REQ.estado]).categoria==='tramite').length;
+  const devuelto = datos.filter(r=>getEstadoInfo(r[COL_REQ.estado]).categoria==='devuelto').length;
+  // Efectividad: casos CERRADO o CERRADO POR CORREO / total
+  const efec = total>0 ? Math.round(resueltos/total*100) : 0;
+
+  actualizarKPI('kpi-req-total',       total.toLocaleString('es-CO'));
+  actualizarKPI('kpi-req-efectividad', efec+'%');
+  actualizarKPI('kpi-req-tramite',     tramite.toLocaleString('es-CO'));
+  actualizarKPI('kpi-req-sin-sol',     devuelto.toLocaleString('es-CO'));
+  const efEl=document.getElementById('kpi-req-efectividad');
+  if(efEl) efEl.style.color=efec>=80?'var(--green)':efec>=60?'var(--amber)':'var(--red)';
+
+  // Tabla gestores
+  const tb=document.getElementById('tabla-req-gestores-body');
+  if(tb) tb.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
+    const ef=v.total>0?Math.round((v.resuelto||0)/v.total*100):0;
+    const sem=semaforo(ef,{verde:80,amarillo:60});
+    return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\\'")}')" title="Clic para ver detalle y torta">
+      <td style="font-size:12px;font-weight:500">${g}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
+      <td style="color:var(--green);font-family:'DM Mono',monospace">${v.resuelto||0}</td>
+      <td style="color:var(--amber);font-family:'DM Mono',monospace">${v.tramite||0}</td>
+      <td style="color:var(--blue);font-family:'DM Mono',monospace">${v.devuelto||0}</td>
+      <td style="color:var(--text2);font-family:'DM Mono',monospace">${v.otro||0}</td>
+      <td><span style="font-weight:600;color:${sem.color}">${ef}%</span></td>
+      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:${sem.bg};color:${sem.color}">${sem.label}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Gráfica torta global
+  dibujarTorta(datos,'Todos los gestores');
+
+  // Barras por tipo (Fórmula 1)
+  const tipos={};
+  datos.forEach(r=>{const t=String(r[COL_REQ.tipo]||'Sin tipo').trim();tipos[t]=(tipos[t]||0)+1;});
+  const tEl=document.getElementById('req-top-tipos');
+  if(tEl){
+    const sorted=Object.entries(tipos).sort((a,b)=>b[1]-a[1]);
+    const mx=sorted[0]?.[1]||1;
+    const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)','var(--red)','var(--text2)'];
+    tEl.innerHTML=sorted.map(([t,n],i)=>{
+      const pct=Math.round(n/total*100);
+      const w=Math.round(n/mx*100);
+      const col=COLS[i%COLS.length];
+      return `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${t.substring(0,45)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col};flex-shrink:0">${n} · ${pct}%</span>
+        </div>
+        <div style="height:6px;background:var(--bg4);border-radius:3px">
+          <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  renderDetalleReq(datos.slice(0,150));
+}
+
+function dibujarTorta(datos, titulo) {
+  const sub=document.getElementById('req-dist-sub');
+  if(sub) sub.textContent=titulo;
+
+  const grupos={};
+  datos.forEach(r=>{
+    const info=getEstadoInfo(r[COL_REQ.estado]);
+    grupos[info.label]=(grupos[info.label]||0)+1;
+  });
+
+  const canvas=document.getElementById('req-chart-torta');
+  const leyEl=document.getElementById('req-torta-leyenda');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-8;
+  const totalT=Object.values(grupos).reduce((a,n)=>a+n,0);
+
+  ctx.clearRect(0,0,W,H);
+  let ang=-Math.PI/2;
+  const entries=Object.entries(grupos).sort((a,b)=>b[1]-a[1]);
+  entries.forEach(([lbl,n])=>{
+    const slice=(n/totalT)*Math.PI*2;
+    const col=PALETA_ESTADOS[lbl]||'#6b7280';
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+slice);ctx.closePath();
+    ctx.fillStyle=col;ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.5;ctx.stroke();
+    ang+=slice;
+  });
+  // Donut hole
+  ctx.beginPath();ctx.arc(cx,cy,r*0.55,0,Math.PI*2);
+  ctx.fillStyle='#0f0f1a';ctx.fill();
+  // Centro
+  ctx.fillStyle='#ffffff';ctx.font=`bold 18px 'DM Mono',monospace`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(totalT,cx,cy-8);
+  ctx.font='10px sans-serif';ctx.fillStyle='#9ca3af';
+  ctx.fillText('casos',cx,cy+10);
+
+  if(leyEl) leyEl.innerHTML=entries.map(([lbl,n])=>{
+    const col=PALETA_ESTADOS[lbl]||'#6b7280';
+    const pct=Math.round(n/totalT*100);
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div style="width:10px;height:10px;border-radius:2px;background:${col};flex-shrink:0"></div>
+      <span style="font-size:11px;color:var(--text2);flex:1">${lbl}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col}">${n} · ${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function renderDetalleReq(filas){
+  const tb=document.getElementById('tabla-req-detalle-body');
+  const sb=document.getElementById('req-detalle-sub');
+  if(!tb)return;
+  if(sb) sb.textContent=`${filas.length} casos mostrados`;
+  tb.innerHTML=filas.map(r=>{
+    const f=parseFechaReq(r[COL_REQ.fecha]);
+    const info=getEstadoInfo(r[COL_REQ.estado]);
+    return `<tr>
+      <td style="font-size:11px;color:var(--text2)">${f?f.toLocaleDateString('es-CO'):'—'}</td>
+      <td style="font-size:11.5px">${String(r[COL_REQ.tipo]||'—').trim()}</td>
+      <td style="font-size:11px;color:var(--text2)">${normalizeGestor(r[COL_REQ.gestor])}</td>
+      <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.regional]||'—').trim()}</td>
+      <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.ciudad]||'—').trim()}</td>
+      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${info.color}">${info.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function verDetalleGestor(gestor){
+  const mes=document.getElementById('req-filtro-mes')?.value||'';
+  let d=DATOS_REQS.filter(r=>normalizeGestor(r[COL_REQ.gestor])===gestor);
+  if(mes) d=d.filter(r=>{const f=parseFechaReq(r[COL_REQ.fecha]);return f&&getMesKey(f)===mes;});
+  const sb=document.getElementById('req-detalle-sub');
+  if(sb) sb.textContent=`Gestor: ${gestor} · ${d.length} casos`;
+  dibujarTorta(d,gestor);
+  renderDetalleReq(d);
+}
+
+function exportarTablaGestores(){
+  const bom='\uFEFF';
+  const headers=['Gestor','Total','Cerrados','En Gestión','Devueltos','Otros','Efectividad %'];
+  const rows=[];
+  document.querySelectorAll('#tabla-req-gestores-body tr').forEach(tr=>{
+    const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+    if(cells.length>=7) rows.push(cells.slice(0,7));
+  });
+  const csv=bom+[headers,...rows].map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`Requerimientos_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// Columnas BASE GESTIÓN REQUERIMIENTOS
 function semaforo(pct, umbrales) {
   if(pct >= umbrales.verde)    return { color:'var(--green)', bg:'var(--gdim)', label:'● Verde' };
   if(pct >= umbrales.amarillo) return { color:'var(--amber)', bg:'var(--adim)', label:'● Amarillo' };
