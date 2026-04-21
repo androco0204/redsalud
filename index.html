@@ -564,11 +564,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
 <!-- ══ RESUMEN ══ -->
 <div class="screen active" id="screen-resumen">
+  <div id="banner-provisional-resumen" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,rgba(245,158,11,0.12),transparent);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12px">
+    <span style="font-size:16px">⚠️</span>
+    <div><span style="color:var(--amber);font-weight:600">Datos provisionales</span><span style="color:var(--text2)"> — Base de contratos vigentes en proceso de actualización. Los valores serán reemplazados al recibir la nueva base oficial.</span></div>
+    <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
+  </div>
   <div class="kpi-strip cols-5">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Prestadores activos</div><div class="kpi-value" style="color:var(--green)" id="kpi-resumen-prestadores">1,248</div><div class="kpi-delta up" id="kpi-resumen-prestadores-delta">↑ 3.2% vs mes anterior</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">87.4%</div><div class="kpi-delta up" id="kpi-resumen-cobertura-delta">↑ 1.1% · meta 90%</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Prestadores activos</div><div class="kpi-value" style="color:var(--green)" id="kpi-resumen-prestadores">—</div><div class="kpi-delta up" id="kpi-resumen-prestadores-delta">Cargando...</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">—</div><div class="kpi-delta up" id="kpi-resumen-cobertura-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas activas</div><div class="kpi-value" style="color:var(--amber)">7</div><div class="kpi-delta warn">3 críticas · 4 medias</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">$4,218 M</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">↑ 8.4% vs mes ant.</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">—</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Score cumplimiento</div><div class="kpi-value" style="color:var(--purple)">81.3</div><div class="kpi-delta up">↑ 2.4pts vs T4 2025</div></div>
   </div>
   <div class="grid-2">
@@ -999,6 +1004,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
 <!-- ══ PRESTADORES ══ -->
 <div class="screen" id="screen-prestadores">
+  <div id="banner-provisional" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,rgba(245,158,11,0.12),transparent);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12px">
+  <span style="font-size:16px">⚠️</span>
+  <div>
+    <span style="color:var(--amber);font-weight:600">Datos provisionales</span>
+    <span style="color:var(--text2)"> — La base de contratos vigentes está siendo actualizada. Los conteos y valores mostrados corresponden a la base anterior y serán reemplazados al recibir la nueva base oficial.</span>
+  </div>
+  <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
+</div>
   <div class="kpi-strip cols-5">
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total habilitados</div><div class="kpi-value" style="color:var(--green)" id="kpi-prest-hab">—</div><div class="kpi-delta up" id="kpi-prest-hab-delta">% de la red</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Sin contrato / gestión</div><div class="kpi-value" style="color:var(--amber)" id="kpi-prest-sincontrato">—</div><div class="kpi-delta warn" id="kpi-prest-sincontrato-delta">Requieren seguimiento</div></div>
@@ -5086,6 +5099,41 @@ function parsearArrayGestores(dataNIT, dataDANE) {
   return { gestores, cobertura };
 }
 
+// ─── PARSER DE MONEDA COLOMBIANA ────────────────────────────────────
+function parseCOP(raw) {
+  if(!raw || raw === '' || raw === '#N/A' || raw === 'null' || raw === '-') return 0;
+  const s = String(raw).replace(/[$\s]/g,'').trim();
+  if(!s) return 0;
+  let n;
+  // Formato colombiano: 1.234.567,89 (punto = miles, coma = decimal)
+  if(s.includes(',') && s.includes('.')) {
+    n = parseFloat(s.replace(/\./g,'').replace(',','.'));
+  }
+  // Solo coma: puede ser decimal (1234,89) o miles sin punto
+  else if(s.includes(',')) {
+    const parts = s.split(',');
+    if(parts[1]?.length <= 2) n = parseFloat(s.replace(',','.'));
+    else n = parseFloat(s.replace(/,/g,''));
+  }
+  // Solo punto: puede ser decimal (1234567.89) o miles (1.234.567)
+  else if(s.includes('.')) {
+    const parts = s.split('.');
+    // Si hay más de un punto o parte decimal != 2-3 chars, son miles
+    if(parts.length > 2 || (parts.length === 2 && parts[1].length > 3)) {
+      n = parseFloat(s.replace(/\./g,''));
+    } else {
+      n = parseFloat(s);
+    }
+  }
+  else {
+    n = parseFloat(s);
+  }
+  if(isNaN(n)) return 0;
+  // Sanity check: valores > 100 billones COP son errores de formato
+  if(n > 100_000_000_000_000) return 0;
+  return n;
+}
+
 function parsearArrayReclamaciones(data) {
   if(!data || data.length < 3) return [];
   
@@ -5254,10 +5302,10 @@ function parsearCSVReclamaciones(csv) {
   return rows.map(r=>({
     nit:get(r,'nit'), nombre:get(r,'nombre'), regional:get(r,'regional'),
     ciudad:get(r,'ciudad'), concepto:get(r,'concepto'),
-    vr_cartera:parseFloat(get(r,'vr_cartera').replace(/\./g,'').replace(',','.'))||0,
-    vr_total:parseFloat(get(r,'vr_total_desagregado').replace(/\./g,'').replace(',','.'))||0,
-    vr_eps:parseFloat(get(r,'vr_eps').replace(/\./g,'').replace(',','.'))||0,
-    vr_ips:parseFloat(get(r,'vr_ips').replace(/\./g,'').replace(',','.'))||0,
+    vr_cartera:parseCOP(get(r,'vr_cartera')),
+    vr_total:parseCOP(get(r,'vr_total_desagregado')),
+    vr_eps:parseCOP(get(r,'vr_eps')),
+    vr_ips:parseCOP(get(r,'vr_ips')),
     pct_eps:parseFloat(get(r,'pct_eps'))||0,
     estado_cartera:get(r,'estado_cartera'), estado_proceso:get(r,'estado_proceso'),
     vr_1ra_cuota:parseFloat(get(r,'vr_1ra_cuota').replace(/\./g,'').replace(',','.'))||0,
@@ -5273,7 +5321,8 @@ function aplicarReclamaciones() {
   const fmtN = v=>v.toLocaleString('es-CO');
 
   // Cálculos
-  const totalCartera   = rec.reduce((a,r)=>a+r.vr_cartera,0);
+  const MAX_COP = 100_000_000_000; // 100B COP máximo razonable
+  const totalCartera   = rec.reduce((a,r)=>a+(r.vr_cartera>0&&r.vr_cartera<MAX_COP?r.vr_cartera:0),0);
   const totalEPS       = rec.reduce((a,r)=>a+r.vr_eps,0);
   const totalIPS       = rec.reduce((a,r)=>a+r.vr_ips,0);
   const total1raCuota  = rec.reduce((a,r)=>a+r.vr_1ra_cuota,0);
