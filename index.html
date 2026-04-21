@@ -6235,7 +6235,7 @@ function filtrarTablaPrestadores(tipo, tabEl) {
 }
 
 // ─── FALLAS Y REQUERIMIENTOS ──────────────────────────────────────────
-const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec?hoja=BASE%20GESTI%C3%93N';
+const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec';
 const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
 
 let DATOS_REQS   = [];
@@ -6262,28 +6262,24 @@ const GESTORES_VALIDOS = new Set([
 
 const AÑOS_VALIDOS = new Set(['2025','2026']);
 
-// Estados reales del archivo — columna AY
-// CERRADO / CERRADO POR CORREO / DEVUELTO / GESTIÓN (+ posible 5to)
-// Mapeo a categorías para semáforo de efectividad
-// "Resuelto" = CERRADO + CERRADO POR CORREO
-// "En trámite" = GESTIÓN
-// "Devuelto" = DEVUELTO
+// Estados reales columna AY: CERRADO / CERRADO POR CORREO / GESTIÓN / PENDIENTE
 function getEstadoInfo(estado) {
   const e = String(estado||'').trim().toUpperCase();
-  if(e === 'CERRADO')            return { label:'Cerrado',           categoria:'resuelto',  color:'#22c55e' };
-  if(e === 'CERRADO POR CORREO') return { label:'Cerrado por correo',categoria:'resuelto',  color:'#16a34a' };
-  if(e === 'DEVUELTO')           return { label:'Devuelto',          categoria:'devuelto',  color:'#3b82f6' };
-  if(e === 'GESTIÓN'||e==='GESTION') return { label:'En gestión',    categoria:'tramite',   color:'#f59e0b' };
-  if(e === '')                   return { label:'Sin estado',        categoria:'otro',      color:'#6b7280' };
+  if(e === 'CERRADO')            return { label:'Cerrado',           categoria:'resuelto', color:'#22c55e' };
+  if(e === 'CERRADO POR CORREO'||e === 'CERRADO CON CARTA') return { label:'Cerrado por correo', categoria:'resuelto', color:'#16a34a' };
+  if(e === 'DEVUELTO')           return { label:'Devuelto',          categoria:'devuelto', color:'#3b82f6' };
+  if(e === 'GESTIÓN'||e==='GESTION') return { label:'En gestión',   categoria:'tramite',  color:'#f59e0b' };
+  if(e === 'PENDIENTE')          return { label:'Pendiente',         categoria:'tramite',  color:'#f97316' };
+  if(e === '')                   return { label:'Sin estado',        categoria:'otro',     color:'#6b7280' };
   return { label: String(estado||'').trim(), categoria:'otro', color:'#6b7280' };
 }
 
-// Paleta para gráfica torta
 const PALETA_ESTADOS = {
   'Cerrado':           '#22c55e',
   'Cerrado por correo':'#16a34a',
   'Devuelto':          '#3b82f6',
   'En gestión':        '#f59e0b',
+  'Pendiente':         '#f97316',
   'Sin estado':        '#6b7280',
 };
 
@@ -6322,42 +6318,59 @@ async function cargarRequerimientos() {
   const el = document.getElementById('req-estado-carga');
   if(el) { el.textContent='⏳ Cargando...'; el.style.color='var(--blue)'; }
   try {
-    const resp = await fetch(REQS_SCRIPT);
+    const url = REQS_SCRIPT + '?hoja=' + encodeURIComponent('BASE GESTIÓN');
+    const resp = await fetch(url);
     if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     if(!Array.isArray(data)||data.length<2) throw new Error('Sin datos');
 
     console.log('[REQ] Total filas raw:', data.length);
-    console.log('[REQ] Headers completos:');
-    data[0].forEach((h,i)=>{ if(h&&String(h).trim()) console.log(`  idx ${i} (col ${i<26?String.fromCharCode(65+i):i<52?'A'+String.fromCharCode(65+i-26):'B'+String.fromCharCode(65+i-52)}): "${h}"`); });
-    
-    // Buscar columnas por nombre en lugar de índice fijo
-    const hdrs = data[0].map(h=>String(h||'').trim().toUpperCase());
-    
-    // Detectar columnas dinámicamente
-    const findCol = (keywords) => {
-      for(const kw of keywords) {
-        const idx = hdrs.findIndex(h=>h.includes(kw));
-        if(idx >= 0) return idx;
+    console.log('[REQ] Fila 1:', JSON.stringify(data[0]?.slice(0,6)));
+    console.log('[REQ] Fila 2:', JSON.stringify(data[1]?.slice(0,30)));
+    console.log('[REQ] Fila 3 (primer dato):', JSON.stringify(data[2]?.slice(0,10)));
+
+    // Fila 1 = título fusionado, Fila 2 = headers reales, datos desde fila 3
+    // Detectar automáticamente: buscar fila con más headers con contenido
+    let headerRowIdx = 0;
+    let maxHeaders = 0;
+    for(let i=0; i<Math.min(5, data.length); i++){
+      const count = (data[i]||[]).filter(c=>c&&String(c).trim()&&String(c).trim().length>1).length;
+      if(count > maxHeaders){ maxHeaders=count; headerRowIdx=i; }
+    }
+    const dataStartIdx = headerRowIdx + 1;
+    console.log('[REQ] Header row detectada:', headerRowIdx+1, '| Datos desde fila:', dataStartIdx+1);
+
+    const hdrs = (data[headerRowIdx]||[]).map(h =>
+      String(h||'').trim().toUpperCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    );
+    console.log('[REQ] Headers normalizados (primeros 52):', hdrs.slice(0,52));
+
+    const findCol = (...keywords) => {
+      for(const kw of keywords){
+        const kn = kw.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+        const idx = hdrs.findIndex(h => h.includes(kn));
+        if(idx >= 0){ console.log(`[REQ] Col "${kw}" → idx ${idx}: "${hdrs[idx]}"`); return idx; }
       }
+      console.warn('[REQ] No encontrado:', keywords);
       return -1;
     };
-    
-    COL_REQ.fecha    = findCol(['FECHA','DATE']) !== -1 ? findCol(['FECHA','DATE']) : 0;
-    COL_REQ.tipo     = findCol(['TIPO DE CASO','TIPO CASO','TIPO DE REQUER']) !== -1 ? findCol(['TIPO DE CASO','TIPO CASO','TIPO DE REQUER']) : 3;
-    COL_REQ.regional = findCol(['REGIONAL']) !== -1 ? findCol(['REGIONAL']) : 13;
-    COL_REQ.depto    = findCol(['DEPARTAMENTO']) !== -1 ? findCol(['DEPARTAMENTO']) : 14;
-    COL_REQ.ciudad   = findCol(['MUNICIPIO','CIUDAD']) !== -1 ? findCol(['MUNICIPIO','CIUDAD']) : 15;
-    COL_REQ.gestor   = findCol(['GESTOR FARMAC','GESTOR FAR']) !== -1 ? findCol(['GESTOR FARMAC','GESTOR FAR']) : 22;
-    COL_REQ.estado   = findCol(['ESTADO']) !== -1 ? findCol(['ESTADO']) : 50;
-    
-    console.log('[REQ] Columnas detectadas:', JSON.stringify(COL_REQ));
-    console.log('[REQ] Fila 2 completa:', data[1]);
-    console.log('[REQ] Estado fila 2:', data[1]?.[COL_REQ.estado]);
-    console.log('[REQ] Gestor fila 2:', data[1]?.[COL_REQ.gestor]);
+
+    COL_REQ.fecha    = findCol('FECHA') !== -1 ? findCol('FECHA') : 0;
+    COL_REQ.tipo     = findCol('TIPO DE CASO','TIPO CASO') !== -1 ? findCol('TIPO DE CASO','TIPO CASO') : 3;
+    COL_REQ.regional = findCol('REGIONAL') !== -1 ? findCol('REGIONAL') : 13;
+    COL_REQ.depto    = findCol('DEPARTAMENTO') !== -1 ? findCol('DEPARTAMENTO') : 14;
+    COL_REQ.ciudad   = findCol('MUNICIPIO','CIUDAD') !== -1 ? findCol('MUNICIPIO','CIUDAD') : 15;
+    COL_REQ.gestor   = findCol('GESTOR FARMACEUTICO','GESTOR FARMAC') !== -1 ? findCol('GESTOR FARMACEUTICO','GESTOR FARMAC') : 22;
+    COL_REQ.estado   = findCol('ESTADO') !== -1 ? findCol('ESTADO') : 50;
+
+    console.log('[REQ] COL_REQ final:', JSON.stringify(COL_REQ));
+    if(data[dataStartIdx]) {
+      console.log('[REQ] Primer dato - gestor:', data[dataStartIdx][COL_REQ.gestor], '| estado:', data[dataStartIdx][COL_REQ.estado], '| fecha:', data[dataStartIdx][COL_REQ.fecha]);
+    }
 
     // Filtro: gestor válido, no vacío/NA, año 2025-2026
-    DATOS_REQS = data.slice(1).filter(r => {
+    DATOS_REQS = data.slice(dataStartIdx).filter(r => {
       const g = normalizeGestor(r[COL_REQ.gestor]);
       if(!g || g==='N/A' || g==='') return false;
       if(!GESTORES_VALIDOS.has(g)) return false;
@@ -6367,10 +6380,11 @@ async function cargarRequerimientos() {
       return true;
     });
 
-    // Log estados únicos para verificar
     const estadosUnicos = [...new Set(DATOS_REQS.map(r=>String(r[COL_REQ.estado]||'').trim()))];
-    console.log('[Requerimientos] Estados únicos col AY:', estadosUnicos);
-    console.log('[Requerimientos] Total filtrado:', DATOS_REQS.length);
+    const gestoresEncontrados = [...new Set(DATOS_REQS.map(r=>normalizeGestor(r[COL_REQ.gestor])))];
+    console.log('[REQ] Estados únicos:', estadosUnicos);
+    console.log('[REQ] Gestores encontrados:', gestoresEncontrados);
+    console.log('[REQ] Total filtrado:', DATOS_REQS.length, 'de', data.length - dataStartIdx, 'filas');
 
     if(el) { el.textContent=`✓ ${DATOS_REQS.length.toLocaleString('es-CO')} requerimientos (${data.length-1} total en base)`; el.style.color='var(--green)'; }
     poblarFiltrosReq();
