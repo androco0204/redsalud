@@ -6325,54 +6325,49 @@ async function cargarRequerimientos() {
     if(!Array.isArray(data)||data.length<2) throw new Error('Sin datos');
 
     console.log('[REQ] Total filas raw:', data.length);
-    console.log('[REQ] Fila 1:', JSON.stringify(data[0]?.slice(0,6)));
-    console.log('[REQ] Fila 2:', JSON.stringify(data[1]?.slice(0,30)));
+    console.log('[REQ] Fila 1 (título):', JSON.stringify(data[0]?.slice(0,3)));
+    console.log('[REQ] Fila 2 (headers):', JSON.stringify(data[1]?.slice(0,30)));
     console.log('[REQ] Fila 3 (primer dato):', JSON.stringify(data[2]?.slice(0,10)));
 
-    // Fila 1 = título fusionado, Fila 2 = headers reales, datos desde fila 3
-    // Detectar automáticamente: buscar fila con más headers con contenido
-    let headerRowIdx = 0;
-    let maxHeaders = 0;
-    for(let i=0; i<Math.min(5, data.length); i++){
-      const count = (data[i]||[]).filter(c=>c&&String(c).trim()&&String(c).trim().length>1).length;
-      if(count > maxHeaders){ maxHeaders=count; headerRowIdx=i; }
-    }
-    const dataStartIdx = headerRowIdx + 1;
-    console.log('[REQ] Header row detectada:', headerRowIdx+1, '| Datos desde fila:', dataStartIdx+1);
+    // Estructura fija: fila 1 = título fusionado, fila 2 = headers, fila 3+ = datos
+    const headerRowIdx = 1;  // índice 1 = fila 2 del Sheet
+    const dataStartIdx = 2;  // índice 2 = fila 3 del Sheet
 
     const hdrs = (data[headerRowIdx]||[]).map(h =>
       String(h||'').trim().toUpperCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     );
-    console.log('[REQ] Headers normalizados (primeros 52):', hdrs.slice(0,52));
+    console.log('[REQ] Headers fila 2 (normalizados):', hdrs.filter(h=>h));
 
     const findCol = (...keywords) => {
       for(const kw of keywords){
         const kn = kw.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-        const idx = hdrs.findIndex(h => h.includes(kn));
-        if(idx >= 0){ console.log(`[REQ] Col "${kw}" → idx ${idx}: "${hdrs[idx]}"`); return idx; }
+        const idx = hdrs.findIndex(h => h === kn || h.includes(kn));
+        if(idx >= 0){ console.log(`[REQ] "${kw}" → idx ${idx} = "${hdrs[idx]}"`); return idx; }
       }
-      console.warn('[REQ] No encontrado:', keywords);
+      console.warn('[REQ] NO encontrado:', keywords);
       return -1;
     };
 
-    COL_REQ.fecha    = findCol('FECHA') !== -1 ? findCol('FECHA') : 0;
-    COL_REQ.tipo     = findCol('TIPO DE CASO','TIPO CASO') !== -1 ? findCol('TIPO DE CASO','TIPO CASO') : 3;
-    COL_REQ.regional = findCol('REGIONAL') !== -1 ? findCol('REGIONAL') : 13;
-    COL_REQ.depto    = findCol('DEPARTAMENTO') !== -1 ? findCol('DEPARTAMENTO') : 14;
-    COL_REQ.ciudad   = findCol('MUNICIPIO','CIUDAD') !== -1 ? findCol('MUNICIPIO','CIUDAD') : 15;
-    COL_REQ.gestor   = findCol('GESTOR FARMACEUTICO','GESTOR FARMAC') !== -1 ? findCol('GESTOR FARMACEUTICO','GESTOR FARMAC') : 22;
-    COL_REQ.estado   = findCol('ESTADO') !== -1 ? findCol('ESTADO') : 50;
+    COL_REQ.fecha    = findCol('FECHA');
+    COL_REQ.tipo     = findCol('TIPO DE CASO','TIPO CASO');
+    COL_REQ.regional = findCol('REGIONAL');
+    COL_REQ.depto    = findCol('DEPARTAMENTO');
+    COL_REQ.ciudad   = findCol('MUNICIPIO','CIUDAD');
+    COL_REQ.gestor   = findCol('GESTOR FARMACEUTICO','GESTOR FARMAC');
+    COL_REQ.estado   = findCol('ESTADO');
 
-    console.log('[REQ] COL_REQ final:', JSON.stringify(COL_REQ));
-    if(data[dataStartIdx]) {
-      console.log('[REQ] Primer dato - gestor:', data[dataStartIdx][COL_REQ.gestor], '| estado:', data[dataStartIdx][COL_REQ.estado], '| fecha:', data[dataStartIdx][COL_REQ.fecha]);
+    console.log('[REQ] Mapa final:', JSON.stringify(COL_REQ));
+    if(data[dataStartIdx]){
+      console.log('[REQ] Fila 3 - gestor:', data[dataStartIdx][COL_REQ.gestor]);
+      console.log('[REQ] Fila 3 - estado:', data[dataStartIdx][COL_REQ.estado]);
+      console.log('[REQ] Fila 3 - fecha:',  data[dataStartIdx][COL_REQ.fecha]);
     }
 
-    // Filtro: gestor válido, no vacío/NA, año 2025-2026
+    // Filtro duro: solo gestores válidos, años 2025-2026, sin N/A ni vacíos
     DATOS_REQS = data.slice(dataStartIdx).filter(r => {
       const g = normalizeGestor(r[COL_REQ.gestor]);
-      if(!g || g==='N/A' || g==='') return false;
+      if(!g || g === 'N/A' || g === '') return false;
       if(!GESTORES_VALIDOS.has(g)) return false;
       const f = parseFechaReq(r[COL_REQ.fecha]);
       if(!f) return false;
@@ -6380,11 +6375,9 @@ async function cargarRequerimientos() {
       return true;
     });
 
-    const estadosUnicos = [...new Set(DATOS_REQS.map(r=>String(r[COL_REQ.estado]||'').trim()))];
-    const gestoresEncontrados = [...new Set(DATOS_REQS.map(r=>normalizeGestor(r[COL_REQ.gestor])))];
-    console.log('[REQ] Estados únicos:', estadosUnicos);
-    console.log('[REQ] Gestores encontrados:', gestoresEncontrados);
-    console.log('[REQ] Total filtrado:', DATOS_REQS.length, 'de', data.length - dataStartIdx, 'filas');
+    console.log('[REQ] Estados únicos:', [...new Set(DATOS_REQS.map(r=>String(r[COL_REQ.estado]||'').trim()))]);
+    console.log('[REQ] Gestores:', [...new Set(DATOS_REQS.map(r=>normalizeGestor(r[COL_REQ.gestor])))]);
+    console.log('[REQ] Total filtrado:', DATOS_REQS.length, 'de', data.length - dataStartIdx);
 
     if(el) { el.textContent=`✓ ${DATOS_REQS.length.toLocaleString('es-CO')} requerimientos (${data.length-1} total en base)`; el.style.color='var(--green)'; }
     poblarFiltrosReq();
@@ -6644,506 +6637,6 @@ function normalizeGestor(g) {
   return String(g||'').trim().toUpperCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace('ETICOS','ÉTICOS');
-}
-
-async function cargarRequerimientos() {
-  const el = document.getElementById('req-estado-carga');
-  if(el) { el.textContent='⏳ Cargando...'; el.style.color='var(--blue)'; }
-  try {
-    const resp = await fetch(REQS_SCRIPT);
-    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    if(!Array.isArray(data) || data.length < 2) throw new Error('Sin datos');
-
-    // Aplicar filtros duros: gestor válido, no vacío/NA, año 2025-2026
-    DATOS_REQS = data.slice(1).filter(r => {
-      const g = normalizeGestor(r[COL_REQ.gestor]);
-      if(!g || g === 'N/A' || g === '') return false;
-      if(!GESTORES_VALIDOS.has(g)) return false;
-      const f = parseFechaReq(r[COL_REQ.fecha]);
-      if(!f) return false;
-      if(!AÑOS_VALIDOS.has(String(f.getFullYear()))) return false;
-      return true;
-    });
-
-    if(el) { el.textContent=`✓ ${DATOS_REQS.length.toLocaleString('es-CO')} requerimientos cargados`; el.style.color='var(--green)'; }
-    poblarFiltrosReq();
-    aplicarFiltrosReq();
-  } catch(e) {
-    if(el) { el.textContent=`⚠ Error: ${e.message}`; el.style.color='var(--red)'; }
-    console.error('Requerimientos:', e);
-  }
-}
-
-function poblarFiltrosReq() {
-  const meses=new Map(), gestores=new Set(), regionales=new Set(), deptos=new Set(), ciudades=new Set();
-  DATOS_REQS.forEach(r => {
-    const f = parseFechaReq(r[COL_REQ.fecha]);
-    if(f) { const k=getMesKey(f); if(!meses.has(k)) meses.set(k, getMesLabel(f)); }
-    const g = normalizeGestor(r[COL_REQ.gestor]);
-    if(g) gestores.add(g);
-    const reg = String(r[COL_REQ.regional]||'').trim(); if(reg) regionales.add(reg);
-    const dep = String(r[COL_REQ.depto]  ||'').trim(); if(dep) deptos.add(dep);
-    const ciu = String(r[COL_REQ.ciudad] ||'').trim(); if(ciu) ciudades.add(ciu);
-  });
-
-  const sortM = [...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
-  const fill = (id, opts, allLabel) => {
-    const el = document.getElementById(id);
-    if(el) el.innerHTML = `<option value="">${allLabel}</option>` + opts.map(o=>`<option value="${o}">${o}</option>`).join('');
-  };
-
-  fill('req-filtro-mes',      sortM.map(([k,v])=>v), 'Todos los meses');
-  // Fix: mes selector uses label as value — use key
-  const selM = document.getElementById('req-filtro-mes');
-  if(selM) { selM.innerHTML = '<option value="">Todos los meses</option>' + sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); if(sortM.length) selM.value = sortM[0][0]; }
-
-  fill('req-filtro-gestor',   [...gestores].sort(), 'Todos los gestores');
-  fill('req-filtro-regional', [...regionales].sort(), 'Todas las regionales');
-  fill('req-filtro-depto',    [...deptos].sort(), 'Todos los departamentos');
-  fill('req-filtro-ciudad',   [...ciudades].sort(), 'Todas las ciudades');
-}
-
-function aplicarFiltrosReq() {
-  const mes      = document.getElementById('req-filtro-mes')?.value      || '';
-  const gestor   = document.getElementById('req-filtro-gestor')?.value   || '';
-  const regional = document.getElementById('req-filtro-regional')?.value || '';
-  const depto    = document.getElementById('req-filtro-depto')?.value    || '';
-  const ciudad   = document.getElementById('req-filtro-ciudad')?.value   || '';
-
-  let d = DATOS_REQS;
-  if(mes)      d = d.filter(r => { const f=parseFechaReq(r[COL_REQ.fecha]); return f && getMesKey(f)===mes; });
-  if(gestor)   d = d.filter(r => normalizeGestor(r[COL_REQ.gestor]) === gestor);
-  if(regional) d = d.filter(r => String(r[COL_REQ.regional]||'').trim() === regional);
-  if(depto)    d = d.filter(r => String(r[COL_REQ.depto]   ||'').trim() === depto);
-  if(ciudad)   d = d.filter(r => String(r[COL_REQ.ciudad]  ||'').trim() === ciudad);
-
-  renderRequerimientos(d);
-}
-
-function renderRequerimientos(datos) {
-  if(!datos.length) {
-    const msg = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos para los filtros seleccionados</td></tr>';
-    ['tabla-req-gestores-body','tabla-req-detalle-body'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.innerHTML = msg;
-    });
-    return;
-  }
-
-  // ── Agrupar por gestor ─────────────────────────────────────────
-  const pg = {};
-  datos.forEach(r => {
-    const g = normalizeGestor(r[COL_REQ.gestor]);
-    const e = String(r[COL_REQ.estado]||'').trim();
-    if(!pg[g]) pg[g] = { total:0, estados:{} };
-    pg[g].total++;
-    pg[g].estados[e] = (pg[g].estados[e]||0) + 1;
-  });
-
-  // ── KPIs globales ──────────────────────────────────────────────
-  const total = datos.length;
-  const resueltos = datos.filter(r => getEstadoColor(r[COL_REQ.estado]).label === 'Resuelto').length;
-  const tramite   = datos.filter(r => getEstadoColor(r[COL_REQ.estado]).label === 'En trámite').length;
-  const sinSol    = datos.filter(r => getEstadoColor(r[COL_REQ.estado]).label === 'Cerrado sin solución').length;
-  const efec      = total > 0 ? Math.round(resueltos/total*100) : 0;
-
-  actualizarKPI('kpi-req-total',       total.toLocaleString('es-CO'));
-  actualizarKPI('kpi-req-efectividad', efec+'%');
-  actualizarKPI('kpi-req-tramite',     tramite.toLocaleString('es-CO'));
-  actualizarKPI('kpi-req-sin-sol',     sinSol.toLocaleString('es-CO'));
-  const efEl = document.getElementById('kpi-req-efectividad');
-  if(efEl) efEl.style.color = efec>=80?'var(--green)':efec>=60?'var(--amber)':'var(--red)';
-
-  // ── Tabla gestores ─────────────────────────────────────────────
-  const tb = document.getElementById('tabla-req-gestores-body');
-  if(tb) {
-    tb.innerHTML = Object.entries(pg)
-      .sort((a,b)=>b[1].total-a[1].total)
-      .map(([g,v]) => {
-        const res = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='Resuelto').reduce((a,[,n])=>a+n,0);
-        const tra = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='En trámite').reduce((a,[,n])=>a+n,0);
-        const ssi = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='Cerrado sin solución').reduce((a,[,n])=>a+n,0);
-        const dev = Object.entries(v.estados).filter(([e])=>getEstadoColor(e).label==='Devuelto').reduce((a,[,n])=>a+n,0);
-        const ef  = v.total>0 ? Math.round(res/v.total*100) : 0;
-        const sem = semaforo(ef, {verde:80, amarillo:60});
-        return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\\'")}')" title="Clic para ver detalle">
-          <td style="font-size:12px;font-weight:500">${g}</td>
-          <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
-          <td style="color:var(--green);font-family:'DM Mono',monospace">${res}</td>
-          <td style="color:var(--amber);font-family:'DM Mono',monospace">${tra}</td>
-          <td style="color:var(--red);font-family:'DM Mono',monospace">${ssi}</td>
-          <td style="color:var(--blue);font-family:'DM Mono',monospace">${dev}</td>
-          <td><span style="font-weight:600;color:${sem.color}">${ef}%</span></td>
-          <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:${sem.bg};color:${sem.color}">${sem.label}</span></td>
-        </tr>`;
-      }).join('');
-  }
-
-  // ── Gráfica torta (Fórmula 2) — distribución estados global ───
-  dibujarTorta(datos, 'Todos los gestores');
-
-  // ── Gráfica barras por tipo (Fórmula 1) ───────────────────────
-  const tipos = {};
-  datos.forEach(r => {
-    const t = String(r[COL_REQ.tipo]||'Sin tipo').trim();
-    tipos[t] = (tipos[t]||0)+1;
-  });
-  const tEl = document.getElementById('req-top-tipos');
-  if(tEl) {
-    const sorted = Object.entries(tipos).sort((a,b)=>b[1]-a[1]);
-    const mx = sorted[0]?.[1]||1;
-    const COLS = ['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)','var(--red)','var(--text2)'];
-    tEl.innerHTML = sorted.map(([t,n],i) => {
-      const pct = Math.round(n/total*100);
-      const w   = Math.round(n/mx*100);
-      const col = COLS[i % COLS.length];
-      return `<div style="margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${t.substring(0,45)}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col};flex-shrink:0">${n} · ${pct}%</span>
-        </div>
-        <div style="height:6px;background:var(--bg4);border-radius:3px">
-          <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .4s"></div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  // ── Detalle ────────────────────────────────────────────────────
-  renderDetalleReq(datos.slice(0,150));
-}
-
-function dibujarTorta(datos, titulo) {
-  const sub = document.getElementById('req-dist-sub');
-  if(sub) sub.textContent = titulo;
-
-  // Agrupar estados
-  const grupos = {};
-  datos.forEach(r => {
-    const info = getEstadoColor(r[COL_REQ.estado]);
-    grupos[info.label] = (grupos[info.label]||0)+1;
-  });
-
-  const canvas = document.getElementById('req-chart-torta');
-  const leyEl  = document.getElementById('req-torta-leyenda');
-  if(!canvas) return;
-
-  const ctx  = canvas.getContext('2d');
-  const W    = canvas.width, H = canvas.height;
-  const cx   = W/2, cy = H/2, r = Math.min(W,H)/2 - 8;
-  const total = Object.values(grupos).reduce((a,n)=>a+n,0);
-
-  // Paleta por label
-  const PALETA = {
-    'Resuelto':              '#22c55e',
-    'En trámite':            '#f59e0b',
-    'Cerrado sin solución':  '#ef4444',
-    'Devuelto':              '#3b82f6',
-    'Otro':                  '#6b7280',
-  };
-
-  ctx.clearRect(0,0,W,H);
-  let ang = -Math.PI/2;
-
-  const entries = Object.entries(grupos).sort((a,b)=>b[1]-a[1]);
-  entries.forEach(([label, n]) => {
-    const slice = (n/total) * Math.PI * 2;
-    const col   = PALETA[label] || '#6b7280';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, ang, ang+slice);
-    ctx.closePath();
-    ctx.fillStyle = col;
-    ctx.fill();
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ang += slice;
-  });
-
-  // Círculo interior (donut)
-  ctx.beginPath();
-  ctx.arc(cx, cy, r*0.55, 0, Math.PI*2);
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg2').trim() || '#1a1a2e';
-  ctx.fill();
-
-  // Total en centro
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `bold 18px 'DM Mono', monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(total, cx, cy-8);
-  ctx.font = '10px sans-serif';
-  ctx.fillStyle = '#9ca3af';
-  ctx.fillText('casos', cx, cy+10);
-
-  // Leyenda
-  if(leyEl) {
-    leyEl.innerHTML = entries.map(([label, n]) => {
-      const col = PALETA[label] || '#6b7280';
-      const pct = Math.round(n/total*100);
-      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-        <div style="width:10px;height:10px;border-radius:2px;background:${col};flex-shrink:0"></div>
-        <span style="font-size:11px;color:var(--text2);flex:1">${label}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col}">${n} · ${pct}%</span>
-      </div>`;
-    }).join('');
-  }
-}
-
-function renderDetalleReq(filas) {
-  const tb = document.getElementById('tabla-req-detalle-body');
-  const sb = document.getElementById('req-detalle-sub');
-  if(!tb) return;
-  if(sb) sb.textContent = `${filas.length} casos mostrados`;
-
-  tb.innerHTML = filas.map(r => {
-    const f    = parseFechaReq(r[COL_REQ.fecha]);
-    const info = getEstadoColor(r[COL_REQ.estado]);
-    return `<tr>
-      <td style="font-size:11px;color:var(--text2)">${f?f.toLocaleDateString('es-CO'):'—'}</td>
-      <td style="font-size:11.5px">${String(r[COL_REQ.tipo]||'—').trim()}</td>
-      <td style="font-size:11px;color:var(--text2)">${normalizeGestor(r[COL_REQ.gestor])}</td>
-      <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.regional]||'—').trim()}</td>
-      <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.ciudad]||'—').trim()}</td>
-      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${info.color}">${info.label}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function verDetalleGestor(gestor) {
-  const mes = document.getElementById('req-filtro-mes')?.value || '';
-  let d = DATOS_REQS.filter(r => normalizeGestor(r[COL_REQ.gestor]) === gestor);
-  if(mes) d = d.filter(r => { const f=parseFechaReq(r[COL_REQ.fecha]); return f && getMesKey(f)===mes; });
-  const sb = document.getElementById('req-detalle-sub');
-  if(sb) sb.textContent = `Gestor: ${gestor} · ${d.length} casos`;
-  dibujarTorta(d, gestor);
-  renderDetalleReq(d);
-}
-
-function exportarTablaGestores() {
-  const bom = '\uFEFF';
-  const headers = ['Gestor','Total','Resueltos','En Trámite','Sin Solución','Devueltos','Efectividad %'];
-  const rows = [];
-  document.querySelectorAll('#tabla-req-gestores-body tr').forEach(tr => {
-    const cells = [...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
-    if(cells.length >= 7) rows.push(cells.slice(0,7));
-  });
-  const csv = bom + [headers,...rows].map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download = `Requerimientos_Gestores_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-}
-
-function semaforo(pct, umbrales) {
-  if(pct >= umbrales.verde)    return { color:'var(--green)', bg:'var(--gdim)', label:'● Verde' };
-  if(pct >= umbrales.amarillo) return { color:'var(--amber)', bg:'var(--adim)', label:'● Amarillo' };
-  return { color:'var(--red)', bg:'var(--rdim)', label:'● Rojo' };
-}
-
-function parseFechaReq(val) {
-  if(!val) return null;
-  const s = String(val).trim();
-  if(s.includes('/')) { const [d,m,y]=s.split('/'); return new Date(+y,+m-1,+d); }
-  if(s.includes('-')) return new Date(s);
-  const n = parseInt(s);
-  if(!isNaN(n) && n > 40000) return new Date((n-25569)*86400*1000);
-  return null;
-}
-
-function getMesKey(f)   { return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''; }
-function getMesLabel(f) {
-  const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  return f?`${M[f.getMonth()]} ${f.getFullYear()}`:'';
-}
-
-async function cargarRequerimientos() {
-  const el = document.getElementById('req-estado-carga');
-  if(el){ el.textContent='⏳ Cargando...'; el.style.color='var(--blue)'; }
-  try {
-    const resp = await fetch(REQS_SCRIPT);
-    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    if(!Array.isArray(data)||data.length<2) throw new Error('Sin datos');
-    DATOS_REQS = data.slice(1).filter(r=>r[COL_REQ.gestor]&&String(r[COL_REQ.gestor]).trim());
-    if(el){ el.textContent=`✓ ${DATOS_REQS.length.toLocaleString('es-CO')} requerimientos`; el.style.color='var(--green)'; }
-    poblarFiltrosReq();
-    aplicarFiltrosReq();
-  } catch(e) {
-    if(el){ el.textContent=`⚠ ${e.message}`; el.style.color='var(--red)'; }
-    console.error('Requerimientos:', e);
-  }
-}
-
-function poblarFiltrosReq() {
-  const meses=new Map(), gestores=new Set(), tipos=new Set();
-  DATOS_REQS.forEach(r=>{
-    const f=parseFechaReq(r[COL_REQ.fecha]);
-    if(f){const k=getMesKey(f); if(!meses.has(k)) meses.set(k,getMesLabel(f));}
-    if(r[COL_REQ.gestor]) gestores.add(String(r[COL_REQ.gestor]).trim());
-    if(r[COL_REQ.tipo])   tipos.add(String(r[COL_REQ.tipo]).trim());
-  });
-  const selM=document.getElementById('req-filtro-mes');
-  const selG=document.getElementById('req-filtro-gestor');
-  const selT=document.getElementById('req-filtro-tipo');
-  const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
-  if(selM){ selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); if(sortM.length) selM.value=sortM[0][0]; }
-  if(selG){ selG.innerHTML='<option value="">Todos los gestores</option>'+[...gestores].sort().map(g=>`<option value="${g}">${g}</option>`).join(''); }
-  if(selT){ selT.innerHTML='<option value="">Todos los tipos</option>'+[...tipos].sort().map(t=>`<option value="${t}">${t}</option>`).join(''); }
-}
-
-function aplicarFiltrosReq() {
-  const mes    = document.getElementById('req-filtro-mes')?.value    || '';
-  const gestor = document.getElementById('req-filtro-gestor')?.value || '';
-  const tipo   = document.getElementById('req-filtro-tipo')?.value   || '';
-  let d = DATOS_REQS;
-  if(mes)    d=d.filter(r=>{const f=parseFechaReq(r[COL_REQ.fecha]); return f&&getMesKey(f)===mes;});
-  if(gestor) d=d.filter(r=>String(r[COL_REQ.gestor]).trim()===gestor);
-  if(tipo)   d=d.filter(r=>String(r[COL_REQ.tipo]).trim()===tipo);
-  renderRequerimientos(d);
-}
-
-function renderRequerimientos(datos) {
-  const fmtN = n=>n.toLocaleString('es-CO');
-  if(!datos.length){
-    ['tabla-req-gestores-body','tabla-req-detalle-body'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos para los filtros seleccionados</td></tr>`;
-    });
-    return;
-  }
-
-  // Agrupar por gestor
-  const pg={};
-  datos.forEach(r=>{
-    const g=String(r[COL_REQ.gestor]).trim();
-    const e=String(r[COL_REQ.estado]||'').trim().toLowerCase();
-    if(!pg[g]) pg[g]={total:0,resuelto:0,tramite:0,sin_sol:0,devuelto:0};
-    pg[g].total++;
-    if(e.includes('resuelto'))                          pg[g].resuelto++;
-    else if(e.includes('tr'+'á'+'mite')||e.includes('tramite')||e.includes('proceso')) pg[g].tramite++;
-    else if(e.includes('sin sol'))                      pg[g].sin_sol++;
-    else if(e.includes('devuelto'))                     pg[g].devuelto++;
-  });
-
-  // KPIs globales
-  const total=datos.length;
-  const res=datos.filter(r=>String(r[COL_REQ.estado]||'').toLowerCase().includes('resuelto')).length;
-  const tram=Object.values(pg).reduce((a,v)=>a+v.tramite,0);
-  const sinS=Object.values(pg).reduce((a,v)=>a+v.sin_sol,0);
-  const efec=total>0?Math.round(res/total*100):0;
-  actualizarKPI('kpi-req-total',       fmtN(total));
-  actualizarKPI('kpi-req-efectividad', efec+'%');
-  actualizarKPI('kpi-req-tramite',     fmtN(tram));
-  actualizarKPI('kpi-req-sin-sol',     fmtN(sinS));
-  const efEl=document.getElementById('kpi-req-efectividad');
-  if(efEl) efEl.style.color=efec>=80?'var(--green)':efec>=60?'var(--amber)':'var(--red)';
-
-  // Tabla gestores
-  const tb=document.getElementById('tabla-req-gestores-body');
-  if(tb) tb.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
-    const ef=v.total>0?Math.round(v.resuelto/v.total*100):0;
-    const s=semaforo(ef,{verde:80,amarillo:60});
-    return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
-      <td style="font-size:12px;font-weight:500">${g}</td>
-      <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
-      <td style="color:var(--green);font-family:'DM Mono',monospace">${v.resuelto}</td>
-      <td style="color:var(--amber);font-family:'DM Mono',monospace">${v.tramite}</td>
-      <td style="color:var(--red);font-family:'DM Mono',monospace">${v.sin_sol}</td>
-      <td style="color:var(--text2);font-family:'DM Mono',monospace">${v.devuelto}</td>
-      <td><span style="font-weight:600;color:${s.color}">${ef}%</span></td>
-      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:${s.bg};color:${s.color}">${s.label}</span></td>
-    </tr>`;
-  }).join('');
-
-  // Distribución estados
-  const est={};
-  datos.forEach(r=>{ const e=String(r[COL_REQ.estado]||'Sin estado').trim(); est[e]=(est[e]||0)+1; });
-  const dEl=document.getElementById('req-dist-estados');
-  if(dEl){
-    const COLS={'resuelto':'var(--green)','trámite':'var(--amber)','tramite':'var(--amber)','sin sol':'var(--red)','devuelto':'var(--blue)'};
-    const sorted=Object.entries(est).sort((a,b)=>b[1]-a[1]);
-    const mx=sorted[0]?.[1]||1;
-    dEl.innerHTML=sorted.map(([e,n])=>{
-      const pct=Math.round(n/total*100);
-      const col=Object.entries(COLS).find(([k])=>e.toLowerCase().includes(k))?.[1]||'var(--text2)';
-      return `<div style="margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:11px;color:var(--text2)">${e}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col}">${n} · ${pct}%</span>
-        </div>
-        <div style="height:5px;background:var(--bg4);border-radius:3px"><div style="height:100%;width:${Math.round(n/mx*100)}%;background:${col};border-radius:3px"></div></div>
-      </div>`;
-    }).join('');
-  }
-
-  // Top 5 tipos
-  const tip={};
-  datos.forEach(r=>{ const t=String(r[COL_REQ.tipo]||'Sin tipo').trim(); tip[t]=(tip[t]||0)+1; });
-  const tEl=document.getElementById('req-top-tipos');
-  if(tEl){
-    const top5=Object.entries(tip).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    const mx=top5[0]?.[1]||1;
-    const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)'];
-    tEl.innerHTML=top5.map(([t,n],i)=>`<div style="margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-        <span style="font-size:11px;color:var(--text2)">${i+1}. ${t.substring(0,42)}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${COLS[i]}">${n}</span>
-      </div>
-      <div style="height:5px;background:var(--bg4);border-radius:3px"><div style="height:100%;width:${Math.round(n/mx*100)}%;background:${COLS[i]};border-radius:3px"></div></div>
-    </div>`).join('');
-  }
-
-  // Detalle
-  renderDetalleReq(datos.slice(0,100));
-}
-
-function renderDetalleReq(filas){
-  const tb=document.getElementById('tabla-req-detalle-body');
-  const sb=document.getElementById('req-detalle-sub');
-  if(!tb) return;
-  if(sb) sb.textContent=`${filas.length} casos`;
-  const COLS_E={'resuelto':'var(--green)','trámite':'var(--amber)','tramite':'var(--amber)','sin sol':'var(--red)','devuelto':'var(--blue)'};
-  tb.innerHTML=filas.map(r=>{
-    const f=parseFechaReq(r[COL_REQ.fecha]);
-    const fecha=f?f.toLocaleDateString('es-CO'):'—';
-    const tipo=String(r[COL_REQ.tipo]||'—').trim();
-    const gst=String(r[COL_REQ.gestor]||'—').trim();
-    const est=String(r[COL_REQ.estado]||'—').trim();
-    const col=Object.entries(COLS_E).find(([k])=>est.toLowerCase().includes(k))?.[1]||'var(--text2)';
-    return `<tr>
-      <td style="font-size:11px;color:var(--text2)">${fecha}</td>
-      <td style="font-size:11.5px">${tipo}</td>
-      <td style="font-size:11px;color:var(--text2)">${gst}</td>
-      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${col}">${est}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function verDetalleGestor(gestor){
-  const mes=document.getElementById('req-filtro-mes')?.value||'';
-  let d=DATOS_REQS.filter(r=>String(r[COL_REQ.gestor]).trim()===gestor);
-  if(mes) d=d.filter(r=>{const f=parseFechaReq(r[COL_REQ.fecha]); return f&&getMesKey(f)===mes;});
-  const sb=document.getElementById('req-detalle-sub');
-  if(sb) sb.textContent=`Gestor: ${gestor} · ${d.length} casos`;
-  renderDetalleReq(d);
-}
-
-function exportarTablaGestores(){
-  const bom='\uFEFF';
-  const headers=['Gestor','Total','Resueltos','En Trámite','Sin Solución','Devueltos','Efectividad %'];
-  const rows=[];
-  document.querySelectorAll('#tabla-req-gestores-body tr').forEach(tr=>{
-    const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
-    if(cells.length>=7) rows.push(cells.slice(0,7));
-  });
-  const csv=bom+[headers,...rows].map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download=`Requerimientos_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
 }
 
 // ─── ADMINISTRACIÓN ──────────────────────────────────────────────────
