@@ -1240,6 +1240,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <select id="req-filtro-ciudad" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todas las ciudades</option>
     </select>
+    <select id="req-filtro-tipo" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los tipos de caso</option>
+    </select>
+    <select id="req-filtro-estado" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los estados</option>
+    </select>
     <button class="btn" onclick="limpiarFiltrosReq()" style="font-size:11.5px">✕ Limpiar</button>
     <button class="btn" onclick="cargarRequerimientos()" style="font-size:11.5px">↺ Recargar</button>
     <span id="req-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
@@ -1306,15 +1312,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
                 <th>Gestor</th>
                 <th>Total</th>
                 <th>Cerrado</th>
-                <th>Cerrado por correo</th>
                 <th>En gestión</th>
                 <th>Devuelto</th>
-                <th>Pendiente</th>
                 <th>Efectividad</th>
               </tr>
             </thead>
             <tbody id="tabla-req-efectividad-body">
-              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr>
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -6406,14 +6410,15 @@ async function cargarRequerimientos() {
 }
 
 function poblarFiltrosReq() {
-  const meses=new Map(), gestores=new Set(), regionales=new Set(), deptos=new Set(), ciudades=new Set();
+  const meses=new Map(), regionales=new Set(), deptos=new Set(), ciudades=new Set(), tipos=new Set(), estados=new Set();
   DATOS_REQS.forEach(r=>{
     const f=parseFechaReq(r[COL_REQ.fecha]);
     if(f){const k=getMesKey(f); if(!meses.has(k)) meses.set(k,getMesLabel(f));}
-    const g=normalizeGestor(r[COL_REQ.gestor]); if(g) gestores.add(g);
     const reg=String(r[COL_REQ.regional]||'').trim(); if(reg) regionales.add(reg);
     const dep=String(r[COL_REQ.depto]||'').trim();    if(dep) deptos.add(dep);
     const ciu=String(r[COL_REQ.ciudad]||'').trim();   if(ciu) ciudades.add(ciu);
+    const tip=String(r[COL_REQ.tipo]||'').trim();     if(tip) tipos.add(tip);
+    const est=getEstadoInfo(r[COL_REQ.estado]).label; if(est&&est!=='Sin estado') estados.add(est);
   });
 
   const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
@@ -6421,10 +6426,17 @@ function poblarFiltrosReq() {
   if(selM){ selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); if(sortM.length) selM.value=sortM[0][0]; }
 
   const fill=(id,arr,lbl)=>{ const el=document.getElementById(id); if(el) el.innerHTML=`<option value="">${lbl}</option>`+arr.sort().map(v=>`<option value="${v}">${v}</option>`).join(''); };
-  fill('req-filtro-gestor',   [...gestores],   'Todos los gestores');
+
+  // Gestores: siempre los 19 fijos, sin depender de los datos presentes
+  const gestoresOrdenados=[...GESTORES_VALIDOS].filter(g=>g!=='ETICOS SERRANO').sort();
+  const selG=document.getElementById('req-filtro-gestor');
+  if(selG){ selG.innerHTML='<option value="">Todos los gestores</option>'+gestoresOrdenados.map(v=>`<option value="${v}">${v}</option>`).join(''); }
+
   fill('req-filtro-regional', [...regionales], 'Todas las regionales');
   fill('req-filtro-depto',    [...deptos],     'Todos los departamentos');
   fill('req-filtro-ciudad',   [...ciudades],   'Todas las ciudades');
+  fill('req-filtro-tipo',     [...tipos],      'Todos los tipos de caso');
+  fill('req-filtro-estado',   [...estados],    'Todos los estados');
 }
 
 function aplicarFiltrosReq() {
@@ -6433,6 +6445,8 @@ function aplicarFiltrosReq() {
   const regional = document.getElementById('req-filtro-regional')?.value || '';
   const depto    = document.getElementById('req-filtro-depto')?.value    || '';
   const ciudad   = document.getElementById('req-filtro-ciudad')?.value   || '';
+  const tipo     = document.getElementById('req-filtro-tipo')?.value     || '';
+  const estado   = document.getElementById('req-filtro-estado')?.value   || '';
 
   let d = DATOS_REQS;
   if(mes)      d=d.filter(r=>{const f=parseFechaReq(r[COL_REQ.fecha]);return f&&getMesKey(f)===mes;});
@@ -6440,11 +6454,13 @@ function aplicarFiltrosReq() {
   if(regional) d=d.filter(r=>String(r[COL_REQ.regional]||'').trim()===regional);
   if(depto)    d=d.filter(r=>String(r[COL_REQ.depto]   ||'').trim()===depto);
   if(ciudad)   d=d.filter(r=>String(r[COL_REQ.ciudad]  ||'').trim()===ciudad);
+  if(tipo)     d=d.filter(r=>String(r[COL_REQ.tipo]    ||'').trim()===tipo);
+  if(estado)   d=d.filter(r=>getEstadoInfo(r[COL_REQ.estado]).label===estado);
   renderRequerimientos(d);
 }
 
 function limpiarFiltrosReq() {
-  ['req-filtro-mes','req-filtro-gestor','req-filtro-regional','req-filtro-depto','req-filtro-ciudad']
+  ['req-filtro-mes','req-filtro-gestor','req-filtro-regional','req-filtro-depto','req-filtro-ciudad','req-filtro-tipo','req-filtro-estado']
     .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   aplicarFiltrosReq();
 }
@@ -6454,10 +6470,10 @@ function renderRequerimientos(datos) {
   const fmtP = (n,t) => t>0 ? (n/t*100).toFixed(1)+'%' : '0%';
 
   if(!datos.length){
-    ['tabla-req-tipo-body','tabla-req-efectividad-body'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos</td></tr>';
-    });
+    const el1=document.getElementById('tabla-req-tipo-body');
+    if(el1) el1.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos</td></tr>';
+    const el2=document.getElementById('tabla-req-efectividad-body');
+    if(el2) el2.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text2)">Sin datos</td></tr>';
     ['kpi-req-total','kpi-req-efectividad','kpi-req-tramite','kpi-req-sin-sol'].forEach(id=>actualizarKPI(id,'0'));
     return;
   }
@@ -6552,11 +6568,9 @@ function renderRequerimientos(datos) {
       return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\'")}')" title="Ver en gráfica">
         <td style="font-size:12px;font-weight:500">${g}</td>
         <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
-        <td style="color:var(--green);font-family:'DM Mono',monospace">${v.cerrado} <span style="color:var(--text2);font-size:10px">(${fmtP(v.cerrado,v.total)})</span></td>
-        <td style="color:var(--green);font-family:'DM Mono',monospace">${v.cerradoCorreo} <span style="color:var(--text2);font-size:10px">(${fmtP(v.cerradoCorreo,v.total)})</span></td>
+        <td style="color:var(--green);font-family:'DM Mono',monospace">${cer} <span style="color:var(--text2);font-size:10px">(${fmtP(cer,v.total)})</span></td>
         <td style="color:var(--amber);font-family:'DM Mono',monospace">${v.gestion} <span style="color:var(--text2);font-size:10px">(${fmtP(v.gestion,v.total)})</span></td>
         <td style="color:var(--blue);font-family:'DM Mono',monospace">${v.devuelto} <span style="color:var(--text2);font-size:10px">(${fmtP(v.devuelto,v.total)})</span></td>
-        <td style="color:#f97316;font-family:'DM Mono',monospace">${v.pendiente} <span style="color:var(--text2);font-size:10px">(${fmtP(v.pendiente,v.total)})</span></td>
         <td><span style="font-weight:600;color:${efColor}">${ef}%</span></td>
       </tr>`;
     }).join('');
