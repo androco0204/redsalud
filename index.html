@@ -1349,7 +1349,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total casos</div><div class="kpi-value" style="color:var(--blue)" id="fallas-kpi-total">—</div><div class="kpi-delta neu" id="fallas-kpi-mes">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Efectividad</div><div class="kpi-value" id="fallas-kpi-efectividad">—</div><div class="kpi-delta up">Resueltos ÷ Total × 100</div></div>
     <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Oportunidad ≤5 días</div><div class="kpi-value" id="fallas-kpi-oportunidad">—</div><div class="kpi-delta neu">Casos resueltos a tiempo</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Promedio días gestión</div><div class="kpi-value" style="color:var(--amber)" id="fallas-kpi-promdiaz">—</div><div class="kpi-delta warn">Columna AL</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Promedio días gestión</div><div class="kpi-value" style="color:var(--amber)" id="fallas-kpi-promdiaz">—</div><div class="kpi-delta warn">Tiempo de resolución</div></div>
   </div>
 
   <!-- Filtros -->
@@ -1373,11 +1373,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
   <!-- Indicador 1: Conteo por gestor -->
   <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">
-    Fórmula 1 — Conteo total por gestor
+    Conteo total por gestor
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
     <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Casos por gestor</div><div class="card-sub">Consolidado RUTA + REGIONALES + G11ASDESAVID</div></div></div>
+      <div class="card-head"><div><div class="card-title">Casos por gestor</div><div class="card-sub">Consolidado tres fuentes · Regional · Ciudad</div></div></div>
       <div class="card-body" style="padding:0 16px">
         <div class="scroll" style="max-height:300px">
           <table class="table" id="fallas-tabla-conteo">
@@ -1390,7 +1390,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
     <!-- Indicador 2: Top 5 tipificación -->
     <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Fórmula 2 — Top 5 tipos de falla</div><div class="card-sub">Columna U · Tipificación · Mayor frecuencia</div></div></div>
+      <div class="card-head"><div><div class="card-title">Top 5 tipos de falla</div><div class="card-sub">Tipificación · Mayor frecuencia</div></div></div>
       <div class="card-body" style="padding:10px 16px;overflow-y:auto;max-height:300px" id="fallas-barras-tipo">
         <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
       </div>
@@ -1399,13 +1399,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
   <!-- Indicadores 3+4+5: Estado, Efectividad, Oportunidad -->
   <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">
-    Fórmulas 3 · 4 · 5 — Estado · Efectividad · Oportunidad por gestor
+    Estado · Efectividad · Oportunidad por gestor
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
 
     <!-- Tabla resumen por gestor -->
     <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Resumen por gestor</div><div class="card-sub">Semáforo efectividad (≥80% verde) y oportunidad (≥85% verde)</div></div></div>
+      <div class="card-head"><div><div class="card-title">Resumen por gestor</div><div class="card-sub">Efectividad ≥80% · Oportunidad ≥85%</div></div></div>
       <div class="card-body" style="padding:0 16px">
         <div class="scroll" style="max-height:300px">
           <table class="table" id="fallas-tabla-resumen">
@@ -6789,6 +6789,8 @@ let _fallasChart = null;
 function parseFechaFalla(val){
   if(!val) return null;
   const s=String(val).trim();
+  // ISO datetime: 2025-01-02T08:00:00.000Z
+  if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
   if(s.includes('/')){const p=s.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]);}
   if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
   const n=parseInt(s);
@@ -6832,13 +6834,20 @@ async function cargarFallas(){
   }
 }
 
+// Regionales válidas para filtro de Fallas
+const REGIONALES_VALIDAS = new Set([
+  'REGIONAL BOGOTÁ','REGIONAL MEDELLÍN','REGIONAL CALI',
+  'REGIONAL BARRANQUILLA','REGIONAL BUCARAMANGA','REGIONAL CENTRO ORIENTE'
+]);
+
 function poblarFiltrosFallas(){
   const meses=new Map(),regionales=new Set(),ciudades=new Set();
   DATOS_FALLAS.forEach(r=>{
     // fecha: intentar columna A (índice 0) primero, luego B
     const f=parseFechaFalla(r[COL_F.fecha]);
     if(f){const k=getMesFalla(f);if(!meses.has(k))meses.set(k,getMesLblFalla(f));}
-    const reg=String(r[COL_F.regional]||'').trim();if(reg)regionales.add(reg);
+    const reg=String(r[COL_F.regional]||'').trim();
+    if(reg && (REGIONALES_VALIDAS.size===0 || REGIONALES_VALIDAS.has(reg))) regionales.add(reg);
     const ciu=String(r[COL_F.ciudad]||'').trim();if(ciu)ciudades.add(ciu);
   });
   const gestoresOrdenados=[...GESTORES_VALIDOS].filter(g=>g!=='ETICOS SERRANO').sort();
