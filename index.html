@@ -1429,24 +1429,104 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 </div>
 
 <div class="screen" id="screen-pqrs">
-  <div class="kpi-strip cols-5">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total abiertas</div><div class="kpi-value" style="color:var(--blue)">38</div><div class="kpi-delta neu">28 PQRS · 10 tutelas</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Vencidas</div><div class="kpi-value" style="color:var(--red)">12</div><div class="kpi-delta dn">↑ 4 esta semana</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">En término</div><div class="kpi-value" style="color:var(--amber)">26</div><div class="kpi-delta warn">7 vencen mañana</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cerradas este mes</div><div class="kpi-value" style="color:var(--green)">84</div><div class="kpi-delta up">↑ 12</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">T° prom. respuesta</div><div class="kpi-value" style="color:var(--purple)">8.2d</div><div class="kpi-delta warn">Meta ANS: ≤ 5d</div></div>
+
+  <!-- Sub-tabs PQRS / Tutelas -->
+  <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--border)">
+    <div id="subtab-pqrs-btn" onclick="switchPqrsTab('pqrs')" style="padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px">PQRS</div>
+    <div id="subtab-tutelas-btn" onclick="switchPqrsTab('tutelas')" style="padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px">Tutelas</div>
   </div>
-  <div class="card"><div class="card-head"><div><div class="card-title">Gestión de PQRS y Tutelas</div><div class="card-sub">Red prestadores y gestores · Ordenadas por vencimiento</div></div><div class="card-act">Exportar</div></div>
-  <div class="tabs"><div class="tab active">Todas</div><div class="tab">Tutelas</div><div class="tab">PQRS</div><div class="tab">Cerradas</div></div>
-  <div class="card-body" style="padding:0 20px"><div class="scroll">
-    <table class="table"><thead><tr><th>Radicado</th><th>Tipo</th><th>Red</th><th>Responsable</th><th>Motivo</th><th>Estado</th><th>Días</th><th>Vence</th></tr></thead>
-    <tbody>
-      <tr><td class="nm" style="font-family:'DM Mono',monospace;font-size:11px">TUT-0341</td><td><span class="badge bg-r"><span class="bd"></span>Tutela</span></td><td><span class="badge bg-t">Gestor</span></td><td>Pharmos Dom.</td><td>No entrega insulina</td><td><span class="badge bg-r">Activa</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">0</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">Hoy</td></tr>
-      <tr><td class="nm" style="font-family:'DM Mono',monospace;font-size:11px">TUT-0339</td><td><span class="badge bg-r"><span class="bd"></span>Tutela</span></td><td><span class="badge bg-t">Gestor</span></td><td>Pharmos Dom.</td><td>Demora &gt;72h</td><td><span class="badge bg-a">En proceso</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">1</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">Mañana</td></tr>
-      <tr><td class="nm" style="font-family:'DM Mono',monospace;font-size:11px">PQR-1182</td><td><span class="badge bg-a"><span class="bd"></span>PQRS</span></td><td><span class="badge bg-t">Gestor</span></td><td>Cruz Verde</td><td>Med. incompleto</td><td><span class="badge bg-r">Vencida</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">-3</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">Hace 3d</td></tr>
-      <tr><td class="nm" style="font-family:'DM Mono',monospace;font-size:11px">TUT-0317</td><td><span class="badge bg-r"><span class="bd"></span>Tutela</span></td><td><span class="badge bg-b">Prestador</span></td><td>Clínica Palermo</td><td>Neg. servicio</td><td><span class="badge bg-r">Vencida</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">-1</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">Vencida</td></tr>
-    </tbody></table>
-  </div></div></div>
+
+  <!-- ══ SUB-TAB PQRS ══ -->
+  <div id="subtab-pqrs">
+
+    <!-- KPIs -->
+    <div class="kpi-strip cols-5" style="margin-bottom:14px">
+      <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total casos</div><div class="kpi-value" style="color:var(--blue)" id="pqrs-kpi-total">—</div><div class="kpi-delta neu" id="pqrs-kpi-mes">Mes activo</div></div>
+      <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Abiertos</div><div class="kpi-value" style="color:var(--amber)" id="pqrs-kpi-abiertos">—</div><div class="kpi-delta warn">Pendientes</div></div>
+      <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cerrados</div><div class="kpi-value" style="color:var(--green)" id="pqrs-kpi-cerrados">—</div><div class="kpi-delta up">Resueltos</div></div>
+      <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">% Cierre</div><div class="kpi-value" id="pqrs-kpi-pct-cierre">—</div><div class="kpi-delta neu">Meta ≥85%</div></div>
+      <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Promedio días</div><div class="kpi-value" style="color:var(--purple)" id="pqrs-kpi-prom-dias">—</div><div class="kpi-delta neu">PQR cerradas</div></div>
+    </div>
+
+    <!-- Filtros -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select id="pqrs-filtro-mes" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los meses</option></select>
+      <select id="pqrs-filtro-gestor" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los gestores</option></select>
+      <select id="pqrs-filtro-depto" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los departamentos</option></select>
+      <select id="pqrs-filtro-ciudad" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todas las ciudades</option></select>
+      <button class="btn" onclick="limpiarFiltrosPqrs()" style="font-size:11.5px">✕ Limpiar</button>
+      <button class="btn" onclick="cargarPqrs()" style="font-size:11.5px">↺ Recargar</button>
+      <span id="pqrs-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
+    </div>
+
+    <!-- Indicadores 1+2: Casos por gestor -->
+    <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">Casos por gestor · Abiertos y cerrados</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Distribución por gestor</div><div class="card-sub">Total · Abiertos · Cerrados · % Cierre</div></div></div>
+        <div class="card-body" style="padding:0 16px">
+          <div class="scroll" style="max-height:300px">
+            <table class="table" id="pqrs-tabla-gestores">
+              <thead><tr><th>Gestor</th><th>Total</th><th>Abiertos</th><th>Cerrados</th><th>% Cierre</th></tr></thead>
+              <tbody id="pqrs-gestores-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador 3: Promedio + ranking -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Promedio y ranking de carga</div><div class="card-sub">PQR promedio del mes · Gestores ordenados por volumen</div></div></div>
+        <div class="card-body" style="padding:10px 16px;overflow-y:auto;max-height:300px" id="pqrs-ranking-body">
+          <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicadores 4+5: Oportunidad y Top 5 motivos -->
+    <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">Oportunidad de respuesta · Top 5 motivos</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+      <!-- Indicador 4: Oportunidad -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head">
+          <div><div class="card-title">Oportunidad de respuesta</div><div class="card-sub">Solo PQR cerradas · % dentro del ANS</div></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:11px;color:var(--text2)">ANS:</span>
+            <input id="pqrs-ans-valor" type="number" value="15" min="1" max="90" onchange="aplicarFiltrosPqrs()" style="width:52px;font-size:12px;padding:4px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);text-align:center">
+            <span style="font-size:11px;color:var(--text2)">días</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0 16px">
+          <div class="scroll" style="max-height:280px">
+            <table class="table" id="pqrs-tabla-oportunidad">
+              <thead><tr><th>Gestor</th><th>Cerradas</th><th>≤ ANS</th><th>% Oportunidad</th><th>Prom. días</th></tr></thead>
+              <tbody id="pqrs-oportunidad-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador 5: Top 5 motivos -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Top 5 motivos de PQR</div><div class="card-sub">Motivo agrupador · Mayor frecuencia</div></div></div>
+        <div class="card-body" style="padding:10px 16px;overflow-y:auto;max-height:300px" id="pqrs-top5-body">
+          <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /subtab-pqrs -->
+
+  <!-- ══ SUB-TAB TUTELAS ══ -->
+  <div id="subtab-tutelas" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:center;height:260px;flex-direction:column;gap:12px">
+      <div style="font-size:32px">⚖️</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text)">Sub-módulo Tutelas</div>
+      <div style="font-size:12px;color:var(--text2)">Pendiente de configuración · Las reglas de negocio están en definición</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══ SEGUIMIENTO Y NOTIFICACIONES ══ -->
@@ -3009,6 +3089,9 @@ function navigate(screen){
   // Auto-cargar datos al navegar a Fallas
   if(screen === 'fallas' && DATOS_FALLAS.length === 0) {
     cargarFallas();
+  }
+  if(screen === 'pqrs' && DATOS_PQRS.length === 0) {
+    cargarPqrs();
   }
 }
 
@@ -6352,6 +6435,7 @@ function filtrarTablaPrestadores(tipo, tabEl) {
 // ─── FALLAS Y REQUERIMIENTOS ──────────────────────────────────────────
 const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec';
 const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
+const PQRS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEYRoKvTNKFsuXk_CUsIRb5UHDmgycJeiGLgA4LoT9G0fcRIphBvEfdA/exec';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -7044,6 +7128,252 @@ function verDetalleGestorFallas(gestor){
   const estados={};
   d.forEach(r=>{const e=String(r[COL_F.estado]||'Sin estado').trim();estados[e]=(estados[e]||0)+1;});
   dibujarTortaFallas(estados,`Gestor: ${gestor} · ${d.length} casos`);
+}
+
+// ─── PQRS ─────────────────────────────────────────────────────────────────────
+// Columnas (0-based, fila 0 = headers, fila 1+ = datos):
+//   D=3 Estado | P=15 Departamento | Q=16 Ciudad | T=19 Motivo Agrupador
+//   Z=25 Gestor | AC=28 Fecha Asignación | AD=29 Fecha Cierre
+const COL_P = { estado:3, depto:15, ciudad:16, motivo:19, gestor:25, fecAsig:28, fecCierre:29 };
+let DATOS_PQRS = [];
+
+function parseFechaPqrs(val){
+  if(!val) return null;
+  const s=String(val).trim();
+  if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
+  if(s.includes('/')){const p=s.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]);}
+  if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
+  const n=parseFloat(s);
+  if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
+  return null;
+}
+
+function getMesPqrs(f){return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''}
+function getMesLblPqrs(f){
+  const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return f?`${M[f.getMonth()]} ${f.getFullYear()}`:'';
+}
+
+function switchPqrsTab(tab){
+  document.getElementById('subtab-pqrs').style.display    = tab==='pqrs'    ? '' : 'none';
+  document.getElementById('subtab-tutelas').style.display = tab==='tutelas' ? '' : 'none';
+  const bP=document.getElementById('subtab-pqrs-btn');
+  const bT=document.getElementById('subtab-tutelas-btn');
+  if(bP){bP.style.borderBottomColor=tab==='pqrs'?'var(--blue)':'transparent';bP.style.color=tab==='pqrs'?'var(--blue)':'var(--text2)';}
+  if(bT){bT.style.borderBottomColor=tab==='tutelas'?'var(--blue)':'transparent';bT.style.color=tab==='tutelas'?'var(--blue)':'var(--text2)';}
+}
+
+async function cargarPqrs(){
+  const el=document.getElementById('pqrs-estado-carga');
+  if(el){el.textContent='⏳ Cargando...';el.style.color='var(--blue)';}
+  try{
+    const resp=await fetch(PQRS_SCRIPT);
+    if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
+    const data=await resp.json();
+    if(!Array.isArray(data)||data.length<2)throw new Error('Sin datos');
+    // Fila 0 = headers, fila 1+ = datos
+    DATOS_PQRS=data.slice(1).filter(r=>{
+      const g=String(r[COL_P.gestor]||'').trim();
+      return g!==''&&g!=='N/A';
+    });
+    console.log('[PQRS] Total:',DATOS_PQRS.length);
+    if(el){el.textContent=`✓ ${DATOS_PQRS.length.toLocaleString('es-CO')} PQR cargadas`;el.style.color='var(--green)';}
+    poblarFiltrosPqrs();
+    aplicarFiltrosPqrs();
+  }catch(e){
+    if(el){el.textContent=`⚠ Error: ${e.message}`;el.style.color='var(--red)';}
+    console.error('[PQRS]',e);
+  }
+}
+
+function poblarFiltrosPqrs(){
+  const meses=new Map(),gestores=new Set(),deptos=new Set(),ciudades=new Set();
+  DATOS_PQRS.forEach(r=>{
+    const f=parseFechaPqrs(r[COL_P.fecAsig]);
+    if(f){const k=getMesPqrs(f);if(!meses.has(k))meses.set(k,getMesLblPqrs(f));}
+    const g=String(r[COL_P.gestor]||'').trim();if(g)gestores.add(g);
+    const d=String(r[COL_P.depto]||'').trim();if(d)deptos.add(d);
+    const c=String(r[COL_P.ciudad]||'').trim();if(c)ciudades.add(c);
+  });
+  const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  const selM=document.getElementById('pqrs-filtro-mes');
+  if(selM)selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  const fill=(id,arr,lbl)=>{const el=document.getElementById(id);if(el)el.innerHTML=`<option value="">${lbl}</option>`+arr.sort().map(v=>`<option value="${v}">${v}</option>`).join('');};
+  fill('pqrs-filtro-gestor',[...gestores],'Todos los gestores');
+  fill('pqrs-filtro-depto',[...deptos],'Todos los departamentos');
+  fill('pqrs-filtro-ciudad',[...ciudades],'Todas las ciudades');
+}
+
+function aplicarFiltrosPqrs(){
+  const mes   =document.getElementById('pqrs-filtro-mes')?.value   ||'';
+  const gestor=document.getElementById('pqrs-filtro-gestor')?.value||'';
+  const depto =document.getElementById('pqrs-filtro-depto')?.value ||'';
+  const ciudad=document.getElementById('pqrs-filtro-ciudad')?.value||'';
+  let d=DATOS_PQRS;
+  if(mes)    d=d.filter(r=>{const f=parseFechaPqrs(r[COL_P.fecAsig]);return f&&getMesPqrs(f)===mes;});
+  if(gestor) d=d.filter(r=>String(r[COL_P.gestor]||'').trim()===gestor);
+  if(depto)  d=d.filter(r=>String(r[COL_P.depto] ||'').trim()===depto);
+  if(ciudad) d=d.filter(r=>String(r[COL_P.ciudad]||'').trim()===ciudad);
+  renderPqrs(d);
+}
+
+function limpiarFiltrosPqrs(){
+  ['pqrs-filtro-mes','pqrs-filtro-gestor','pqrs-filtro-depto','pqrs-filtro-ciudad']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  aplicarFiltrosPqrs();
+}
+
+function semPqrs(pct,verde,amarillo){
+  if(pct>=verde)   return{color:'var(--green)',bg:'var(--gdim)'};
+  if(pct>=amarillo)return{color:'var(--amber)',bg:'var(--adim)'};
+  return{color:'var(--red)',bg:'var(--rdim)'};
+}
+
+function diffDias(fIni,fFin){
+  if(!fIni||!fFin)return null;
+  const ms=fFin.getTime()-fIni.getTime();
+  return Math.round(ms/(1000*60*60*24));
+}
+
+function renderPqrs(datos){
+  const fmtN=n=>n.toLocaleString('es-CO');
+  const fmtP=(n,t)=>t>0?(n/t*100).toFixed(1)+'%':'0%';
+  const total=datos.length;
+  const ANS=parseInt(document.getElementById('pqrs-ans-valor')?.value||'15')||15;
+
+  if(!total){
+    ['pqrs-gestores-body','pqrs-oportunidad-body'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">Sin datos</td></tr>';
+    });
+    ['pqrs-ranking-body','pqrs-top5-body'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML='<div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>';
+    });
+    ['pqrs-kpi-total','pqrs-kpi-abiertos','pqrs-kpi-cerrados','pqrs-kpi-pct-cierre','pqrs-kpi-prom-dias']
+      .forEach(id=>actualizarKPI(id,'0'));
+    return;
+  }
+
+  const abiertos=datos.filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='ABIERTO').length;
+  const cerrados=datos.filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='CERRADO').length;
+  const pctCierre=total?Math.round(cerrados/total*100):0;
+
+  // Promedio días solo cerradas
+  const diasCerradas=datos
+    .filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='CERRADO')
+    .map(r=>diffDias(parseFechaPqrs(r[COL_P.fecAsig]),parseFechaPqrs(r[COL_P.fecCierre])))
+    .filter(d=>d!==null&&d>=0);
+  const promDias=diasCerradas.length?(diasCerradas.reduce((a,b)=>a+b,0)/diasCerradas.length).toFixed(1):'—';
+
+  // KPIs
+  const semC=semPqrs(pctCierre,85,70);
+  actualizarKPI('pqrs-kpi-total',fmtN(total));
+  actualizarKPI('pqrs-kpi-abiertos',fmtN(abiertos));
+  actualizarKPI('pqrs-kpi-cerrados',fmtN(cerrados));
+  actualizarKPI('pqrs-kpi-pct-cierre',pctCierre+'%');
+  actualizarKPI('pqrs-kpi-prom-dias',promDias==='—'?'—':promDias+'d');
+  const elC=document.getElementById('pqrs-kpi-pct-cierre');
+  if(elC)elC.style.color=semC.color;
+
+  // ── Indicadores 1+2: tabla por gestor ──
+  const pg={};
+  datos.forEach(r=>{
+    const g=String(r[COL_P.gestor]||'Sin gestor').trim();
+    const est=String(r[COL_P.estado]||'').trim().toUpperCase();
+    if(!pg[g])pg[g]={total:0,abiertos:0,cerrados:0};
+    pg[g].total++;
+    if(est==='ABIERTO')pg[g].abiertos++;
+    else if(est==='CERRADO')pg[g].cerrados++;
+  });
+  const tb1=document.getElementById('pqrs-gestores-body');
+  if(tb1){
+    tb1.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
+      const pct=v.total?Math.round(v.cerrados/v.total*100):0;
+      const s=semPqrs(pct,85,70);
+      return `<tr>
+        <td style="font-size:12px;font-weight:500">${g}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:600">${fmtN(v.total)}</td>
+        <td style="color:var(--amber);font-family:'DM Mono',monospace">${fmtN(v.abiertos)}</td>
+        <td style="color:var(--green);font-family:'DM Mono',monospace">${fmtN(v.cerrados)}</td>
+        <td><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${s.bg};color:${s.color}">${pct}%</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Indicador 3: Promedio + ranking ──
+  const gestoresActivos=Object.keys(pg).length;
+  const promedio=gestoresActivos?Math.round(total/gestoresActivos):0;
+  const rankEl=document.getElementById('pqrs-ranking-body');
+  if(rankEl){
+    const sorted=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total);
+    const mx=sorted[0]?.[1].total||1;
+    const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)','var(--red)'];
+    rankEl.innerHTML=`<div style="padding:8px 0 12px;border-bottom:1px solid var(--border);margin-bottom:10px">
+      <span style="font-size:11px;color:var(--text2)">Promedio mensual: </span>
+      <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--blue)">${fmtN(promedio)} PQR</span>
+      <span style="font-size:11px;color:var(--text2);margin-left:8px">por gestor · ${gestoresActivos} activos</span>
+    </div>`+sorted.map(([g,v],i)=>`
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${g.substring(0,40)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${COLS[i%COLS.length]};flex-shrink:0">${fmtN(v.total)} · ${fmtP(v.total,total)}</span>
+        </div>
+        <div style="height:6px;background:var(--bg4);border-radius:3px">
+          <div style="height:100%;width:${Math.round(v.total/mx*100)}%;background:${COLS[i%COLS.length]};border-radius:3px;transition:width .4s"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Indicador 4: Oportunidad ──
+  const po={};
+  datos.filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='CERRADO').forEach(r=>{
+    const g=String(r[COL_P.gestor]||'Sin gestor').trim();
+    const dias=diffDias(parseFechaPqrs(r[COL_P.fecAsig]),parseFechaPqrs(r[COL_P.fecCierre]));
+    if(!po[g])po[g]={cerradas:0,dentroAns:0,diasArr:[]};
+    po[g].cerradas++;
+    if(dias!==null&&dias>=0){
+      po[g].diasArr.push(dias);
+      if(dias<=ANS)po[g].dentroAns++;
+    }
+  });
+  const tb2=document.getElementById('pqrs-oportunidad-body');
+  if(tb2){
+    tb2.innerHTML=Object.entries(po).sort((a,b)=>b[1].cerradas-a[1].cerradas).map(([g,v])=>{
+      const pct=v.cerradas?Math.round(v.dentroAns/v.cerradas*100):0;
+      const prom=v.diasArr.length?(v.diasArr.reduce((a,b)=>a+b,0)/v.diasArr.length).toFixed(1):'—';
+      const sOp=semPqrs(pct,85,70);
+      const promNum=parseFloat(prom);
+      const sD=!isNaN(promNum)?(promNum<=ANS?{color:'var(--green)',bg:'var(--gdim)'}:promNum<=ANS+2?{color:'var(--amber)',bg:'var(--adim)'}:{color:'var(--red)',bg:'var(--rdim)'}):null;
+      return `<tr>
+        <td style="font-size:12px;font-weight:500">${g}</td>
+        <td style="font-family:'DM Mono',monospace">${fmtN(v.cerradas)}</td>
+        <td style="font-family:'DM Mono',monospace;color:var(--green)">${fmtN(v.dentroAns)}</td>
+        <td><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${sOp.bg};color:${sOp.color}">${pct}%</span></td>
+        <td>${sD?`<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${sD.bg};color:${sD.color}">${prom}d</span>`:prom}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Indicador 5: Top 5 motivos ──
+  const mt={};
+  datos.forEach(r=>{const m=String(r[COL_P.motivo]||'Sin motivo').trim();mt[m]=(mt[m]||0)+1;});
+  const top5=Object.entries(mt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const t5El=document.getElementById('pqrs-top5-body');
+  if(t5El){
+    const mx5=top5[0]?.[1]||1;
+    const COLS5=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)'];
+    t5El.innerHTML=top5.map(([m,n],i)=>`
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${m.substring(0,50)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${COLS5[i]};flex-shrink:0">${fmtN(n)} · ${fmtP(n,total)}</span>
+        </div>
+        <div style="height:8px;background:var(--bg4);border-radius:4px">
+          <div style="height:100%;width:${Math.round(n/mx5*100)}%;background:${COLS5[i]};border-radius:4px;transition:width .4s"></div>
+        </div>
+      </div>`).join('');
+  }
 }
 
 // Columnas BASE GESTIÓN REQUERIMIENTOS
