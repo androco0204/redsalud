@@ -477,6 +477,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="nav-item" data-screen="indicadores"><svg viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Indicadores</div>
     <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
     <div class="nav-item" data-screen="cobertura"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 5.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Requerimientos</div>
+    <div class="nav-item" data-screen="fallas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.3 1.2 4L7 9 3.5 11.3l1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Fallas</div>
     <div class="nav-item" data-screen="pqrs"><svg viewBox="0 0 14 14" fill="none"><path d="M12 2H2a1 1 0 00-1 1v7a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.2"/></svg>PQRS y Tutelas <span class="nav-badge">38</span></div>
     <div class="nav-sec">Auditoría</div>
     <div class="nav-item" data-screen="seguimiento"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12M5 2V1M9 2V1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="9" r="1" fill="currentColor"/><circle cx="7" cy="9" r="1" fill="currentColor"/><circle cx="10" cy="9" r="1" fill="currentColor"/></svg>Seguimiento y notif.</div>
@@ -1338,6 +1339,93 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 </div>
 
 
+
+<!-- ═══════════════════════════════════════════════════════════ FALLAS ══ -->
+<div class="screen" id="screen-fallas">
+
+  <!-- KPIs -->
+  <div class="kpi-strip cols-4">
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total casos</div><div class="kpi-value" style="color:var(--blue)" id="fallas-kpi-total">—</div><div class="kpi-delta neu" id="fallas-kpi-mes">Cargando...</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Efectividad</div><div class="kpi-value" id="fallas-kpi-efectividad">—</div><div class="kpi-delta up">Resueltos ÷ Total × 100</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Oportunidad ≤5 días</div><div class="kpi-value" id="fallas-kpi-oportunidad">—</div><div class="kpi-delta neu">Casos resueltos a tiempo</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Promedio días gestión</div><div class="kpi-value" style="color:var(--amber)" id="fallas-kpi-promdiaz">—</div><div class="kpi-delta warn">Columna AL</div></div>
+  </div>
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+    <select id="fallas-filtro-mes" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los meses</option>
+    </select>
+    <select id="fallas-filtro-gestor" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todos los gestores</option>
+    </select>
+    <select id="fallas-filtro-regional" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todas las regionales</option>
+    </select>
+    <select id="fallas-filtro-ciudad" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+      <option value="">Todas las ciudades</option>
+    </select>
+    <button class="btn" onclick="limpiarFiltrosFallas()" style="font-size:11.5px">✕ Limpiar</button>
+    <button class="btn" onclick="cargarFallas()" style="font-size:11.5px">↺ Recargar</button>
+    <span id="fallas-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
+  </div>
+
+  <!-- Indicador 1: Conteo por gestor -->
+  <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">
+    Fórmula 1 — Conteo total por gestor
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Casos por gestor</div><div class="card-sub">Consolidado RUTA + REGIONALES + G11ASDESAVID</div></div></div>
+      <div class="card-body" style="padding:0 16px">
+        <div class="scroll" style="max-height:300px">
+          <table class="table" id="fallas-tabla-conteo">
+            <thead><tr><th>Gestor</th><th>Regional</th><th>Ciudad</th><th>Casos</th><th>%</th></tr></thead>
+            <tbody id="fallas-conteo-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicador 2: Top 5 tipificación -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Fórmula 2 — Top 5 tipos de falla</div><div class="card-sub">Columna U · Tipificación · Mayor frecuencia</div></div></div>
+      <div class="card-body" style="padding:10px 16px;overflow-y:auto;max-height:300px" id="fallas-barras-tipo">
+        <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicadores 3+4+5: Estado, Efectividad, Oportunidad -->
+  <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">
+    Fórmulas 3 · 4 · 5 — Estado · Efectividad · Oportunidad por gestor
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+    <!-- Tabla resumen por gestor -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Resumen por gestor</div><div class="card-sub">Semáforo efectividad (≥80% verde) y oportunidad (≥85% verde)</div></div></div>
+      <div class="card-body" style="padding:0 16px">
+        <div class="scroll" style="max-height:300px">
+          <table class="table" id="fallas-tabla-resumen">
+            <thead><tr><th>Gestor</th><th>Total</th><th>Resueltos</th><th>Efectividad</th><th>≤5 días</th><th>Oportunidad</th><th>Prom. días</th></tr></thead>
+            <tbody id="fallas-resumen-body"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Torta distribución por estado -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Distribución por estado</div><div class="card-sub" id="fallas-dist-sub">Total · clic en gestor para filtrar</div></div></div>
+      <div class="card-body" style="padding:10px 16px;display:flex;flex-direction:column;align-items:center">
+        <canvas id="fallas-chart-torta" width="200" height="200" style="display:block"></canvas>
+        <div id="fallas-torta-leyenda" style="margin-top:10px;font-size:11px;width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 <div class="screen" id="screen-pqrs">
   <div class="kpi-strip cols-5">
@@ -2891,6 +2979,7 @@ const titles = {
   indicadores:['Indicadores','Medición y seguimiento · 34 indicadores activos'],
   alertas:['Alertas','Centro de alertas · 7 activas · 3 críticas'],
   cobertura:['Requerimientos','Gestores farmacéuticos · Seguimiento mensual'],
+  fallas:['Fallas de acceso','Matriz sistematizada · RUTA + REGIONALES + G11ASDESAVID'],
   pqrs:['PQRS y Tutelas','Gestión de reclamaciones · 38 activas'],
   seguimiento:['Seguimiento y notificaciones','Cronograma · informes por contrato · notificación de hallazgos'],
   trazabilidad:['Trazabilidad','Cadena EPS → Gestor → Paciente'],
@@ -2912,9 +3001,13 @@ function navigate(screen){
     document.getElementById('tb-title').textContent=titles[screen][0];
     document.getElementById('tb-sub').textContent=titles[screen][1];
   }
-  // Auto-cargar datos al navegar a Fallas y Requerimientos
+  // Auto-cargar datos al navegar a Requerimientos
   if(screen === 'cobertura' && DATOS_REQS.length === 0) {
     cargarRequerimientos();
+  }
+  // Auto-cargar datos al navegar a Fallas
+  if(screen === 'fallas' && DATOS_FALLAS.length === 0) {
+    cargarFallas();
   }
 }
 
@@ -6682,6 +6775,268 @@ function exportarTablaGestores(){
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
   a.download=`Requerimientos_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
+}
+
+// ─── FALLAS DE ACCESO ─────────────────────────────────────────────────────────
+// Columnas (0-based, fila 2 = headers, fila 3+ = datos):
+//   J=9  Regional | L=11 Ciudad | U=20 Tipificación
+//   AA=26 Gestor farmacéutico | AL=37 Días gestión | AM=38 Estado
+const COL_F = { fecha:1, regional:9, ciudad:11, tipo:20, gestor:26, dias:37, estado:38 };
+const HOJAS_FALLAS = ['RUTA','REGIONALES','G11ASDESAVID'];
+let _fallasChart = null;
+
+function parseFechaFalla(val){
+  if(!val) return null;
+  const s=String(val).trim();
+  if(s.includes('/')){const p=s.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]);}
+  if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
+  const n=parseInt(s);
+  if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
+  return null;
+}
+
+function getMesFalla(f){return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''}
+function getMesLblFalla(f){
+  const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return f?`${M[f.getMonth()]} ${f.getFullYear()}`:'';
+}
+
+async function cargarFallas(){
+  const el=document.getElementById('fallas-estado-carga');
+  if(el){el.textContent='⏳ Cargando 3 hojas...';el.style.color='var(--blue)';}
+  try{
+    const resultados=await Promise.all(HOJAS_FALLAS.map(h=>
+      fetch(FALLAS_SCRIPT+'?hoja='+encodeURIComponent(h)).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status} hoja ${h}`);return r.json();})
+    ));
+    // Consolidar: fila 1 = título fusionado, fila 2 = headers, fila 3+ = datos
+    let todos=[];
+    resultados.forEach((data,i)=>{
+      if(!Array.isArray(data)||data.length<3)return;
+      const filasDatos=data.slice(2); // skip fila 1 (título) y fila 2 (headers)
+      const filtradas=filasDatos.filter(r=>{
+        const g=String(r[COL_F.gestor]||'').trim();
+        return g!==''&&g!=='N/A';
+      });
+      console.log(`[FALLAS] Hoja ${HOJAS_FALLAS[i]}: ${data.length} filas → ${filtradas.length} con gestor`);
+      todos=todos.concat(filtradas);
+    });
+    DATOS_FALLAS=todos;
+    console.log('[FALLAS] Total consolidado:',DATOS_FALLAS.length);
+    if(el){el.textContent=`✓ ${DATOS_FALLAS.length.toLocaleString('es-CO')} fallas (${HOJAS_FALLAS.join(' + ')})`;el.style.color='var(--green)';}
+    poblarFiltrosFallas();
+    aplicarFiltrosFallas();
+  }catch(e){
+    if(el){el.textContent=`⚠ Error: ${e.message}`;el.style.color='var(--red)';}
+    console.error('[FALLAS]',e);
+  }
+}
+
+function poblarFiltrosFallas(){
+  const meses=new Map(),regionales=new Set(),ciudades=new Set();
+  DATOS_FALLAS.forEach(r=>{
+    // fecha: intentar columna A (índice 0) primero, luego B
+    const f=parseFechaFalla(r[COL_F.fecha]);
+    if(f){const k=getMesFalla(f);if(!meses.has(k))meses.set(k,getMesLblFalla(f));}
+    const reg=String(r[COL_F.regional]||'').trim();if(reg)regionales.add(reg);
+    const ciu=String(r[COL_F.ciudad]||'').trim();if(ciu)ciudades.add(ciu);
+  });
+  const gestoresOrdenados=[...GESTORES_VALIDOS].filter(g=>g!=='ETICOS SERRANO').sort();
+  const fill=(id,arr,lbl)=>{const el=document.getElementById(id);if(el)el.innerHTML=`<option value="">${lbl}</option>`+arr.sort().map(v=>`<option value="${v}">${v}</option>`).join('');};
+  const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  const selM=document.getElementById('fallas-filtro-mes');
+  if(selM)selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  const selG=document.getElementById('fallas-filtro-gestor');
+  if(selG)selG.innerHTML='<option value="">Todos los gestores</option>'+gestoresOrdenados.map(v=>`<option value="${v}">${v}</option>`).join('');
+  fill('fallas-filtro-regional',[...regionales],'Todas las regionales');
+  fill('fallas-filtro-ciudad',[...ciudades],'Todas las ciudades');
+}
+
+function aplicarFiltrosFallas(){
+  const mes     =document.getElementById('fallas-filtro-mes')?.value     ||'';
+  const gestor  =document.getElementById('fallas-filtro-gestor')?.value  ||'';
+  const regional=document.getElementById('fallas-filtro-regional')?.value||'';
+  const ciudad  =document.getElementById('fallas-filtro-ciudad')?.value  ||'';
+  let d=DATOS_FALLAS;
+  if(mes){d=d.filter(r=>{const f=parseFechaFalla(r[COL_F.fecha]);return f&&getMesFalla(f)===mes;});}
+  if(gestor)   d=d.filter(r=>normalizeGestor(r[COL_F.gestor])===gestor);
+  if(regional) d=d.filter(r=>String(r[COL_F.regional]||'').trim()===regional);
+  if(ciudad)   d=d.filter(r=>String(r[COL_F.ciudad]||'').trim()===ciudad);
+  renderFallas(d);
+}
+
+function limpiarFiltrosFallas(){
+  ['fallas-filtro-mes','fallas-filtro-gestor','fallas-filtro-regional','fallas-filtro-ciudad']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  aplicarFiltrosFallas();
+}
+
+function semFallas(pct,verde,amarillo){
+  if(pct>=verde)   return {color:'var(--green)',bg:'var(--gdim)'};
+  if(pct>=amarillo)return {color:'var(--amber)',bg:'var(--adim)'};
+  return {color:'var(--red)',bg:'var(--rdim)'};
+}
+
+function renderFallas(datos){
+  const fmtN=n=>n.toLocaleString('es-CO');
+  const fmtP=(n,t)=>t>0?(n/t*100).toFixed(1)+'%':'0%';
+  const total=datos.length;
+
+  // ── KPIs globales ──
+  const resueltos=datos.filter(r=>String(r[COL_F.estado]||'').trim().toUpperCase()==='RESUELTO').length;
+  const conDias=datos.filter(r=>!isNaN(parseFloat(r[COL_F.dias])));
+  const diasArr=conDias.map(r=>parseFloat(r[COL_F.dias]));
+  const promDias=diasArr.length?( diasArr.reduce((a,b)=>a+b,0)/diasArr.length).toFixed(1):'—';
+  const oportTotal=diasArr.filter(d=>d<=5).length;
+  const efecGlobal=total?Math.round(resueltos/total*100):0;
+  const oporGlobal=diasArr.length?Math.round(oportTotal/diasArr.length*100):0;
+
+  const semEf=semFallas(efecGlobal,80,60);
+  const semOp=semFallas(oporGlobal,85,70);
+
+  const kv=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  kv('fallas-kpi-total',fmtN(total));
+  kv('fallas-kpi-efectividad',total?efecGlobal+'%':'—');
+  kv('fallas-kpi-oportunidad',diasArr.length?oporGlobal+'%':'—');
+  kv('fallas-kpi-promdiaz',promDias==='—'?'—':promDias+' d');
+  const eEl=document.getElementById('fallas-kpi-efectividad');
+  if(eEl&&total){eEl.style.color=semEf.color;}
+  const oEl=document.getElementById('fallas-kpi-oportunidad');
+  if(oEl&&diasArr.length){oEl.style.color=semOp.color;}
+
+  if(!total){
+    ['fallas-conteo-body','fallas-resumen-body'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text2)">Sin datos</td></tr>';
+    });
+    document.getElementById('fallas-barras-tipo').innerHTML='<div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>';
+    dibujarTortaFallas({},'Sin datos');
+    return;
+  }
+
+  // ── Indicador 1: Conteo por gestor+regional+ciudad ──
+  const grc={};
+  datos.forEach(r=>{
+    const g=normalizeGestor(r[COL_F.gestor]);
+    const reg=String(r[COL_F.regional]||'—').trim();
+    const ciu=String(r[COL_F.ciudad]||'—').trim();
+    const k=`${g}||${reg}||${ciu}`;
+    grc[k]=(grc[k]||0)+1;
+  });
+  const tb1=document.getElementById('fallas-conteo-body');
+  if(tb1){
+    tb1.innerHTML=Object.entries(grc).sort((a,b)=>b[1]-a[1]).map(([k,n])=>{
+      const [g,reg,ciu]=k.split('||');
+      return `<tr>
+        <td style="font-size:12px;font-weight:500">${g}</td>
+        <td style="font-size:11px;color:var(--text2)">${reg}</td>
+        <td style="font-size:11px;color:var(--text2)">${ciu}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:600">${fmtN(n)}</td>
+        <td style="font-family:'DM Mono',monospace;color:var(--text2)">${fmtP(n,total)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Indicador 2: Top 5 tipificación ──
+  const ct={};
+  datos.forEach(r=>{const t=String(r[COL_F.tipo]||'Sin tipo').trim();ct[t]=(ct[t]||0)+1;});
+  const top5=Object.entries(ct).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const barEl=document.getElementById('fallas-barras-tipo');
+  if(barEl){
+    const mx=top5[0]?.[1]||1;
+    const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)'];
+    barEl.innerHTML=top5.map(([t,n],i)=>`
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${t.substring(0,48)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${COLS[i]};flex-shrink:0">${fmtN(n)} · ${fmtP(n,total)}</span>
+        </div>
+        <div style="height:8px;background:var(--bg4);border-radius:4px">
+          <div style="height:100%;width:${Math.round(n/mx*100)}%;background:${COLS[i]};border-radius:4px;transition:width .4s"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Indicadores 3+4+5: tabla resumen por gestor ──
+  const pg={};
+  datos.forEach(r=>{
+    const g=normalizeGestor(r[COL_F.gestor]);
+    const est=String(r[COL_F.estado]||'').trim().toUpperCase();
+    const d=parseFloat(r[COL_F.dias]);
+    if(!pg[g])pg[g]={total:0,resuelto:0,cerradoSin:0,devuelto:0,tramite:0,diasArr:[]};
+    pg[g].total++;
+    if(est==='RESUELTO')pg[g].resuelto++;
+    else if(est==='CERRADO SIN SOLUCIÓN'||est==='CERRADO SIN SOLUCION')pg[g].cerradoSin++;
+    else if(est==='DEVUELTO')pg[g].devuelto++;
+    else pg[g].tramite++;
+    if(!isNaN(d))pg[g].diasArr.push(d);
+  });
+
+  const estados={};
+  datos.forEach(r=>{const e=String(r[COL_F.estado]||'Sin estado').trim();estados[e]=(estados[e]||0)+1;});
+  dibujarTortaFallas(estados,'Total');
+
+  const tb2=document.getElementById('fallas-resumen-body');
+  if(tb2){
+    tb2.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
+      const ef=v.total?Math.round(v.resuelto/v.total*100):0;
+      const prom=v.diasArr.length?(v.diasArr.reduce((a,b)=>a+b,0)/v.diasArr.length).toFixed(1):'—';
+      const op5=v.diasArr.filter(d=>d<=5).length;
+      const opPct=v.diasArr.length?Math.round(op5/v.diasArr.length*100):0;
+      const sEf=semFallas(ef,80,60);
+      const sOp=semFallas(opPct,85,70);
+      return `<tr style="cursor:pointer" onclick="verDetalleGestorFallas('${g.replace(/'/g,"\\'")}')" title="Ver en gráfica">
+        <td style="font-size:12px;font-weight:500">${g}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:600">${fmtN(v.total)}</td>
+        <td style="color:var(--green);font-family:'DM Mono',monospace">${fmtN(v.resuelto)} <span style="color:var(--text2);font-size:10px">(${fmtP(v.resuelto,v.total)})</span></td>
+        <td><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${sEf.bg};color:${sEf.color}">${ef}%</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${fmtN(op5)}</td>
+        <td><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${sOp.bg};color:${sOp.color}">${opPct}%</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">${prom==='—'?'—':prom+' d'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function dibujarTortaFallas(estados,titulo){
+  const canvas=document.getElementById('fallas-chart-torta');
+  const leyEl=document.getElementById('fallas-torta-leyenda');
+  const sub=document.getElementById('fallas-dist-sub');
+  if(sub)sub.textContent=titulo;
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  if(_fallasChart){_fallasChart.destroy();_fallasChart=null;}
+  const PALETA={'Resuelto':'#22c55e','Cerrado sin solución':'#ef4444','Cerrado sin solucion':'#ef4444','Devuelto':'#3b82f6','En trámite':'#f59e0b','En tramite':'#f59e0b'};
+  const labels=Object.keys(estados);
+  const vals=Object.values(estados);
+  const cols=labels.map(l=>PALETA[l]||'#6b7280');
+  if(!vals.length||vals.every(v=>v===0)){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(leyEl)leyEl.innerHTML='';
+    return;
+  }
+  _fallasChart=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:cols,borderWidth:2,borderColor:'#1a2230'}]},
+    options:{responsive:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/vals.reduce((a,b)=>a+b,0)*100)}%)`}}}}
+  });
+  if(leyEl){
+    const tot=vals.reduce((a,b)=>a+b,0);
+    leyEl.innerHTML=labels.map((l,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+        <div style="width:10px;height:10px;border-radius:2px;background:${cols[i]};flex-shrink:0"></div>
+        <span style="flex:1;color:var(--text2)">${l}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px">${vals[i]} <span style="color:var(--text3)">(${Math.round(vals[i]/tot*100)}%)</span></span>
+      </div>`).join('');
+  }
+}
+
+function verDetalleGestorFallas(gestor){
+  const mes=document.getElementById('fallas-filtro-mes')?.value||'';
+  let d=DATOS_FALLAS.filter(r=>normalizeGestor(r[COL_F.gestor])===gestor);
+  if(mes)d=d.filter(r=>{const f=parseFechaFalla(r[COL_F.fecha]);return f&&getMesFalla(f)===mes;});
+  const estados={};
+  d.forEach(r=>{const e=String(r[COL_F.estado]||'Sin estado').trim();estados[e]=(estados[e]||0)+1;});
+  dibujarTortaFallas(estados,`Gestor: ${gestor} · ${d.length} casos`);
 }
 
 // Columnas BASE GESTIÓN REQUERIMIENTOS
