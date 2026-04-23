@@ -1218,9 +1218,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   <!-- KPIs superiores -->
   <div class="kpi-strip cols-4">
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total requerimientos</div><div class="kpi-value" style="color:var(--blue)" id="kpi-req-total">—</div><div class="kpi-delta neu" id="kpi-req-mes">Mes activo</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Efectividad gestión</div><div class="kpi-value" style="color:var(--green)" id="kpi-req-efectividad">—</div><div class="kpi-delta up">Resueltos / Total</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">En trámite</div><div class="kpi-value" style="color:var(--amber)" id="kpi-req-tramite">—</div><div class="kpi-delta warn">Sin cerrar</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cerrados sin solución</div><div class="kpi-value" style="color:var(--red)" id="kpi-req-sin-sol">—</div><div class="kpi-delta dn">Requieren revisión</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Efectividad gestión</div><div class="kpi-value" style="color:var(--green)" id="kpi-req-efectividad">—</div><div class="kpi-delta up">(Cerrados ÷ Total) × 100</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">En gestión</div><div class="kpi-value" style="color:var(--amber)" id="kpi-req-tramite">—</div><div class="kpi-delta warn">Estado GESTIÓN</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Devueltos</div><div class="kpi-value" style="color:var(--blue)" id="kpi-req-sin-sol">—</div><div class="kpi-delta neu">Estado DEVUELTO</div></div>
   </div>
 
   <!-- Filtros propios -->
@@ -1240,82 +1240,99 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <select id="req-filtro-ciudad" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todas las ciudades</option>
     </select>
-    <button class="btn" onclick="cargarRequerimientos()" style="font-size:11.5px">↺ Recargar datos</button>
+    <button class="btn" onclick="limpiarFiltrosReq()" style="font-size:11.5px">✕ Limpiar</button>
+    <button class="btn" onclick="cargarRequerimientos()" style="font-size:11.5px">↺ Recargar</button>
     <span id="req-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
   </div>
 
-  <div class="grid-21" style="gap:14px">
+  <!-- INDICADOR 1: Conteo por tipo de caso -->
+  <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">
+    Indicador 1 — Conteo total y por tipo de caso
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
 
-    <!-- Tabla por gestor -->
+    <!-- Tabla conteo por tipo -->
     <div class="card" style="margin-bottom:0">
       <div class="card-head">
-        <div><div class="card-title">Requerimientos por gestor</div><div class="card-sub">Conteo · efectividad · distribución de estados</div></div>
+        <div><div class="card-title">Conteo por tipo de caso</div><div class="card-sub">Gestor · Regional · Departamento · Ciudad · Estado · Conteo · %</div></div>
         <button class="btn" onclick="exportarTablaGestores()" style="font-size:11px">⬇ Exportar</button>
       </div>
-      <div class="card-body" style="padding:0 20px">
-        <div class="scroll" style="max-height:340px">
-          <table class="table" id="tabla-req-gestores">
+      <div class="card-body" style="padding:0 16px">
+        <div class="scroll" style="max-height:320px">
+          <table class="table" id="tabla-req-tipo">
             <thead>
               <tr>
-                <th>Gestor farmacéutico</th>
-                <th>Total</th>
-                <th>Resueltos</th>
-                <th>En trámite</th>
-                <th>Sin solución</th>
-                <th>Devueltos</th>
-                <th>Efectividad</th>
-                <th>Semáforo</th>
+                <th>Tipo de caso</th>
+                <th>Gestor</th>
+                <th>Regional</th>
+                <th>Departamento</th>
+                <th>Ciudad</th>
+                <th>Estado</th>
+                <th>Conteo</th>
+                <th>%</th>
               </tr>
             </thead>
-            <tbody id="tabla-req-gestores-body">
-              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando datos de requerimientos...</td></tr>
+            <tbody id="tabla-req-tipo-body">
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- Panel derecho: torta + barras tipo -->
-    <div style="display:flex;flex-direction:column;gap:14px">
-
-      <!-- Fórmula 2: Gráfica torta distribución estados por gestor -->
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Distribución por estado</div><div class="card-sub" id="req-dist-sub">Selecciona un gestor o ve el total</div></div></div>
-        <div class="card-body" style="padding:10px 16px">
-          <canvas id="req-chart-torta" width="220" height="220" style="display:block;margin:0 auto"></canvas>
-          <div id="req-torta-leyenda" style="margin-top:8px;font-size:11px"></div>
-        </div>
+    <!-- Gráfica barras por tipo -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Distribución por tipo</div><div class="card-sub">Volumen por categoría</div></div></div>
+      <div class="card-body" style="padding:10px 16px;overflow-y:auto;max-height:340px" id="req-barras-tipo">
+        <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
       </div>
-
-      <!-- Fórmula 1: Barras por tipo de caso -->
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Tipos de requerimiento</div><div class="card-sub">Distribución por volumen</div></div></div>
-        <div class="card-body" style="padding:10px 16px" id="req-top-tipos">
-          <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
-        </div>
-      </div>
-
     </div>
   </div>
 
-  <!-- Detalle de casos -->
-  <div class="card" style="margin-top:14px">
-    <div class="card-head">
-      <div><div class="card-title">Detalle de casos</div><div class="card-sub" id="req-detalle-sub">Filtrado por gestor y mes</div></div>
+  <!-- INDICADOR 2: Efectividad por gestor -->
+  <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">
+    Indicador 2 — Efectividad de gestión por gestor
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+    <!-- Tabla efectividad por gestor -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Efectividad por gestor</div><div class="card-sub">Estados col AY · Conteo · % efectividad</div></div></div>
+      <div class="card-body" style="padding:0 16px">
+        <div class="scroll" style="max-height:320px">
+          <table class="table" id="tabla-req-efectividad">
+            <thead>
+              <tr>
+                <th>Gestor</th>
+                <th>Total</th>
+                <th>Cerrado</th>
+                <th>Cerrado por correo</th>
+                <th>En gestión</th>
+                <th>Devuelto</th>
+                <th>Pendiente</th>
+                <th>Efectividad</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-req-efectividad-body">
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <div class="card-body" style="padding:0 20px">
-      <div class="scroll" style="max-height:260px">
-        <table class="table">
-          <thead><tr><th>Fecha</th><th>Tipo de caso</th><th>Gestor</th><th>Regional</th><th>Ciudad</th><th>Estado</th></tr></thead>
-          <tbody id="tabla-req-detalle-body">
-            <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text2)">Selecciona un gestor o aplica filtros para ver el detalle</td></tr>
-          </tbody>
-        </table>
+
+    <!-- Gráfica dona por estados -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Distribución por estado</div><div class="card-sub" id="req-dist-sub">Total · clic en gestor para filtrar</div></div></div>
+      <div class="card-body" style="padding:10px 16px;display:flex;flex-direction:column;align-items:center">
+        <canvas id="req-chart-torta" width="200" height="200" style="display:block"></canvas>
+        <div id="req-torta-leyenda" style="margin-top:10px;font-size:11px;width:100%"></div>
       </div>
     </div>
   </div>
 
 </div>
+
 
 
 <div class="screen" id="screen-pqrs">
@@ -6252,7 +6269,7 @@ let COL_REQ = {
   estado:   50,  // AY — se ajusta dinámicamente
 };
 
-// Gestores válidos
+// Gestores válidos — 19 gestores confirmados
 const GESTORES_VALIDOS = new Set([
   'INSUMEDIC','PHARMASAN','GENHOSPI','COHAN','CRUZ VERDE',
   'DISFARMA','MYT SALUD','DISCOLMETS','HUMSALUD','AUDIFARMA',
@@ -6426,87 +6443,128 @@ function aplicarFiltrosReq() {
   renderRequerimientos(d);
 }
 
+function limpiarFiltrosReq() {
+  ['req-filtro-mes','req-filtro-gestor','req-filtro-regional','req-filtro-depto','req-filtro-ciudad']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  aplicarFiltrosReq();
+}
+
 function renderRequerimientos(datos) {
+  const fmtN = n => n.toLocaleString('es-CO');
+  const fmtP = (n,t) => t>0 ? (n/t*100).toFixed(1)+'%' : '0%';
+
   if(!datos.length){
-    const msg='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos para los filtros seleccionados</td></tr>';
-    ['tabla-req-gestores-body','tabla-req-detalle-body'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=msg;});
+    ['tabla-req-tipo-body','tabla-req-efectividad-body'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2)">Sin datos</td></tr>';
+    });
     ['kpi-req-total','kpi-req-efectividad','kpi-req-tramite','kpi-req-sin-sol'].forEach(id=>actualizarKPI(id,'0'));
     return;
   }
 
-  // Agrupar por gestor
-  const pg={};
-  datos.forEach(r=>{
-    const g=normalizeGestor(r[COL_REQ.gestor]);
-    const info=getEstadoInfo(r[COL_REQ.estado]);
-    if(!pg[g]) pg[g]={total:0,resuelto:0,tramite:0,devuelto:0,otro:0,estados:{}};
-    pg[g].total++;
-    pg[g][info.categoria]=(pg[g][info.categoria]||0)+1;
-    const lbl=info.label;
-    pg[g].estados[lbl]=(pg[g].estados[lbl]||0)+1;
-  });
+  const total = datos.length;
+  const cerrados  = datos.filter(r=>['CERRADO','CERRADO POR CORREO','CERRADO CON CARTA'].includes(String(r[COL_REQ.estado]||'').trim().toUpperCase())).length;
+  const enGestion = datos.filter(r=>['GESTIÓN','GESTION'].includes(String(r[COL_REQ.estado]||'').trim().toUpperCase())).length;
+  const devueltos = datos.filter(r=>String(r[COL_REQ.estado]||'').trim().toUpperCase()==='DEVUELTO').length;
+  const efec = total>0 ? Math.round(cerrados/total*100) : 0;
 
-  // KPIs globales
-  const total    = datos.length;
-  const resueltos= datos.filter(r=>getEstadoInfo(r[COL_REQ.estado]).categoria==='resuelto').length;
-  const tramite  = datos.filter(r=>getEstadoInfo(r[COL_REQ.estado]).categoria==='tramite').length;
-  const devuelto = datos.filter(r=>getEstadoInfo(r[COL_REQ.estado]).categoria==='devuelto').length;
-  // Efectividad: casos CERRADO o CERRADO POR CORREO / total
-  const efec = total>0 ? Math.round(resueltos/total*100) : 0;
-
-  actualizarKPI('kpi-req-total',       total.toLocaleString('es-CO'));
+  actualizarKPI('kpi-req-total',       fmtN(total));
   actualizarKPI('kpi-req-efectividad', efec+'%');
-  actualizarKPI('kpi-req-tramite',     tramite.toLocaleString('es-CO'));
-  actualizarKPI('kpi-req-sin-sol',     devuelto.toLocaleString('es-CO'));
+  actualizarKPI('kpi-req-tramite',     fmtN(enGestion));
+  actualizarKPI('kpi-req-sin-sol',     fmtN(devueltos));
   const efEl=document.getElementById('kpi-req-efectividad');
   if(efEl) efEl.style.color=efec>=80?'var(--green)':efec>=60?'var(--amber)':'var(--red)';
 
-  // Tabla gestores
-  const tb=document.getElementById('tabla-req-gestores-body');
-  if(tb) tb.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
-    const ef=v.total>0?Math.round((v.resuelto||0)/v.total*100):0;
-    const sem=semaforo(ef,{verde:80,amarillo:60});
-    return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\\'")}')" title="Clic para ver detalle y torta">
-      <td style="font-size:12px;font-weight:500">${g}</td>
-      <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
-      <td style="color:var(--green);font-family:'DM Mono',monospace">${v.resuelto||0}</td>
-      <td style="color:var(--amber);font-family:'DM Mono',monospace">${v.tramite||0}</td>
-      <td style="color:var(--blue);font-family:'DM Mono',monospace">${v.devuelto||0}</td>
-      <td style="color:var(--text2);font-family:'DM Mono',monospace">${v.otro||0}</td>
-      <td><span style="font-weight:600;color:${sem.color}">${ef}%</span></td>
-      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:${sem.bg};color:${sem.color}">${sem.label}</span></td>
-    </tr>`;
-  }).join('');
+  // INDICADOR 1: tabla por tipo+gestor+regional+depto+ciudad+estado
+  const grupTipo={};
+  datos.forEach(r=>{
+    const tipo=String(r[COL_REQ.tipo]||'Sin tipo').trim();
+    const gestor=normalizeGestor(r[COL_REQ.gestor]);
+    const regional=String(r[COL_REQ.regional]||'—').trim();
+    const depto=String(r[COL_REQ.depto]||'—').trim();
+    const ciudad=String(r[COL_REQ.ciudad]||'—').trim();
+    const estado=getEstadoInfo(r[COL_REQ.estado]).label;
+    const key=`${tipo}||${gestor}||${regional}||${depto}||${ciudad}||${estado}`;
+    grupTipo[key]=(grupTipo[key]||0)+1;
+  });
 
-  // Gráfica torta global
-  dibujarTorta(datos,'Todos los gestores');
+  const tb1=document.getElementById('tabla-req-tipo-body');
+  if(tb1){
+    const COLS_EST={'Cerrado':'var(--green)','Cerrado por correo':'var(--green)','En gestión':'var(--amber)','Devuelto':'var(--blue)','Pendiente':'#f97316'};
+    tb1.innerHTML=Object.entries(grupTipo).sort((a,b)=>b[1]-a[1]).map(([key,n])=>{
+      const [tipo,gestor,regional,depto,ciudad,estado]=key.split('||');
+      const col=COLS_EST[estado]||'var(--text2)';
+      return `<tr>
+        <td style="font-size:11.5px">${tipo}</td>
+        <td style="font-size:11px;color:var(--text2)">${gestor}</td>
+        <td style="font-size:11px;color:var(--text2)">${regional}</td>
+        <td style="font-size:11px;color:var(--text2)">${depto}</td>
+        <td style="font-size:11px;color:var(--text2)">${ciudad}</td>
+        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${col}">${estado}</span></td>
+        <td style="font-family:'DM Mono',monospace;font-weight:600">${n}</td>
+        <td style="font-family:'DM Mono',monospace;color:var(--text2)">${fmtP(n,total)}</td>
+      </tr>`;
+    }).join('');
+  }
 
-  // Barras por tipo (Fórmula 1)
-  const tipos={};
-  datos.forEach(r=>{const t=String(r[COL_REQ.tipo]||'Sin tipo').trim();tipos[t]=(tipos[t]||0)+1;});
-  const tEl=document.getElementById('req-top-tipos');
-  if(tEl){
-    const sorted=Object.entries(tipos).sort((a,b)=>b[1]-a[1]);
+  // Barras por tipo (derecha Indicador 1)
+  const contTipo={};
+  datos.forEach(r=>{const t=String(r[COL_REQ.tipo]||'Sin tipo').trim();contTipo[t]=(contTipo[t]||0)+1;});
+  const bEl=document.getElementById('req-barras-tipo');
+  if(bEl){
+    const sorted=Object.entries(contTipo).sort((a,b)=>b[1]-a[1]);
     const mx=sorted[0]?.[1]||1;
-    const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)','var(--red)','var(--text2)'];
-    tEl.innerHTML=sorted.map(([t,n],i)=>{
-      const pct=Math.round(n/total*100);
-      const w=Math.round(n/mx*100);
+    const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)','var(--red)'];
+    bEl.innerHTML=sorted.map(([t,n],i)=>{
       const col=COLS[i%COLS.length];
-      return `<div style="margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${t.substring(0,45)}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col};flex-shrink:0">${n} · ${pct}%</span>
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${t.substring(0,42)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col};flex-shrink:0">${n} · ${fmtP(n,total)}</span>
         </div>
         <div style="height:6px;background:var(--bg4);border-radius:3px">
-          <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .4s"></div>
+          <div style="height:100%;width:${Math.round(n/mx*100)}%;background:${col};border-radius:3px;transition:width .4s"></div>
         </div>
       </div>`;
     }).join('');
   }
 
-  renderDetalleReq(datos.slice(0,150));
+  // INDICADOR 2: efectividad por gestor
+  const pg={};
+  datos.forEach(r=>{
+    const g=normalizeGestor(r[COL_REQ.gestor]);
+    const e=String(r[COL_REQ.estado]||'').trim().toUpperCase();
+    if(!pg[g]) pg[g]={total:0,cerrado:0,cerradoCorreo:0,gestion:0,devuelto:0,pendiente:0};
+    pg[g].total++;
+    if(e==='CERRADO') pg[g].cerrado++;
+    else if(e==='CERRADO POR CORREO'||e==='CERRADO CON CARTA') pg[g].cerradoCorreo++;
+    else if(e==='GESTIÓN'||e==='GESTION') pg[g].gestion++;
+    else if(e==='DEVUELTO') pg[g].devuelto++;
+    else if(e==='PENDIENTE') pg[g].pendiente++;
+  });
+
+  const tb2=document.getElementById('tabla-req-efectividad-body');
+  if(tb2){
+    tb2.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
+      const cer=v.cerrado+v.cerradoCorreo;
+      const ef=v.total>0?Math.round(cer/v.total*100):0;
+      const efColor=ef>=80?'var(--green)':ef>=60?'var(--amber)':'var(--red)';
+      return `<tr style="cursor:pointer" onclick="verDetalleGestor('${g.replace(/'/g,"\'")}')" title="Ver en gráfica">
+        <td style="font-size:12px;font-weight:500">${g}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:600">${v.total}</td>
+        <td style="color:var(--green);font-family:'DM Mono',monospace">${v.cerrado} <span style="color:var(--text2);font-size:10px">(${fmtP(v.cerrado,v.total)})</span></td>
+        <td style="color:var(--green);font-family:'DM Mono',monospace">${v.cerradoCorreo} <span style="color:var(--text2);font-size:10px">(${fmtP(v.cerradoCorreo,v.total)})</span></td>
+        <td style="color:var(--amber);font-family:'DM Mono',monospace">${v.gestion} <span style="color:var(--text2);font-size:10px">(${fmtP(v.gestion,v.total)})</span></td>
+        <td style="color:var(--blue);font-family:'DM Mono',monospace">${v.devuelto} <span style="color:var(--text2);font-size:10px">(${fmtP(v.devuelto,v.total)})</span></td>
+        <td style="color:#f97316;font-family:'DM Mono',monospace">${v.pendiente} <span style="color:var(--text2);font-size:10px">(${fmtP(v.pendiente,v.total)})</span></td>
+        <td><span style="font-weight:600;color:${efColor}">${ef}%</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  dibujarTorta(datos,'Total gestores');
 }
+
 
 function dibujarTorta(datos, titulo) {
   const sub=document.getElementById('req-dist-sub');
