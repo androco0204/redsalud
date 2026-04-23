@@ -6561,7 +6561,7 @@ function parseFechaReq(val) {
   if(!val) return null;
   const s = String(val).trim();
   if(s.includes('/')) {
-    const datePart = s.split(' ')[0]; // strip time component
+    const datePart = s.split(' ')[0];
     const p = datePart.split('/');
     if(p.length === 3) { const d=new Date(+p[2], +p[1]-1, +p[0]); if(!isNaN(d)) return d; }
   }
@@ -7212,7 +7212,7 @@ function parseFechaPqrs(val){
   const s=String(val).trim();
   if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
   if(s.includes('/')){
-    const datePart=s.split(' ')[0]; // strip time component
+    const datePart=s.split(' ')[0];
     const p=datePart.split('/');
     if(p.length===3){const d=new Date(+p[2],+p[1]-1,+p[0]);if(!isNaN(d))return d;}
   }
@@ -7267,9 +7267,7 @@ async function cargarPqrs(){
     const fechasMuestra=DATOS_PQRS.slice(0,3).map(r=>({asig:r[COL_P.fecAsig],cierre:r[COL_P.fecCierre]}));
     console.log('[PQRS] Fechas muestra:', JSON.stringify(fechasMuestra));
     if(el){el.textContent=`✓ ${DATOS_PQRS.length.toLocaleString('es-CO')} PQR cargadas`;el.style.color='var(--green)';}
-    // Badge dinámico en menú — desactivado: hay dos módulos (PQRS + Tutelas), el conteo no aplica
-    // const badge=document.getElementById('pqrs-nav-badge');
-    // if(badge){badge.textContent=DATOS_PQRS.length.toLocaleString('es-CO');badge.style.display='';}
+    // Badge desactivado: hay dos módulos (PQRS + Tutelas), el conteo no aplica
     poblarFiltrosPqrs();
     aplicarFiltrosPqrs();
   }catch(e){
@@ -7469,18 +7467,44 @@ function renderPqrs(datos){
 }
 
 // ─── TUTELAS ──────────────────────────────────────────────────────────────────
-// Columnas (0-based, fila 0 = headers, fila 1+ = datos):
-//   A=0 Marca temporal | D=3 Proveedor/Gestor | F=5 Documento usuario
-//   J=9 Descripción medicamento | N=13 Municipio | Z=25 Fecha entrega | AL=37 Cumple ANS
-const COL_T = { fecha:0, gestor:3, docUsuario:5, medicamento:9, ciudad:13, fecEntrega:25, cumpleAns:37 };
+// Columnas se detectan dinámicamente desde la fila de encabezados del sheet.
+// Fallback a índices fijos si no se encuentran por nombre.
+let COL_T = { fecha:0, gestor:3, docUsuario:5, medicamento:9, ciudad:13, fecEntrega:25, cumpleAns:37 };
 let DATOS_TUTELAS = [];
+
+function detectarColumnasTut(headers){
+  const norm = h => String(h||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const find = (...kws) => {
+    for(const kw of kws){
+      const k=norm(kw);
+      const i=headers.findIndex(h=>norm(h).includes(k));
+      if(i>=0) return i;
+    }
+    return -1;
+  };
+  const c = {
+    fecha:      find('MARCA TEMPORAL','TIMESTAMP','FECHA REGISTRO','FECHA INGRESO'),
+    gestor:     find('GESTOR','PROVEEDOR','RESPONSABLE','OPERADOR'),
+    docUsuario: find('DOCUMENTO','DOC USUARIO','CEDULA','IDENTIFICACION','CC PACIENTE','NUMERO DOC'),
+    medicamento:find('MEDICAMENTO','DESCRIPCION','PRINCIPIO ACTIVO','NOMBRE MEDICAMENTO'),
+    ciudad:     find('CIUDAD','MUNICIPIO','LOCALIDAD'),
+    fecEntrega: find('FECHA ENTREGA','ENTREGA','FEC ENTREGA','FECHA DE ENTREGA','FECHA CUMPLIMIENTO'),
+    cumpleAns:  find('CUMPLE ANS','ANS','CUMPLE','RESULTADO ANS','CUMPLIMIENTO ANS','OPORTUNO'),
+  };
+  // Fallback a índices fijos para columnas no encontradas
+  const defaults = { fecha:0, gestor:3, docUsuario:5, medicamento:9, ciudad:13, fecEntrega:25, cumpleAns:37 };
+  Object.keys(defaults).forEach(k=>{ if(c[k]<0) c[k]=defaults[k]; });
+  console.log('[TUTELAS] Columnas detectadas:', c);
+  console.log('[TUTELAS] Headers completos:', headers);
+  return c;
+}
 
 function parseFechaTut(val){
   if(!val) return null;
   const s=String(val).trim();
   if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
   if(s.includes('/')){
-    const datePart=s.split(' ')[0]; // strip time component e.g. "1/2/2026 8:00:00" → "1/2/2026"
+    const datePart=s.split(' ')[0]; // strip time e.g. "1/2/2026 8:00:00" → "1/2/2026"
     const p=datePart.split('/');
     if(p.length===3){const d=new Date(+p[2],+p[1]-1,+p[0]);if(!isNaN(d))return d;}
   }
@@ -7488,9 +7512,17 @@ function parseFechaTut(val){
   const n=parseFloat(s);if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
   return null;
 }
-function getMesTut(f){return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''}
+function getMesTut(f){return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:'';}
 function getMesLblTut(f){const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return f?`${M[f.getMonth()]} ${f.getFullYear()}`:''}
-function esCumple(val){return String(val||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes('CUMPLE');}
+// Reconoce: "Cumple","CUMPLE","Si","Sí","SI","S","1","Yes","Y","TRUE","Oportunamente","A tiempo"
+// No cumple: "No cumple","NO","N","0","No","Tardío","Fuera de término","FALSE"
+function esCumple(val){
+  const v=String(val||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(!v||v===''||v==='N/A'||v==='-') return false;
+  if(v.includes('NO CUMPLE')||v==='NO'||v==='N'||v==='0'||v.includes('TARDIA')||v.includes('TARDIO')||v.includes('FUERA')||v==='FALSE') return false;
+  if(v.includes('CUMPLE')||v==='SI'||v==='S'||v==='1'||v==='YES'||v==='Y'||v==='TRUE'||v.includes('OPORTUN')||v.includes('TIEMPO')) return true;
+  return false; // valor desconocido → no contar
+}
 function semTut(pct,verde,amarillo){if(pct>=verde)return{color:'var(--green)',bg:'var(--gdim)'};if(pct>=amarillo)return{color:'var(--amber)',bg:'var(--adim)'};return{color:'var(--red)',bg:'var(--rdim)'};}
 
 async function cargarTutelas(){
@@ -7501,10 +7533,16 @@ async function cargarTutelas(){
     if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
     const data=await resp.json();
     if(!Array.isArray(data)||data.length<2)throw new Error('Sin datos');
+    // Detectar columnas dinámicamente desde la fila de headers
+    COL_T = detectarColumnasTut(data[0]);
     DATOS_TUTELAS=data.slice(1).filter(r=>{const g=String(r[COL_T.gestor]||'').trim();return g!==''&&g!=='N/A';});
-    console.log('[TUTELAS] Total:',DATOS_TUTELAS.length);
-    console.log('[TUTELAS] Muestra col AL:',[...new Set(DATOS_TUTELAS.slice(0,20).map(r=>String(r[COL_T.cumpleAns]||'').trim()))]);
-    if(el){el.textContent=`✓ ${DATOS_TUTELAS.length.toLocaleString('es-CO')} tutelas cargadas`;el.style.color='var(--green)';}
+    console.log('[TUTELAS] Total filas:',DATOS_TUTELAS.length);
+    // Debug: muestra valores reales de las columnas clave
+    const muestraCumple=[...new Set(DATOS_TUTELAS.slice(0,30).map(r=>String(r[COL_T.cumpleAns]||'').trim()))];
+    const muestraEntrega=[...new Set(DATOS_TUTELAS.slice(0,10).map(r=>String(r[COL_T.fecEntrega]||'').trim()))];
+    console.log('[TUTELAS] Col cumpleAns (idx '+COL_T.cumpleAns+') valores únicos:',muestraCumple);
+    console.log('[TUTELAS] Col fecEntrega (idx '+COL_T.fecEntrega+') muestra:',muestraEntrega);
+    if(el){el.textContent=`✓ ${DATOS_TUTELAS.length.toLocaleString('es-CO')} tutelas · Cumple idx:${COL_T.cumpleAns} · Entrega idx:${COL_T.fecEntrega}`;el.style.color='var(--green)';}
     poblarFiltrosTutelas();aplicarFiltrosTutelas();
   }catch(e){if(el){el.textContent=`⚠ Error: ${e.message}`;el.style.color='var(--red)';}console.error('[TUTELAS]',e);}
 }
