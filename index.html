@@ -6417,13 +6417,21 @@ function poblarFiltrosReq() {
     const reg=String(r[COL_REQ.regional]||'').trim(); if(reg) regionales.add(reg);
     const dep=String(r[COL_REQ.depto]||'').trim();    if(dep) deptos.add(dep);
     const ciu=String(r[COL_REQ.ciudad]||'').trim();   if(ciu) ciudades.add(ciu);
-    const tip=String(r[COL_REQ.tipo]||'').trim();     if(tip) tipos.add(tip);
-    const est=getEstadoInfo(r[COL_REQ.estado]).label; if(est&&est!=='Sin estado') estados.add(est);
+    const tip=String(r[COL_REQ.tipo]||'').trim();
+    if(tip){
+      // Normalizar a Title Case para unificar variantes (TUTELAS / Tutelas / tutelas)
+      const tipNorm=tip.charAt(0).toUpperCase()+tip.slice(1).toLowerCase();
+      tipos.add(tipNorm);
+    }
+    const est=getEstadoInfo(r[COL_REQ.estado]).label;
+    // Excluir estados que no aplican
+    if(est && est!=='Sin estado' && est!=='Cerrado por correo') estados.add(est);
   });
 
   const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
   const selM=document.getElementById('req-filtro-mes');
-  if(selM){ selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); if(sortM.length) selM.value=sortM[0][0]; }
+  // Inicia en "Todos los meses" (sin pre-seleccionar ningún mes)
+  if(selM){ selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); }
 
   const fill=(id,arr,lbl)=>{ const el=document.getElementById(id); if(el) el.innerHTML=`<option value="">${lbl}</option>`+arr.sort().map(v=>`<option value="${v}">${v}</option>`).join(''); };
 
@@ -6454,7 +6462,7 @@ function aplicarFiltrosReq() {
   if(regional) d=d.filter(r=>String(r[COL_REQ.regional]||'').trim()===regional);
   if(depto)    d=d.filter(r=>String(r[COL_REQ.depto]   ||'').trim()===depto);
   if(ciudad)   d=d.filter(r=>String(r[COL_REQ.ciudad]  ||'').trim()===ciudad);
-  if(tipo)     d=d.filter(r=>String(r[COL_REQ.tipo]    ||'').trim()===tipo);
+  if(tipo)     d=d.filter(r=>{ const t=String(r[COL_REQ.tipo]||'').trim(); const tN=t.charAt(0).toUpperCase()+t.slice(1).toLowerCase(); return tN===tipo; });
   if(estado)   d=d.filter(r=>getEstadoInfo(r[COL_REQ.estado]).label===estado);
   renderRequerimientos(d);
 }
