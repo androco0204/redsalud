@@ -6561,8 +6561,9 @@ function parseFechaReq(val) {
   if(!val) return null;
   const s = String(val).trim();
   if(s.includes('/')) {
-    const p = s.split('/');
-    if(p.length === 3) return new Date(+p[2], +p[1]-1, +p[0]);
+    const datePart = s.split(' ')[0]; // strip time component
+    const p = datePart.split('/');
+    if(p.length === 3) { const d=new Date(+p[2], +p[1]-1, +p[0]); if(!isNaN(d)) return d; }
   }
   if(s.includes('-')) { const d=new Date(s); if(!isNaN(d)) return d; }
   const n = parseInt(s);
@@ -7210,7 +7211,11 @@ function parseFechaPqrs(val){
   if(!val) return null;
   const s=String(val).trim();
   if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
-  if(s.includes('/')){const p=s.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]);}
+  if(s.includes('/')){
+    const datePart=s.split(' ')[0]; // strip time component
+    const p=datePart.split('/');
+    if(p.length===3){const d=new Date(+p[2],+p[1]-1,+p[0]);if(!isNaN(d))return d;}
+  }
   if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
   const n=parseFloat(s);
   if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
@@ -7262,9 +7267,9 @@ async function cargarPqrs(){
     const fechasMuestra=DATOS_PQRS.slice(0,3).map(r=>({asig:r[COL_P.fecAsig],cierre:r[COL_P.fecCierre]}));
     console.log('[PQRS] Fechas muestra:', JSON.stringify(fechasMuestra));
     if(el){el.textContent=`✓ ${DATOS_PQRS.length.toLocaleString('es-CO')} PQR cargadas`;el.style.color='var(--green)';}
-    // Badge dinámico en menú
-    const badge=document.getElementById('pqrs-nav-badge');
-    if(badge){badge.textContent=DATOS_PQRS.length.toLocaleString('es-CO');badge.style.display='';}
+    // Badge dinámico en menú — desactivado: hay dos módulos (PQRS + Tutelas), el conteo no aplica
+    // const badge=document.getElementById('pqrs-nav-badge');
+    // if(badge){badge.textContent=DATOS_PQRS.length.toLocaleString('es-CO');badge.style.display='';}
     poblarFiltrosPqrs();
     aplicarFiltrosPqrs();
   }catch(e){
@@ -7474,7 +7479,11 @@ function parseFechaTut(val){
   if(!val) return null;
   const s=String(val).trim();
   if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
-  if(s.includes('/')) {const p=s.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]);}
+  if(s.includes('/')){
+    const datePart=s.split(' ')[0]; // strip time component e.g. "1/2/2026 8:00:00" → "1/2/2026"
+    const p=datePart.split('/');
+    if(p.length===3){const d=new Date(+p[2],+p[1]-1,+p[0]);if(!isNaN(d))return d;}
+  }
   if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
   const n=parseFloat(s);if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
   return null;
