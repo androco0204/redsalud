@@ -479,7 +479,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
     <div class="nav-item" data-screen="cobertura"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 5.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Requerimientos</div>
     <div class="nav-item" data-screen="fallas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.3 1.2 4L7 9 3.5 11.3l1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Fallas</div>
-    <div class="nav-item" data-screen="pqrs"><svg viewBox="0 0 14 14" fill="none"><path d="M12 2H2a1 1 0 00-1 1v7a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.2"/></svg>PQRS y Tutelas <span class="nav-badge">38</span></div>
+    <div class="nav-item" data-screen="pqrs"><svg viewBox="0 0 14 14" fill="none"><path d="M12 2H2a1 1 0 00-1 1v7a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.2"/></svg>PQRS y Tutelas <span class="nav-badge" id="pqrs-nav-badge" style="display:none"></span></div>
     <div class="nav-sec">Auditoría</div>
     <div class="nav-item" data-screen="seguimiento"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12M5 2V1M9 2V1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="9" r="1" fill="currentColor"/><circle cx="7" cy="9" r="1" fill="currentColor"/><circle cx="10" cy="9" r="1" fill="currentColor"/></svg>Seguimiento y notif.</div>
     <div class="nav-item" data-screen="sanciones"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1L2 4v4c0 3 2.5 4.5 5 5 2.5-.5 5-2 5-5V4L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7l1.5 1.5L9 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sanciones</div>
@@ -7154,6 +7154,15 @@ function getMesLblPqrs(f){
   return f?`${M[f.getMonth()]} ${f.getFullYear()}`:'';
 }
 
+function clasificarEstadoPqrs(val){
+  const e=String(val||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(e.includes('CERRAD')) return 'cerrado';
+  if(e.includes('ABIERT')) return 'abierto';
+  if(e.includes('TRAMIT')||e.includes('TRAMITE')||e.includes('GESTION')) return 'abierto';
+  return 'otro';
+}
+
 function switchPqrsTab(tab){
   document.getElementById('subtab-pqrs').style.display    = tab==='pqrs'    ? '' : 'none';
   document.getElementById('subtab-tutelas').style.display = tab==='tutelas' ? '' : 'none';
@@ -7177,7 +7186,15 @@ async function cargarPqrs(){
       return g!==''&&g!=='N/A';
     });
     console.log('[PQRS] Total:',DATOS_PQRS.length);
+    // Log estados únicos para diagnóstico
+    const estadosUnicos=[...new Set(DATOS_PQRS.map(r=>String(r[COL_P.estado]||'').trim()))].slice(0,10);
+    console.log('[PQRS] Estados únicos en col D:', estadosUnicos);
+    const fechasMuestra=DATOS_PQRS.slice(0,3).map(r=>({asig:r[COL_P.fecAsig],cierre:r[COL_P.fecCierre]}));
+    console.log('[PQRS] Fechas muestra:', JSON.stringify(fechasMuestra));
     if(el){el.textContent=`✓ ${DATOS_PQRS.length.toLocaleString('es-CO')} PQR cargadas`;el.style.color='var(--green)';}
+    // Badge dinámico en menú
+    const badge=document.getElementById('pqrs-nav-badge');
+    if(badge){badge.textContent=DATOS_PQRS.length.toLocaleString('es-CO');badge.style.display='';}
     poblarFiltrosPqrs();
     aplicarFiltrosPqrs();
   }catch(e){
@@ -7255,13 +7272,13 @@ function renderPqrs(datos){
     return;
   }
 
-  const abiertos=datos.filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='ABIERTO').length;
-  const cerrados=datos.filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='CERRADO').length;
+  const abiertos=datos.filter(r=>clasificarEstadoPqrs(r[COL_P.estado])==='abierto').length;
+  const cerrados=datos.filter(r=>clasificarEstadoPqrs(r[COL_P.estado])==='cerrado').length;
   const pctCierre=total?Math.round(cerrados/total*100):0;
 
   // Promedio días solo cerradas
   const diasCerradas=datos
-    .filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='CERRADO')
+    .filter(r=>clasificarEstadoPqrs(r[COL_P.estado])==='cerrado')
     .map(r=>diffDias(parseFechaPqrs(r[COL_P.fecAsig]),parseFechaPqrs(r[COL_P.fecCierre])))
     .filter(d=>d!==null&&d>=0);
   const promDias=diasCerradas.length?(diasCerradas.reduce((a,b)=>a+b,0)/diasCerradas.length).toFixed(1):'—';
@@ -7280,11 +7297,11 @@ function renderPqrs(datos){
   const pg={};
   datos.forEach(r=>{
     const g=String(r[COL_P.gestor]||'Sin gestor').trim();
-    const est=String(r[COL_P.estado]||'').trim().toUpperCase();
+    const est=clasificarEstadoPqrs(r[COL_P.estado]);
     if(!pg[g])pg[g]={total:0,abiertos:0,cerrados:0};
     pg[g].total++;
-    if(est==='ABIERTO')pg[g].abiertos++;
-    else if(est==='CERRADO')pg[g].cerrados++;
+    if(est==='abierto')pg[g].abiertos++;
+    else if(est==='cerrado')pg[g].cerrados++;
   });
   const tb1=document.getElementById('pqrs-gestores-body');
   if(tb1){
@@ -7327,7 +7344,7 @@ function renderPqrs(datos){
 
   // ── Indicador 4: Oportunidad ──
   const po={};
-  datos.filter(r=>String(r[COL_P.estado]||'').trim().toUpperCase()==='CERRADO').forEach(r=>{
+  datos.filter(r=>clasificarEstadoPqrs(r[COL_P.estado])==='cerrado').forEach(r=>{
     const g=String(r[COL_P.gestor]||'Sin gestor').trim();
     const dias=diffDias(parseFechaPqrs(r[COL_P.fecAsig]),parseFechaPqrs(r[COL_P.fecCierre]));
     if(!po[g])po[g]={cerradas:0,dentroAns:0,diasArr:[]};
