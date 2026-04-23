@@ -6782,7 +6782,7 @@ function exportarTablaGestores(){
 // Columnas (0-based, fila 2 = headers, fila 3+ = datos):
 //   J=9  Regional | L=11 Ciudad | U=20 Tipificación
 //   AA=26 Gestor farmacéutico | AL=37 Días gestión | AM=38 Estado
-const COL_F = { fecha:1, regional:9, ciudad:11, tipo:20, gestor:26, dias:37, estado:38 };
+const COL_F = { fecha:0, regional:9, ciudad:11, tipo:20, gestor:26, dias:37, estado:38 };
 const HOJAS_FALLAS = ['RUTA','REGIONALES','G11ASDESAVID'];
 let _fallasChart = null;
 
@@ -6834,11 +6834,8 @@ async function cargarFallas(){
   }
 }
 
-// Regionales válidas para filtro de Fallas
-const REGIONALES_VALIDAS = new Set([
-  'REGIONAL BOGOTÁ','REGIONAL MEDELLÍN','REGIONAL CALI',
-  'REGIONAL BARRANQUILLA','REGIONAL BUCARAMANGA','REGIONAL CENTRO ORIENTE'
-]);
+// Regionales inválidas para Fallas (se excluyen del filtro)
+const REGIONALES_EXCLUIDAS_FALLAS = new Set(['NEIVA']);
 
 function poblarFiltrosFallas(){
   const meses=new Map(),regionales=new Set(),ciudades=new Set();
@@ -6847,7 +6844,7 @@ function poblarFiltrosFallas(){
     const f=parseFechaFalla(r[COL_F.fecha]);
     if(f){const k=getMesFalla(f);if(!meses.has(k))meses.set(k,getMesLblFalla(f));}
     const reg=String(r[COL_F.regional]||'').trim();
-    if(reg && (REGIONALES_VALIDAS.size===0 || REGIONALES_VALIDAS.has(reg))) regionales.add(reg);
+    if(reg && !REGIONALES_EXCLUIDAS_FALLAS.has(reg.toUpperCase())) regionales.add(reg);
     const ciu=String(r[COL_F.ciudad]||'').trim();if(ciu)ciudades.add(ciu);
   });
   const gestoresOrdenados=[...GESTORES_VALIDOS].filter(g=>g!=='ETICOS SERRANO').sort();
