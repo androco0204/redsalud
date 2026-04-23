@@ -1520,12 +1520,80 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
   <!-- ══ SUB-TAB TUTELAS ══ -->
   <div id="subtab-tutelas" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:center;height:260px;flex-direction:column;gap:12px">
-      <div style="font-size:32px">⚖️</div>
-      <div style="font-size:14px;font-weight:500;color:var(--text)">Sub-módulo Tutelas</div>
-      <div style="font-size:12px;color:var(--text2)">Pendiente de configuración · Las reglas de negocio están en definición</div>
+
+    <!-- KPIs -->
+    <div class="kpi-strip cols-5" style="margin-bottom:14px">
+      <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total tutelas</div><div class="kpi-value" style="color:var(--blue)" id="tut-kpi-total">—</div><div class="kpi-delta neu" id="tut-kpi-mes">Mes activo</div></div>
+      <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" style="color:var(--purple)" id="tut-kpi-usuarios">—</div><div class="kpi-delta neu">Pacientes distintos</div></div>
+      <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumple ANS</div><div class="kpi-value" style="color:var(--green)" id="tut-kpi-cumple">—</div><div class="kpi-delta up">Col AL = Cumple</div></div>
+      <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Efectividad</div><div class="kpi-value" id="tut-kpi-efectividad">—</div><div class="kpi-delta neu">Meta ≥80%</div></div>
+      <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Oportunidad</div><div class="kpi-value" id="tut-kpi-oportunidad">—</div><div class="kpi-delta warn">Meta ≥90% con entrega</div></div>
     </div>
-  </div>
+
+    <!-- Filtros -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select id="tut-filtro-mes" onchange="aplicarFiltrosTutelas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los meses</option></select>
+      <select id="tut-filtro-gestor" onchange="aplicarFiltrosTutelas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los gestores</option></select>
+      <select id="tut-filtro-ciudad" onchange="aplicarFiltrosTutelas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todas las ciudades</option></select>
+      <button class="btn" onclick="limpiarFiltrosTutelas()" style="font-size:11.5px">✕ Limpiar</button>
+      <button class="btn" onclick="cargarTutelas()" style="font-size:11.5px">↺ Recargar</button>
+      <span id="tut-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
+    </div>
+
+    <!-- Indicadores 1+2: Volumen por gestor + Usuarios únicos -->
+    <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">Volumen por gestor · Usuarios únicos</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Casos por gestor</div><div class="card-sub">Total · Cumple ANS · No cumple</div></div></div>
+        <div class="card-body" style="padding:0 16px">
+          <div class="scroll" style="max-height:300px">
+            <table class="table" id="tut-tabla-gestores">
+              <thead><tr><th>Gestor</th><th>Total</th><th>Cumple</th><th>No cumple</th><th>% Cumple</th></tr></thead>
+              <tbody id="tut-gestores-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Usuarios únicos por gestor</div><div class="card-sub">Pacientes distintos · Documento único</div></div></div>
+        <div class="card-body" style="padding:0 16px">
+          <div class="scroll" style="max-height:300px">
+            <table class="table" id="tut-tabla-usuarios">
+              <thead><tr><th>Gestor</th><th>Total casos</th><th>Usuarios únicos</th><th>Ratio</th></tr></thead>
+              <tbody id="tut-usuarios-body"><tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicadores 3+4+5: Top 5 medicamentos + Efectividad + Oportunidad -->
+    <div style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);font-weight:600;padding:0 2px">Top 5 medicamentos · Efectividad · Oportunidad</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Top 5 medicamentos en tutelas</div><div class="card-sub">Mayor frecuencia · Priorización</div></div></div>
+        <div class="card-body" style="padding:10px 16px;overflow-y:auto;max-height:300px" id="tut-top5-body">
+          <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Efectividad y oportunidad por gestor</div><div class="card-sub">Efectividad meta ≥80% · Oportunidad meta ≥90%</div></div></div>
+        <div class="card-body" style="padding:0 16px">
+          <div class="scroll" style="max-height:300px">
+            <table class="table" id="tut-tabla-efop">
+              <thead><tr><th>Gestor</th><th>Efectividad</th><th>Oportunidad</th></tr></thead>
+              <tbody id="tut-efop-body"><tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text2)">⏳ Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /subtab-tutelas -->
 
 </div>
 
@@ -6435,7 +6503,8 @@ function filtrarTablaPrestadores(tipo, tabEl) {
 // ─── FALLAS Y REQUERIMIENTOS ──────────────────────────────────────────
 const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec';
 const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
-const PQRS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEYRoKvTNKFsuXk_CUsIRb5UHDmgycJeiGLgA4LoT9G0fcRIphBvEfdA/exec';
+const PQRS_SCRIPT    = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEYRoKvTNKFsuXk_CUsIRb5UHDmgycJeiGLgA4LoT9G0fcRIphBvEfdA/exec';
+const TUTELAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzVt-Q5bggChVwxeM_Wew_QsLkweNZZiYh5aQxP16lxVeCAR0BiLMouZbJbzarSwJ0Kfg/exec';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -7170,6 +7239,7 @@ function switchPqrsTab(tab){
   const bT=document.getElementById('subtab-tutelas-btn');
   if(bP){bP.style.borderBottomColor=tab==='pqrs'?'var(--blue)':'transparent';bP.style.color=tab==='pqrs'?'var(--blue)':'var(--text2)';}
   if(bT){bT.style.borderBottomColor=tab==='tutelas'?'var(--blue)':'transparent';bT.style.color=tab==='tutelas'?'var(--blue)':'var(--text2)';}
+  if(tab==='tutelas' && DATOS_TUTELAS.length===0) cargarTutelas();
 }
 
 async function cargarPqrs(){
@@ -7391,6 +7461,134 @@ function renderPqrs(datos){
         </div>
       </div>`).join('');
   }
+}
+
+// ─── TUTELAS ──────────────────────────────────────────────────────────────────
+// Columnas (0-based, fila 0 = headers, fila 1+ = datos):
+//   A=0 Marca temporal | D=3 Proveedor/Gestor | F=5 Documento usuario
+//   J=9 Descripción medicamento | N=13 Municipio | Z=25 Fecha entrega | AL=37 Cumple ANS
+const COL_T = { fecha:0, gestor:3, docUsuario:5, medicamento:9, ciudad:13, fecEntrega:25, cumpleAns:37 };
+let DATOS_TUTELAS = [];
+
+function parseFechaTut(val){
+  if(!val) return null;
+  const s=String(val).trim();
+  if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
+  if(s.includes('/')) {const p=s.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]);}
+  if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
+  const n=parseFloat(s);if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
+  return null;
+}
+function getMesTut(f){return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''}
+function getMesLblTut(f){const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return f?`${M[f.getMonth()]} ${f.getFullYear()}`:''}
+function esCumple(val){return String(val||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes('CUMPLE');}
+function semTut(pct,verde,amarillo){if(pct>=verde)return{color:'var(--green)',bg:'var(--gdim)'};if(pct>=amarillo)return{color:'var(--amber)',bg:'var(--adim)'};return{color:'var(--red)',bg:'var(--rdim)'};}
+
+async function cargarTutelas(){
+  const el=document.getElementById('tut-estado-carga');
+  if(el){el.textContent='⏳ Cargando...';el.style.color='var(--blue)';}
+  try{
+    const resp=await fetch(TUTELAS_SCRIPT+'?hoja=Consolidado Tutelas 2026');
+    if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
+    const data=await resp.json();
+    if(!Array.isArray(data)||data.length<2)throw new Error('Sin datos');
+    DATOS_TUTELAS=data.slice(1).filter(r=>{const g=String(r[COL_T.gestor]||'').trim();return g!==''&&g!=='N/A';});
+    console.log('[TUTELAS] Total:',DATOS_TUTELAS.length);
+    console.log('[TUTELAS] Muestra col AL:',[...new Set(DATOS_TUTELAS.slice(0,20).map(r=>String(r[COL_T.cumpleAns]||'').trim()))]);
+    if(el){el.textContent=`✓ ${DATOS_TUTELAS.length.toLocaleString('es-CO')} tutelas cargadas`;el.style.color='var(--green)';}
+    poblarFiltrosTutelas();aplicarFiltrosTutelas();
+  }catch(e){if(el){el.textContent=`⚠ Error: ${e.message}`;el.style.color='var(--red)';}console.error('[TUTELAS]',e);}
+}
+
+function poblarFiltrosTutelas(){
+  const meses=new Map(),gestores=new Set(),ciudades=new Set();
+  DATOS_TUTELAS.forEach(r=>{
+    const f=parseFechaTut(r[COL_T.fecha]);if(f){const k=getMesTut(f);if(!meses.has(k))meses.set(k,getMesLblTut(f));}
+    const g=String(r[COL_T.gestor]||'').trim();if(g)gestores.add(g);
+    const c=String(r[COL_T.ciudad]||'').trim();if(c)ciudades.add(c);
+  });
+  const sortM=[...meses.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  const selM=document.getElementById('tut-filtro-mes');
+  if(selM)selM.innerHTML='<option value="">Todos los meses</option>'+sortM.map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  const fill=(id,arr,lbl)=>{const el=document.getElementById(id);if(el)el.innerHTML=`<option value="">${lbl}</option>`+arr.sort().map(v=>`<option value="${v}">${v}</option>`).join('');};
+  fill('tut-filtro-gestor',[...gestores],'Todos los gestores');
+  fill('tut-filtro-ciudad',[...ciudades],'Todas las ciudades');
+}
+
+function aplicarFiltrosTutelas(){
+  const mes=document.getElementById('tut-filtro-mes')?.value||'';
+  const gestor=document.getElementById('tut-filtro-gestor')?.value||'';
+  const ciudad=document.getElementById('tut-filtro-ciudad')?.value||'';
+  let d=DATOS_TUTELAS;
+  if(mes)d=d.filter(r=>{const f=parseFechaTut(r[COL_T.fecha]);return f&&getMesTut(f)===mes;});
+  if(gestor)d=d.filter(r=>String(r[COL_T.gestor]||'').trim()===gestor);
+  if(ciudad)d=d.filter(r=>String(r[COL_T.ciudad]||'').trim()===ciudad);
+  renderTutelas(d);
+}
+
+function limpiarFiltrosTutelas(){
+  ['tut-filtro-mes','tut-filtro-gestor','tut-filtro-ciudad'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  aplicarFiltrosTutelas();
+}
+
+function renderTutelas(datos){
+  const fmtN=n=>n.toLocaleString('es-CO');
+  const fmtP=(n,t)=>t>0?(n/t*100).toFixed(1)+'%':'0%';
+  const total=datos.length;
+  if(!total){
+    ['tut-gestores-body','tut-usuarios-body','tut-efop-body'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">Sin datos</td></tr>';});
+    const t5=document.getElementById('tut-top5-body');if(t5)t5.innerHTML='<div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">Sin datos</div>';
+    ['tut-kpi-total','tut-kpi-usuarios','tut-kpi-cumple','tut-kpi-efectividad','tut-kpi-oportunidad'].forEach(id=>actualizarKPI(id,'0'));
+    return;
+  }
+  const cumpleTotal=datos.filter(r=>esCumple(r[COL_T.cumpleAns])).length;
+  const usuariosUnicos=new Set(datos.map(r=>String(r[COL_T.docUsuario]||'').trim()).filter(Boolean)).size;
+  const efec=total?Math.round(cumpleTotal/total*100):0;
+  const conEntrega=datos.filter(r=>parseFechaTut(r[COL_T.fecEntrega])!==null);
+  const cumpleConEntrega=conEntrega.filter(r=>esCumple(r[COL_T.cumpleAns])).length;
+  const opor=conEntrega.length?Math.round(cumpleConEntrega/conEntrega.length*100):0;
+  const semEf=semTut(efec,80,65);const semOp=semTut(opor,90,75);
+  actualizarKPI('tut-kpi-total',fmtN(total));actualizarKPI('tut-kpi-usuarios',fmtN(usuariosUnicos));
+  actualizarKPI('tut-kpi-cumple',fmtN(cumpleTotal));actualizarKPI('tut-kpi-efectividad',efec+'%');
+  actualizarKPI('tut-kpi-oportunidad',conEntrega.length?opor+'%':'—');
+  const eEl=document.getElementById('tut-kpi-efectividad');if(eEl)eEl.style.color=semEf.color;
+  const oEl=document.getElementById('tut-kpi-oportunidad');if(oEl&&conEntrega.length)oEl.style.color=semOp.color;
+
+  const pg={};
+  datos.forEach(r=>{
+    const g=String(r[COL_T.gestor]||'Sin gestor').trim();
+    if(!pg[g])pg[g]={total:0,cumple:0,noCumple:0,docs:new Set()};
+    pg[g].total++;if(esCumple(r[COL_T.cumpleAns]))pg[g].cumple++;else pg[g].noCumple++;
+    const doc=String(r[COL_T.docUsuario]||'').trim();if(doc)pg[g].docs.add(doc);
+  });
+
+  const tb1=document.getElementById('tut-gestores-body');
+  if(tb1){tb1.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
+    const pct=v.total?Math.round(v.cumple/v.total*100):0;const s=semTut(pct,80,65);
+    return `<tr><td style="font-size:12px;font-weight:500">${g}</td><td style="font-family:'DM Mono',monospace;font-weight:600">${fmtN(v.total)}</td><td style="color:var(--green);font-family:'DM Mono',monospace">${fmtN(v.cumple)}</td><td style="color:var(--red);font-family:'DM Mono',monospace">${fmtN(v.noCumple)}</td><td><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${s.bg};color:${s.color}">${pct}%</span></td></tr>`;
+  }).join('');}
+
+  const tb2=document.getElementById('tut-usuarios-body');
+  if(tb2){tb2.innerHTML=Object.entries(pg).sort((a,b)=>b[1].docs.size-a[1].docs.size).map(([g,v])=>
+    `<tr><td style="font-size:12px;font-weight:500">${g}</td><td style="font-family:'DM Mono',monospace">${fmtN(v.total)}</td><td style="font-family:'DM Mono',monospace;font-weight:600;color:var(--purple)">${fmtN(v.docs.size)}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${v.docs.size?(v.total/v.docs.size).toFixed(1):'—'}x</td></tr>`
+  ).join('');}
+
+  const mt={};datos.forEach(r=>{const m=String(r[COL_T.medicamento]||'').trim();if(m)mt[m]=(mt[m]||0)+1;});
+  const top5=Object.entries(mt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const t5El=document.getElementById('tut-top5-body');
+  if(t5El){const mx=top5[0]?.[1]||1;const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)'];
+    t5El.innerHTML=top5.map(([m,n],i)=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${m.substring(0,52)}</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:${COLS[i]};flex-shrink:0">${fmtN(n)} · ${fmtP(n,total)}</span></div><div style="height:8px;background:var(--bg4);border-radius:4px"><div style="height:100%;width:${Math.round(n/mx*100)}%;background:${COLS[i]};border-radius:4px;transition:width .4s"></div></div></div>`).join('');}
+
+  const tb3=document.getElementById('tut-efop-body');
+  if(tb3){tb3.innerHTML=Object.entries(pg).sort((a,b)=>b[1].total-a[1].total).map(([g,v])=>{
+    const ef=v.total?Math.round(v.cumple/v.total*100):0;const sEf=semTut(ef,80,65);
+    const filasG=datos.filter(r=>String(r[COL_T.gestor]||'').trim()===g);
+    const conEnt=filasG.filter(r=>parseFechaTut(r[COL_T.fecEntrega])!==null);
+    const cumEnt=conEnt.filter(r=>esCumple(r[COL_T.cumpleAns])).length;
+    const op=conEnt.length?Math.round(cumEnt/conEnt.length*100):null;
+    const sOp=op!==null?semTut(op,90,75):null;
+    return `<tr><td style="font-size:12px;font-weight:500">${g}</td><td><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${sEf.bg};color:${sEf.color}">${ef}%</span></td><td>${sOp?`<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:${sOp.bg};color:${sOp.color}">${op}%</span>`:'<span style="font-size:11px;color:var(--text3)">Sin entrega</span>'}</td></tr>`;
+  }).join('');}
 }
 
 // Columnas BASE GESTIÓN REQUERIMIENTOS
