@@ -6560,14 +6560,10 @@ function semaforo(pct, umbrales) {
 function parseFechaReq(val) {
   if(!val) return null;
   const s = String(val).trim();
-  const MESES_R={'enero':0,'febrero':1,'marzo':2,'abril':3,'mayo':4,'junio':5,'julio':6,'agosto':7,'septiembre':8,'octubre':9,'noviembre':10,'diciembre':11};
-  const mL=s.toLowerCase().match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
-  if(mL&&MESES_R[mL[2]]!==undefined)return new Date(+mL[3],MESES_R[mL[2]],+mL[1]);
-  if(s.includes('/')) {
-    const datePart = s.split(' ')[0];
-    const p = datePart.split('/');
-    if(p.length === 3) { const d=new Date(+p[2], +p[1]-1, +p[0]); if(!isNaN(d)) return d; }
-  }
+  const _MS={'enero':0,'febrero':1,'marzo':2,'abril':3,'mayo':4,'junio':5,'julio':6,'agosto':7,'septiembre':8,'octubre':9,'noviembre':10,'diciembre':11};
+  const _mL=s.toLowerCase().match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+  if(_mL&&_MS[_mL[2]]!==undefined)return new Date(+_mL[3],_MS[_mL[2]],+_mL[1]);
+    if(s.includes('/')){const _dp=s.split(' ')[0];const _p=_dp.split('/');if(_p.length===3){const _d=new Date(+_p[2],+_p[1]-1,+_p[0]);if(!isNaN(_d))return _d;}}
   if(s.includes('-')) { const d=new Date(s); if(!isNaN(d)) return d; }
   const n = parseInt(s);
   if(!isNaN(n) && n > 40000) return new Date((n-25569)*86400*1000);
@@ -7214,10 +7210,10 @@ function parseFechaPqrs(val){
   if(!val) return null;
   const s=String(val).trim();
   if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
-  const MESES_P={'enero':0,'febrero':1,'marzo':2,'abril':3,'mayo':4,'junio':5,'julio':6,'agosto':7,'septiembre':8,'octubre':9,'noviembre':10,'diciembre':11};
-  const mL=s.toLowerCase().match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
-  if(mL&&MESES_P[mL[2]]!==undefined)return new Date(+mL[3],MESES_P[mL[2]],+mL[1]);
-  if(s.includes('/')){const dp=s.split(' ')[0];const p=dp.split('/');if(p.length===3){const d=new Date(+p[2],+p[1]-1,+p[0]);if(!isNaN(d))return d;}}
+  const _MS={'enero':0,'febrero':1,'marzo':2,'abril':3,'mayo':4,'junio':5,'julio':6,'agosto':7,'septiembre':8,'octubre':9,'noviembre':10,'diciembre':11};
+  const _mL=s.toLowerCase().match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+  if(_mL&&_MS[_mL[2]]!==undefined)return new Date(+_mL[3],_MS[_mL[2]],+_mL[1]);
+    if(s.includes('/')){const _dp=s.split(' ')[0];const _p=_dp.split('/');if(_p.length===3){const _d=new Date(+_p[2],+_p[1]-1,+_p[0]);if(!isNaN(_d))return _d;}}
   if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
   const n=parseFloat(s);
   if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
@@ -7269,7 +7265,7 @@ async function cargarPqrs(){
     const fechasMuestra=DATOS_PQRS.slice(0,3).map(r=>({asig:r[COL_P.fecAsig],cierre:r[COL_P.fecCierre]}));
     console.log('[PQRS] Fechas muestra:', JSON.stringify(fechasMuestra));
     if(el){el.textContent=`✓ ${DATOS_PQRS.length.toLocaleString('es-CO')} PQR cargadas`;el.style.color='var(--green)';}
-    // Badge desactivado: módulo tiene PQRS + Tutelas, conteo parcial no aplica
+    // Badge desactivado (dos módulos internos)
     poblarFiltrosPqrs();
     aplicarFiltrosPqrs();
   }catch(e){
@@ -7469,25 +7465,31 @@ function renderPqrs(datos){
 }
 
 // ─── TUTELAS ──────────────────────────────────────────────────────────────────
+// Columnas confirmadas desde el sheet real:
+//   A=0 Marca temporal | D=3 Gestor | Z=25 Fecha entrega | AL=37 Cumple ANS
+// docUsuario: pendiente confirmar (no visible en captura)
 let COL_T = { fecha:0, gestor:3, docUsuario:5, medicamento:9, ciudad:13, fecEntrega:25, cumpleAns:37 };
 let DATOS_TUTELAS = [];
+let _TUT_HDRS = [];
 
 function detectarColumnasTut(headers){
-  const norm=h=>String(h||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const find=(...kws)=>{for(const kw of kws){const k=norm(kw);const i=headers.findIndex(h=>norm(h).includes(k));if(i>=0)return i;}return -1;};
+  _TUT_HDRS = headers;
+  const n=h=>String(h||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const find=(...kws)=>{for(const kw of kws){const k=n(kw);const i=headers.findIndex(h=>n(h).includes(k));if(i>=0)return i;}return -1;};
   const c={
     fecha:       find('MARCA TEMPORAL','TIMESTAMP','FECHA REGISTRO','FECHA INGRESO'),
     gestor:      find('GESTOR','PROVEEDOR','OPERADOR LOGISTICO','OPERADOR'),
-    docUsuario:  find('NUMERO DE IDENTIFICACION','DOCUMENTO','CEDULA','IDENTIFICACION','CC PACIENTE'),
-    medicamento: find('MEDICAMENTO','DESCRIPCION','PRINCIPIO ACTIVO','NOMBRE MEDICAMENTO'),
+    docUsuario:  find('NUMERO DE IDENTIFICACION','NUMERO IDENTIFICACION','NRO IDENTIFICACION','DOCUMENTO PACIENTE','CEDULA','IDENTIFICACION DEL'),
+    medicamento: find('MEDICAMENTO','DESCRIPCION','PRINCIPIO ACTIVO'),
     ciudad:      find('CIUDAD','MUNICIPIO'),
-    fecEntrega:  find('FECHA ENTREGA','FEC ENTREGA','FECHA DE ENTREGA','FECHA CUMPLIMIENTO','ENTREGA DEL MEDICAMENTO'),
-    cumpleAns:   find('CUMPLE ANS','ANS','CUMPLE','RESULTADO','OPORTUNO','CUMPLIMIENTO'),
+    fecEntrega:  find('FECHA ENTREGA DEL MEDICAMENTO','FECHA ENTREGA','ENTREGA DEL MEDICAMENTO','FECHA DE ENTREGA'),
+    cumpleAns:   find('CUMPLE ANS','CUMPLE A','CUMPLE','ANS'),
   };
+  // Fallback a índices confirmados del sheet real
   const def={fecha:0,gestor:3,docUsuario:5,medicamento:9,ciudad:13,fecEntrega:25,cumpleAns:37};
-  Object.keys(def).forEach(k=>{if(c[k]<0)c[k]=def[k];});
-  console.log('[TUTELAS] Headers:',headers);
-  console.log('[TUTELAS] Columnas detectadas:',c);
+  Object.keys(def).forEach(k=>{if(!(k in c)||c[k]<0)c[k]=def[k];});
+  console.log('[TUTELAS] Headers completos:',headers);
+  console.log('[TUTELAS] Columnas resueltas:',c);
   return c;
 }
 
@@ -7495,19 +7497,23 @@ function parseFechaTut(val){
   if(!val) return null;
   const s=String(val).trim();
   if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d;}
-  // Fecha larga en español: "lunes, 16 de febrero de 2026"
-  const MESES_T={'enero':0,'febrero':1,'marzo':2,'abril':3,'mayo':4,'junio':5,'julio':6,'agosto':7,'septiembre':8,'octubre':9,'noviembre':10,'diciembre':11};
-  const mLarga=s.toLowerCase().match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
-  if(mLarga&&MESES_T[mLarga[2]]!==undefined)return new Date(+mLarga[3],MESES_T[mLarga[2]],+mLarga[1]);
-  // D/M/YYYY H:MM:SS (Google Forms Colombia)
-  if(s.includes('/')){const dp=s.split(' ')[0];const p=dp.split('/');if(p.length===3){const d=new Date(+p[2],+p[1]-1,+p[0]);if(!isNaN(d))return d;}}
+  const _MS={'enero':0,'febrero':1,'marzo':2,'abril':3,'mayo':4,'junio':5,'julio':6,'agosto':7,'septiembre':8,'octubre':9,'noviembre':10,'diciembre':11};
+  const _mL=s.toLowerCase().match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+  if(_mL&&_MS[_mL[2]]!==undefined)return new Date(+_mL[3],_MS[_mL[2]],+_mL[1]);
+    if(s.includes('/')){const _dp=s.split(' ')[0];const _p=_dp.split('/');if(_p.length===3){const _d=new Date(+_p[2],+_p[1]-1,+_p[0]);if(!isNaN(_d))return _d;}}
   if(s.includes('-')){const d=new Date(s);if(!isNaN(d))return d;}
   const n=parseFloat(s);if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
   return null;
 }
 function getMesTut(f){return f?`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}`:''}
 function getMesLblTut(f){const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return f?`${M[f.getMonth()]} ${f.getFullYear()}`:''}
-function esCumple(val){return String(val||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes('CUMPLE');}
+function esCumple(val){
+  // ⚠ "No Cumple".includes("Cumple") = true → hay que verificar "NO " primero
+  const v=String(val||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(!v) return false;
+  if(v.startsWith('NO ')) return false;   // "No Cumple" → false
+  return v.includes('CUMPLE');             // "Cumple" → true
+}
 function semTut(pct,verde,amarillo){if(pct>=verde)return{color:'var(--green)',bg:'var(--gdim)'};if(pct>=amarillo)return{color:'var(--amber)',bg:'var(--adim)'};return{color:'var(--red)',bg:'var(--rdim)'};}
 
 async function cargarTutelas(){
@@ -7520,10 +7526,9 @@ async function cargarTutelas(){
     if(!Array.isArray(data)||data.length<2)throw new Error('Sin datos');
     COL_T=detectarColumnasTut(data[0]);
     DATOS_TUTELAS=data.slice(1).filter(r=>{const g=String(r[COL_T.gestor]||'').trim();return g!==''&&g!=='N/A';});
-    const mCumple=[...new Set(DATOS_TUTELAS.slice(0,20).map(r=>String(r[COL_T.cumpleAns]||'').trim()))];
-    const mEntrega=[...new Set(DATOS_TUTELAS.slice(0,5).map(r=>String(r[COL_T.fecEntrega]||'').trim()))];
-    console.log('[TUTELAS] Total:',DATOS_TUTELAS.length,'| cumpleAns idx:',COL_T.cumpleAns,'valores:',mCumple,'| fecEntrega idx:',COL_T.fecEntrega,'muestra:',mEntrega);
-    if(el){el.textContent=`✓ ${DATOS_TUTELAS.length.toLocaleString('es-CO')} tutelas · idx cumple:${COL_T.cumpleAns} · idx entrega:${COL_T.fecEntrega}`;el.style.color='var(--green)';}
+    const _mc=[...new Set(DATOS_TUTELAS.slice(0,30).map(r=>String(r[COL_T.cumpleAns]||'').trim()))];
+    console.log('[TUTELAS] Total:',DATOS_TUTELAS.length,'| cumple idx:',COL_T.cumpleAns,'vals:',_mc,'| entrega idx:',COL_T.fecEntrega,'| doc idx:',COL_T.docUsuario);
+    if(el){el.textContent=`✓ ${DATOS_TUTELAS.length.toLocaleString('es-CO')} tutelas · cumple AL[${COL_T.cumpleAns}] · entrega Z[${COL_T.fecEntrega}]`;el.style.color='var(--green)';}
     poblarFiltrosTutelas();aplicarFiltrosTutelas();
   }catch(e){if(el){el.textContent=`⚠ Error: ${e.message}`;el.style.color='var(--red)';}console.error('[TUTELAS]',e);}
 }
