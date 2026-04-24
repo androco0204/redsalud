@@ -7480,13 +7480,13 @@ function detectarColumnasTut(headers){
     fecha:       find('MARCA TEMPORAL','TIMESTAMP','FECHA REGISTRO','FECHA INGRESO'),
     gestor:      find('GESTOR','PROVEEDOR','OPERADOR LOGISTICO','OPERADOR'),
     docUsuario:  find('NUMERO DE IDENTIFICACION','NUMERO IDENTIFICACION','NRO IDENTIFICACION','DOCUMENTO PACIENTE','CEDULA','IDENTIFICACION DEL'),
-    medicamento: find('MEDICAMENTO','DESCRIPCION','PRINCIPIO ACTIVO'),
+    medicamento: find('DESCRIPCION DEL MEDICAMENTO','NOMBRE DEL MEDICAMENTO','DESCRIPCION MEDICAMENTO','PRINCIPIO ACTIVO'),
     ciudad:      find('CIUDAD','MUNICIPIO'),
     fecEntrega:  find('FECHA ENTREGA DEL MEDICAMENTO','FECHA ENTREGA','ENTREGA DEL MEDICAMENTO','FECHA DE ENTREGA'),
     cumpleAns:   find('CUMPLE ANS','CUMPLE A','CUMPLE','ANS'),
   };
   // Fallback a índices confirmados del sheet real
-  const def={fecha:0,gestor:3,docUsuario:5,medicamento:9,ciudad:13,fecEntrega:25,cumpleAns:37};
+  const def={fecha:0,gestor:3,docUsuario:5,medicamento:9,ciudad:13,fecEntrega:25,cumpleAns:37}; // medicamento=9 es J=Descripción
   Object.keys(def).forEach(k=>{if(!(k in c)||c[k]<0)c[k]=def[k];});
   console.log('[TUTELAS] Headers completos:',headers);
   console.log('[TUTELAS] Columnas resueltas:',c);
