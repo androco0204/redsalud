@@ -7480,7 +7480,7 @@ function detectarColumnasTut(headers){
     fecha:       find('MARCA TEMPORAL','TIMESTAMP','FECHA REGISTRO','FECHA INGRESO'),
     gestor:      find('GESTOR','PROVEEDOR','OPERADOR LOGISTICO','OPERADOR'),
     docUsuario:  find('NUMERO DE IDENTIFICACION','NUMERO IDENTIFICACION','NRO IDENTIFICACION','DOCUMENTO PACIENTE','CEDULA','IDENTIFICACION DEL'),
-    medicamento: find('DESCRIPCION DEL MEDICAMENTO','NOMBRE DEL MEDICAMENTO','DESCRIPCION MEDICAMENTO','PRINCIPIO ACTIVO'),
+    medicamento: 9, // Col J confirmada: 'Descripción medicamento'
     ciudad:      find('CIUDAD','MUNICIPIO'),
     fecEntrega:  find('FECHA ENTREGA DEL MEDICAMENTO','FECHA ENTREGA','ENTREGA DEL MEDICAMENTO','FECHA DE ENTREGA'),
     cumpleAns:   find('CUMPLE ANS','CUMPLE A','CUMPLE','ANS'),
@@ -7528,7 +7528,7 @@ async function cargarTutelas(){
     DATOS_TUTELAS=data.slice(1).filter(r=>{const g=String(r[COL_T.gestor]||'').trim();return g!==''&&g!=='N/A';});
     const _mc=[...new Set(DATOS_TUTELAS.slice(0,30).map(r=>String(r[COL_T.cumpleAns]||'').trim()))];
     console.log('[TUTELAS] Total:',DATOS_TUTELAS.length,'| cumple idx:',COL_T.cumpleAns,'vals:',_mc,'| entrega idx:',COL_T.fecEntrega,'| doc idx:',COL_T.docUsuario);
-    if(el){el.textContent=`✓ ${DATOS_TUTELAS.length.toLocaleString('es-CO')} tutelas · cumple AL[${COL_T.cumpleAns}] · entrega Z[${COL_T.fecEntrega}]`;el.style.color='var(--green)';}
+    if(el){el.textContent=`✓ ${DATOS_TUTELAS.length.toLocaleString('es-CO')} tutelas cargadas`;el.style.color='var(--green)';}
     poblarFiltrosTutelas();aplicarFiltrosTutelas();
   }catch(e){if(el){el.textContent=`⚠ Error: ${e.message}`;el.style.color='var(--red)';}console.error('[TUTELAS]',e);}
 }
