@@ -5138,12 +5138,8 @@ function exportarBateriaExcel(){
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyB9S8UO6BQFOI7Khtf0hnAxG68puxyNpcbpDMwcG37cQlQ9IS_x2W12BFtguZgjm-8/exec';
 
 const DRIVE_CONFIG = {
-  prestadores: {
-    id: '1opr38TJ9Qm-QnjnOSZEXCrhZiEVGF0JAXwJzgI5nm74',
-    hoja: 'EPS Sanitas',
-    nombre: 'Base Prestadores Nacionales',
-    icono: '🏥'
-  },
+  // prestadores: DESCONECTADO — nueva base en preparación
+  prestadores: null,
   medicamentos_nit: {
     id: '1FrEUSxBdgmdZQUPHZxXgF4rpj6tYuZxLz5ZsA3_yxA4',
     hoja: 'NIT Gestores Farmacéuticos',
@@ -5215,8 +5211,10 @@ async function cargarDesdeDrive() {
   actualizarEstadoFuente('reclamaciones', '⏳ Cargando...','var(--bdim)','var(--blue)');
 
   // ── Cargar las 4 fuentes EN PARALELO ─────────────────────────────────
-  const [resPrest, resNIT, resDANE, resRec] = await Promise.allSettled([
-    fetchViaAppsScript(DRIVE_CONFIG.prestadores.id,       DRIVE_CONFIG.prestadores.hoja),
+  // Prestadores desconectados — nueva base en preparación
+  actualizarEstadoFuente('prestadores','⏳ Nueva base en preparación...','var(--adim)','var(--amber)');
+  const resPrest = { status: 'skipped' };
+  const [resNIT, resDANE, resRec] = await Promise.allSettled([
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_nit.id,  DRIVE_CONFIG.medicamentos_nit.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_dane.id, DRIVE_CONFIG.medicamentos_dane.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
@@ -5224,20 +5222,9 @@ async function cargarDesdeDrive() {
 
   const resultados = [];
 
-  // ── Procesar Prestadores ─────────────────────────────────────────────
-  if(resPrest.status === 'fulfilled') {
-    try {
-      const prest = parsearArrayPrestadores(resPrest.value);
-      DATOS_CARGADOS.prestadores = prest;
-      actualizarEstadoFuente('prestadores',`✓ ${prest.length.toLocaleString('es-CO')} prestadores`,'var(--gdim)','var(--green)');
-      resultados.push(`${prest.length.toLocaleString('es-CO')} prestadores`);
-    } catch(e) {
-      actualizarEstadoFuente('prestadores',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
-      console.error('Prestadores parser:', e);
-    }
-  } else {
-    actualizarEstadoFuente('prestadores',`⚠ Error: ${resPrest.reason?.message||'Sin respuesta'}`,'var(--adim)','var(--amber)');
-  }
+  // ── Prestadores: desconectados — nueva base en preparación ──────────
+  DATOS_CARGADOS.prestadores = [];
+  actualizarEstadoFuente('prestadores','⚠ Nueva base en preparación','var(--adim)','var(--amber)');
 
   // ── Procesar Gestores ────────────────────────────────────────────────
   if(resNIT.status === 'fulfilled' && resDANE.status === 'fulfilled') {
