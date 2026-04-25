@@ -474,7 +474,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="nav-sec">Análisis</div>
     <div class="nav-item" data-screen="ranking"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1 3h3l-2.5 2 1 3L7 7.5 4.5 9l1-3L3 4h3z" stroke="currentColor" stroke-width="1.2"/></svg>Ranking y cumplimiento</div>
     <div class="nav-item" data-screen="financiero"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="9" r="1" fill="currentColor"/></svg>Módulo financiero</div>
-    <div class="nav-item" data-screen="contratacion"><svg viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 5h4M5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Modelos de contratación</div>
+    <!-- Modelos de contratación: integrado en Red de prestadores -->
     <div class="nav-item" data-screen="indicadores"><svg viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Indicadores</div>
     <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
     <div class="nav-item" data-screen="cobertura"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 5.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Requerimientos</div>
@@ -5391,20 +5391,33 @@ function parsearArrayPrestadores(data) {
       ciudad:           get(row, cols.ciudad),
       departamento:     get(row, cols.departamento),
       regional:         get(row, cols.regional),
+      modelo:           get(row, cols.modelo),          // FORMA CONTRATACION
+      tipo:             get(row, cols.tipo),             // Tipo Prestador
+      habilitacion:     get(row, cols.habilitacion),    // COD HABILITACION
+      estado:           get(row, cols.estado),           // ESTADO DE CONTRATO
+      no_contrato:      get(row, cols.no_contrato),
+      fecha_inicio:     get(row, cols.fecha_inicio),
+      objeto:           get(row, cols.objeto),
+      regimen:          get(row, cols.regimen),
+      tipo_ips:         get(row, cols.tipo_ips),
+      agrupador:        get(row, cols.agrupador),
+      facturacion:      getNum(row, cols.facturacion),  // Facturacion_Ajustado
+      promedio:         getNum(row, cols.promedio),
+      frec_seguimiento: get(row, cols.frec_seguimiento),
+      frec_informe:     get(row, cols.frec_informe),
+      supervisor:       get(row, cols.supervisor),
+      observacion:      get(row, cols.observacion),
+      recuento_docs:    getNum(row, cols.recuento_docs),
+      docs_2026:        getNum(row, cols.docs_2026),
+      docs_2025:        getNum(row, cols.docs_2025),
+      // aliases para compatibilidad con KPIs existentes
+      tiene_contrato:   get(row, cols.estado).toUpperCase().includes('VIGENTE') ? 'Si' : 'No',
+      fact_2025:        getNum(row, cols.facturacion),
+      fact_mar26:       0,
+      estado_tarifas:   '',
       especialidad:     '',
-      modelo:           get(row, cols.modelo),
-      habilitacion:     get(row, cols.habilitacion),
       nivel:            '',
-      tipo:             get(row, cols.tipo),
-      tiene_contrato:  get(row, cols.tiene_contrato),
-      no_contrato:     get(row, cols.no_contrato),
-      estado_tarifas:  get(row, cols.estado_tarifas),
-      responsable:     get(row, cols.responsable),
-      red_seguimiento: get(row, cols.red_seguimiento),
-      fact_2024:       getNum(row, cols.fact_2024),
-      fact_2025:       getNum(row, cols.fact_2025),
-      fact_2026:       getNum(row, cols.fact_2026),
-      fact_mar26:      getNum(row, fact_mar26_col),
+      responsable:      get(row, cols.supervisor),
     };
   }).filter(Boolean);
 
@@ -5992,9 +6005,9 @@ function aplicarPrestadores() {
   actualizarKPI('kpi-regionales', regionales.length);
   // KPIs con IDs directos en el HTML
   actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
-  actualizarKPI('kpi-resumen-prestadores-delta', `${pctHab}% habilitados · ${regionales.length} regionales`);
+  actualizarKPI('kpi-resumen-prestadores-delta', `${pctHab}% vigentes · ${regionales.length} regionales`);
   actualizarKPI('kpi-resumen-cobertura', pctContrato+'%');
-  actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(conContrato)} con contrato activo`);
+  actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(conContrato)} contratos vigentes`);
   // Módulo financiero
   actualizarKPI('kpi-fin-fact2025', fmtM(fact2025));
   actualizarKPI('kpi-modelos-count', modelos.length);
@@ -6261,21 +6274,23 @@ function aplicarFiltrosGlobales() {
   const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
   const fmtN = v=>v.toLocaleString('es-CO');
 
-  const habilitados  = filtrados.filter(p=>p.habilitacion==='Si').length;
-  const conContrato  = filtrados.filter(p=>p.tiene_contrato==='Si').length;
+  // Campos reales de la nueva base: estado (ESTADO DE CONTRATO), facturacion (Facturacion_Ajustado)
+  const vigentes     = filtrados.filter(p=>(p.estado||'').toUpperCase().includes('VIGENTE')).length;
+  const conContrato  = vigentes;
   const regionales   = [...new Set(filtrados.map(p=>p.regional).filter(Boolean))];
   const departamentos= [...new Set(filtrados.map(p=>p.departamento).filter(Boolean))];
   const modelos      = [...new Set(filtrados.map(p=>p.modelo).filter(Boolean))];
-  const fact2025     = filtrados.reduce((a,p)=>a+p.fact_2025,0);
-  const factMar26    = filtrados.reduce((a,p)=>a+p.fact_mar26,0);
-  const pctHab       = total>0?Math.round(habilitados/total*100):0;
-  const pctContrato2 = total>0?Math.round(conContrato/total*100):0;
+  const fact2025     = filtrados.reduce((a,p)=>a+(p.facturacion||0),0);
+  const factMar26    = 0;
+  const habilitados  = vigentes; // alias
+  const pctHab       = total>0?Math.round(vigentes/total*100):0;
+  const pctContrato2 = pctHab;
 
   // ── Resumen ejecutivo ─────────────────────────────────────────────
   actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
-  actualizarKPI('kpi-resumen-prestadores-delta', `${pctHab}% habilitados · ${regionales.length} regionales`);
+  actualizarKPI('kpi-resumen-prestadores-delta', `${pctHab}% vigentes · ${regionales.length} regionales`);
   actualizarKPI('kpi-resumen-cobertura', pctContrato2+'%');
-  actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(conContrato)} con contrato activo`);
+  actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(conContrato)} contratos vigentes`);
   actualizarKPI('kpi-fin-fact2025', fmtM(fact2025));
 
   // ── KPIs Red de prestadores ───────────────────────────────────────
@@ -6305,7 +6320,7 @@ function aplicarFiltrosGlobales() {
     filtrados.forEach(p => {
       const k = p.modelo?.split(' ')[0] || 'OTRO';
       if(!porMod[k]) porMod[k] = { fact:0, count:0 };
-      porMod[k].fact  += p.fact_2025;
+      porMod[k].fact  += (p.facturacion||0);
       porMod[k].count++;
     });
     const COLORES = {EVENTO:'var(--green)',CAPITA:'var(--teal)',PGP:'var(--blue)',MRC:'var(--purple)',TECHO:'var(--amber)',LIBRO:'var(--red)',OTRO:'var(--text2)'};
@@ -6333,9 +6348,9 @@ function aplicarFiltrosGlobales() {
   if(tablaResumen) {
     const top8 = [...filtrados].sort((a,b)=>b.fact_2025-a.fact_2025).slice(0,8);
     tablaResumen.innerHTML = top8.map(p => {
-      const hab = p.habilitacion === 'Si';
+      const hab = (p.estado||'').toUpperCase().includes('VIGENTE');
       const badgeClass = hab ? 'bg-g' : 'bg-r';
-      const badgeLabel = hab ? 'Activo' : 'Inactivo';
+      const badgeLabel = hab ? 'Vigente' : (p.estado||'Inactivo');
       const modKey = p.modelo?.split(' ')[0]||'';
       const modBadge = {CAPITA:'bg-b',EVENTO:'bg-g',MRC:'bg-t',PGP:'bg-p',TECHO:'bg-a'}[modKey]||'';
       return `<tr>
