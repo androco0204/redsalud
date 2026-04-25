@@ -6000,7 +6000,7 @@ function aplicarPrestadores() {
   const regionales    = [...new Set(prest.map(p=>p.regional).filter(Boolean))];
   const departamentos = [...new Set(prest.map(p=>p.departamento).filter(Boolean))];
   const ciudades2     = [...new Set(prest.map(p=>p.ciudad).filter(Boolean))];
-  // ciudades ya declarada arriba como ciudades2
+
   const conHabInfo   = prest.filter(p=>p.hab_cumple!==null&&p.hab_cumple!==undefined).length;
   const habCumple    = conHabInfo>0 ? prest.filter(p=>p.hab_cumple===true).length : total;
   const habilitados  = habCumple;
@@ -6155,7 +6155,7 @@ function aplicarPrestadores() {
 
   // ══ COBERTURA GEOGRÁFICA ══════════════════════════════════════════════
   actualizarKPI('kpi-cobertura-dept', [...new Set(prest.map(p=>p.departamento).filter(Boolean))].length);
-  actualizarKPI('kpi-cobertura-ciudades', ciudades.length);
+  actualizarKPI('kpi-cobertura-ciudades', ciudades2.length);
   actualizarKPI('kpi-cobertura-prest', fmtN(total));
 }
 
