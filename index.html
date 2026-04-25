@@ -6327,8 +6327,6 @@ function aplicarFiltrosGlobales() {
   const habilitados  = conHabInfo>0 ? filtrados.filter(p=>p.hab_cumple===true).length : total;
   const pctHab       = conHabInfo>0 ? Math.round(habilitados/total*100) : 100;
   const pctContrato2 = 100;
-  const sinContrato  = 0;
-  const sinContrato2 = 0;
 
   // ── Resumen ejecutivo ─────────────────────────────────────────────
   actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
@@ -6338,7 +6336,6 @@ function aplicarFiltrosGlobales() {
   actualizarKPI('kpi-fin-fact2025', fmtM(fact2025));
 
   // ── KPIs Red de prestadores ───────────────────────────────────────
-  const sinContrato2  = total - conContrato;
   actualizarKPI('kpi-prest-total',             fmtN(total));
   actualizarKPI('kpi-prest-hab',               fmtN(total));
   actualizarKPI('kpi-prest-hab-delta',         conHabInfo>0?`${pctHab}% cumplen habilitación`:'Contratos vigentes Mar 2026');
