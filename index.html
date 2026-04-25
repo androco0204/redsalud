@@ -5230,7 +5230,7 @@ async function cargarDesdeDrive() {
   if(resultados.length > 0) {
     if(icon) icon.textContent = '✓';
     if(lbl)  lbl.textContent  = resultados.join(' · ');
-    const bd=document.getElementById('btn-datos');if(bd){bd.style.background='var(--gdim)';bd.style.color='var(--green)';bd.style.borderColor='var(--green)';}
+    const bd=document.getElementById('btn-datos');if(bd) bd.style.display='none';
     cerrarCargador();
     const toast = document.getElementById('notif-toast');
     if(toast){
