@@ -598,7 +598,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       </div>
       <div class="card-body">
         <div class="al-item" style="--alc:var(--red)"><div><div class="al-title">Clínica Palermo — Habilitación vencida</div><div class="al-meta">+ cartera vencida 67 días · $842 M en riesgo</div></div><div class="al-time">Hoy</div></div>
-        <div class="al-item" style="--alc:var(--red)"><div><div class="al-title">Pharmos Domicilios — ANS 63% + mora 45d</div><div class="al-meta">3 tutelas activas · $1,240 M pendientes de pago</div></div><div class="al-time">Ayer</div></div>
         <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">IPS San Rafael — Score bajo umbral</div><div class="al-meta">Pago pendiente 32 días · Contrato en revisión</div></div><div class="al-time">Lun</div></div>
         <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">Techo presupuestal capita — 94.1% ejecutado</div><div class="al-meta">Riesgo de sobreejecutar antes de fin de mes</div></div><div class="al-time">Lun</div></div>
       </div>
@@ -611,23 +610,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Ranking rápido — Prestadores</div></div><div class="card-act" onclick="navigate('ranking')" style="cursor:pointer">Ver ranking →</div></div>
-      <div class="card-body" style="padding:10px 16px" id="graf-ranking-rapido">
-        <div class="rank-row"><div class="rank-num" style="color:var(--amber)">🥇</div><div class="rank-semaforo" style="background:var(--green)"></div><div><div class="rank-name">Audifarma S.A.</div><div class="rank-type">Físico · Nacional</div></div><div class="rank-pct" style="color:var(--green)">91</div><div class="rank-trend up">↑+2</div></div>
-        <div class="rank-row"><div class="rank-num" style="color:var(--text2)">🥈</div><div class="rank-semaforo" style="background:var(--teal)"></div><div><div class="rank-name">Medipharma Eje</div><div class="rank-type">Físico · Regional</div></div><div class="rank-pct" style="color:var(--teal)">86</div><div class="rank-trend up">↑+1</div></div>
-        <div class="rank-row"><div class="rank-num" style="color:var(--text2)">🥉</div><div class="rank-semaforo" style="background:var(--amber)"></div><div><div class="rank-name">Cruz Verde</div><div class="rank-type">Físico · Sur</div></div><div class="rank-pct" style="color:var(--amber)">74</div><div class="rank-trend dn">↓-3</div></div>
-        <div class="rank-row"><div class="rank-num" style="color:var(--red);font-size:11px">4°</div><div class="rank-semaforo" style="background:var(--red)"></div><div><div class="rank-name">Pharmos Dom.</div><div class="rank-type">Domiciliario</div></div><div class="rank-pct" style="color:var(--red)">61</div><div class="rank-trend dn">↓-5</div></div>
-      </div>
+      <div class="card-body" style="padding:10px 16px" id="graf-ranking-rapido"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px;grid-column:1/-1">⏳ Conectando a Drive...</div></div></div><div class="rank-pct" style="color:var(--green)">91</div><div class="rank-trend up">↑+2</div></div>
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Cumplimiento global</div></div></div>
-      <div class="card-body" id="graf-cumplimiento-global">
-        <div class="donut-wrap" style="justify-content:center">
-          <svg width="80" height="80" viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="none" stroke="var(--bg3)" stroke-width="12"/><circle cx="50" cy="50" r="38" fill="none" stroke="var(--green)" stroke-width="12" stroke-dasharray="213" stroke-dashoffset="40" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="46" text-anchor="middle" font-family="Fraunces,serif" font-size="16" fill="var(--text)" font-weight="600">81.3</text><text x="50" y="57" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="var(--text2)">score</text></svg>
-          <div class="legend-list">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Habilitación <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:11px">91%</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>ANS gestores <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:11px">83%</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>RIPS / reporte <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:11px">74%</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Financiero <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:11px">78%</span></div>
+      <div class="card-body" id="graf-cumplimiento-global"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px;grid-column:1/-1">⏳ Conectando a Drive...</div></div>
           </div>
         </div>
       </div>
@@ -651,29 +638,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div class="card-body">
         <div class="podio">
           <div class="pod-item">
-            <div class="pod-name" style="color:var(--text2)">2° Medipharma</div>
-            <div class="pod-bar" style="background:var(--tdim);border:1px solid var(--teal);height:80px"><div class="pod-score" style="color:var(--teal)">86</div></div>
-            <div class="pod-pos" style="color:var(--teal)">🥈 Bueno</div>
-          </div>
-          <div class="pod-item">
-            <div class="pod-name" style="color:var(--text);font-weight:500">1° Audifarma S.A.</div>
-            <div class="pod-bar" style="background:var(--gdim);border:1px solid var(--green);height:110px"><div class="pod-score" style="color:var(--green)">91</div></div>
-            <div class="pod-pos" style="color:var(--green)">🥇 Óptimo</div>
-          </div>
-          <div class="pod-item">
-            <div class="pod-name" style="color:var(--text2)">3° Cruz Verde</div>
-            <div class="pod-bar" style="background:var(--adim);border:1px solid var(--amber);height:60px"><div class="pod-score" style="color:var(--amber)">74</div></div>
             <div class="pod-pos" style="color:var(--amber)">🥉 En riesgo</div>
           </div>
         </div>
         <div style="border-top:1px solid var(--border);padding-top:12px">
-          <div class="rank-row"><div class="rank-num" style="color:var(--text2);font-size:11px">4°</div><div class="rank-semaforo" style="background:var(--red)"></div><div style="flex:1"><div class="rank-name">Pharmos Domicilios</div><div class="rank-type" style="font-size:10.5px;color:var(--text2)">Domiciliario · Nacional</div></div><div class="rank-pct" style="color:var(--red)">61</div><div style="width:80px"><div class="bar-track"><div class="bar-fill" style="width:61%;background:var(--red)"></div></div></div><div class="rank-trend dn" style="font-size:10.5px;margin-left:8px">↓ -5</div></div>
-          <div class="rank-row" style="border-bottom:none"><div class="rank-num" style="color:var(--text2);font-size:11px">5°</div><div class="rank-semaforo" style="background:var(--text3)"></div><div style="flex:1"><div class="rank-name" style="color:var(--text2)">Farma Norte (nuevo)</div><div class="rank-type" style="font-size:10.5px;color:var(--text2)">Físico · Caribe</div></div><div class="rank-pct" style="color:var(--text2)">—</div><div style="width:80px"><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--text3)"></div></div></div><div class="rank-trend neu" style="font-size:10.5px;margin-left:8px">nuevo</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RANKING PRESTADORES -->
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Ranking prestadores</div><div class="card-sub">Top mejores · Top críticos · Semáforo automático</div></div><div class="card-act">Ver todos →</div></div>
       <div class="tabs"><div class="tab active">Top 5 mejores</div><div class="tab">Top 5 críticos</div><div class="tab">Todos</div></div>
@@ -696,40 +664,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
         <div style="background:var(--bg3);border-radius:10px;padding:14px">
           <div style="font-size:11px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Dic 2025</div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--green)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Audifarma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)">89</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--teal)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Medipharma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">85</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--amber)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Cruz Verde</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">77</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent;border-bottom:none"><div class="rank-semaforo" style="background:var(--red)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Pharmos</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)">66</div></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:14px">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Ene 2026</div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--green)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Audifarma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)">90</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--teal)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Medipharma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">85</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--amber)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Cruz Verde</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">75</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent;border-bottom:none"><div class="rank-semaforo" style="background:var(--red)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Pharmos</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)">64</div></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:14px">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Feb 2026</div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--green)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Audifarma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)">90</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--teal)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Medipharma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">85</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--amber)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Cruz Verde</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">77</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent;border-bottom:none"><div class="rank-semaforo" style="background:var(--red)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Pharmos</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)">66</div></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;border:1px solid var(--green)">
-          <div style="font-size:11px;color:var(--green);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Mar 2026 · Actual</div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--green)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Audifarma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)">91 ↑</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--teal)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Medipharma</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">86 ↑</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent"><div class="rank-semaforo" style="background:var(--amber)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Cruz Verde</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">74 ↓</div></div>
-          <div class="rank-row" style="padding:5px 0;border-color:transparent;border-bottom:none"><div class="rank-semaforo" style="background:var(--red)"></div><div style="flex:1;font-size:11.5px;color:var(--text)">Pharmos</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)">61 ↓</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ FINANCIERO ══ -->
-<div class="screen" id="screen-financiero">
-  <div class="kpi-strip cols-5">
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Facturación total 2025</div><div class="kpi-value" style="color:var(--blue)" id="kpi-fin-fact2025">$41,240 M</div><div class="kpi-delta neu">Mar 2026</div></div>
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Pagos al día</div><div class="kpi-value" style="color:var(--green)">$34,820 M</div><div class="kpi-delta up">84.4% del total</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Pagos pendientes</div><div class="kpi-value" style="color:var(--amber)">$2,202 M</div><div class="kpi-delta warn">14 prestadores · 8 gestores</div></div>
@@ -762,19 +696,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
         <table class="table"><thead><tr><th>Gestor</th><th>Capita mes</th><th>Pagado</th><th>Pendiente</th><th>Estado</th><th>Mora</th></tr></thead>
         <tbody>
           <tr><td class="nm">Audifarma S.A.</td><td style="font-family:'DM Mono',monospace;font-size:11px">$6,840 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">$6,840 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$0</td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">Medipharma Eje</td><td style="font-family:'DM Mono',monospace;font-size:11px">$3,240 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">$3,240 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$0</td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">Cruz Verde</td><td style="font-family:'DM Mono',monospace;font-size:11px">$4,120 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">$3,240 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">$880 M</td><td><span class="badge bg-a">Pendiente</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">18d</td></tr>
           <tr><td class="nm">Pharmos Domicilios</td><td style="font-family:'DM Mono',monospace;font-size:11px">$4,040 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">$2,800 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">$1,240 M</td><td><span class="badge bg-r">Vencido</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">45d</td></tr>
         </tbody></table>
       </div></div>
     </div>
   </div>
-
-  <!-- CARTERA Y PROYECCION -->
-  <div class="grid-3" style="margin-bottom:0">
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Cartera por días de mora</div><div class="card-sub">Antigüedad de cartera vencida</div></div></div>
-      <div class="card-body" style="padding:10px 16px">
         <div class="mora-item"><div class="mora-dias" style="background:var(--adim);color:var(--amber)">1-30d</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Mora temprana</div><div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:35%;background:var(--amber)"></div></div></div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber);flex-shrink:0">$440 M</div></div>
         <div class="mora-item"><div class="mora-dias" style="background:var(--rdim);color:var(--red)">31-60d</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Mora media</div><div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:55%;background:var(--red)"></div></div></div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red);flex-shrink:0">$1,680 M</div></div>
         <div class="mora-item"><div class="mora-dias" style="background:var(--rdim);color:var(--red)">+60d</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Mora crítica</div><div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:68%;background:var(--red)"></div></div></div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red);flex-shrink:0">$2,098 M</div></div>
@@ -936,7 +862,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   </div>
   <div class="g-grid">
     <div class="g-card sel">
-      <div class="g-head"><div><div class="g-name">Audifarma S.A.</div><div class="g-meta">Físico · 18 puntos · Bogotá, Cund., Boyacá</div><div class="g-tags"><span class="tag tg">ANS cumplido</span><span class="tag tg">Pago al día</span><span class="tag tg">Sin tutelas</span></div></div><div class="g-score"><div class="g-sv" style="color:var(--green)">91</div><div class="g-sl">score</div></div></div>
       <div class="g-body">
         <div class="ans-mini">
           <div class="ans-cell"><div class="ans-lbl">Oportunidad</div><div class="ans-v" style="color:var(--green)">98.2%</div><div class="ans-bar"><div class="ans-bf" style="width:98%;background:var(--green)"></div></div></div>
@@ -6080,7 +6005,7 @@ function aplicarPrestadores() {
 
   // Contador subtitle
   const cnt = document.getElementById('cnt-prestadores');
-  if(cnt) cnt.textContent = `${fmtN(total)} prestadores · ${fmtN(conContrato)} con contrato · ${regionales.length} regionales · ${ciudades.length} ciudades`;
+  if(cnt) cnt.textContent = `${fmtN(total)} prestadores · ${fmtN(conContrato)} con contrato · ${regionales.length} regionales · ${ciudades2.length} ciudades`;
 
   // Tabla top 50 por facturación
   const tbody = document.getElementById('tabla-prestadores-body');
