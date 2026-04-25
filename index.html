@@ -513,16 +513,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   <div class="tb-left"><span class="tb-title" id="tb-title">Resumen ejecutivo</span><span class="sep">/</span><span class="tb-sub" id="tb-sub">Red de prestadores y gestores · Mar 2026</span></div>
   <div class="tb-right">
     <div class="btn" onclick="abrirCargador()" style="background:var(--gdim);border-color:var(--green);color:var(--green);display:flex;align-items:center;gap:6px">
-      <span id="datos-estado-icon">📂</span> <span id="datos-estado-lbl">Cargar datos</span>
-    </div>
-    <div style="position:relative">
-      <div class="btn" id="btn-departamento" onclick="toggleFiltroPanel('departamento')" style="min-width:160px;display:flex;justify-content:space-between;gap:8px">
-        <span id="lbl-departamento">▼ Todos los departamentos</span>
-      </div>
-      <div id="panel-departamento" style="display:none;position:absolute;top:42px;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:10px;min-width:220px;z-index:400;box-shadow:0 8px 32px rgba(0,0,0,.4);max-height:320px;overflow-y:auto">
-        <div style="font-size:11px;color:var(--text2);padding:4px 8px 8px;text-transform:uppercase;letter-spacing:.05em">Departamento</div>
-        <div id="lista-departamentos"></div>
-      </div>
+      <span id="datos-estado-icon">📂</span> <span id="datos-estado-lbl">Sincronizar</span>
     </div>
     <div style="position:relative">
       <div class="btn" id="btn-regional" onclick="toggleFiltroPanel('regional')" style="min-width:140px;display:flex;justify-content:space-between;gap:8px">
@@ -531,6 +522,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div id="panel-regional" style="display:none;position:absolute;top:42px;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:10px;min-width:200px;z-index:400;box-shadow:0 8px 32px rgba(0,0,0,.4);max-height:320px;overflow-y:auto">
         <div style="font-size:11px;color:var(--text2);padding:4px 8px 8px;text-transform:uppercase;letter-spacing:.05em">Regional</div>
         <div id="lista-regionales"></div>
+      </div>
+    </div>
+    <div style="position:relative">
+      <div class="btn" id="btn-departamento" onclick="toggleFiltroPanel('departamento')" style="min-width:160px;display:flex;justify-content:space-between;gap:8px">
+        <span id="lbl-departamento">▼ Todos los departamentos</span>
+      </div>
+      <div id="panel-departamento" style="display:none;position:absolute;top:42px;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:10px;min-width:220px;z-index:400;box-shadow:0 8px 32px rgba(0,0,0,.4);max-height:320px;overflow-y:auto">
+        <div style="font-size:11px;color:var(--text2);padding:4px 8px 8px;text-transform:uppercase;letter-spacing:.05em">Departamento</div>
+        <div id="lista-departamentos"></div>
       </div>
     </div>
     <div style="position:relative">
@@ -609,7 +609,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Ranking rápido — Prestadores</div></div><div class="card-act" onclick="navigate('ranking')" style="cursor:pointer">Ver ranking →</div></div>
-      <div class="card-body" style="padding:10px 16px" id="graf-ranking-rapido"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px;grid-column:1/-1">⏳ Conectando a Drive...</div></div></div><div class="rank-pct" style="color:var(--green)">91</div><div class="rank-trend up">↑+2</div></div>
+      <div class="card-body" style="padding:10px 16px" id="graf-ranking-rapido"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px;grid-column:1/-1">⏳ Conectando a Drive...</div></div>
     </div>
 <!-- cumplimiento global movido al kpi strip -->
         </div>
@@ -5184,7 +5184,14 @@ async function cargarDesdeDrive() {
         const v = r.vr_cartera;
         return a + (v > 0 && v < MAX_RAZONABLE ? v : 0);
       }, 0);
-      const fmtM = v=>v>=1e12?'$'+(v/1e12).toFixed(1)+'B':v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$0';
+      const fmtM = v=>{
+        if(!v||v===0) return '$0';
+        const n=Math.abs(v);
+        if(n>=1e12) return '$'+(v/1e12).toFixed(2)+' Bill.';
+        if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';
+        if(n>=1e6)  return '$'+(v/1e6).toFixed(0)+' M';
+        return '$'+v.toLocaleString('es-CO');
+      };
       actualizarEstadoFuente('reclamaciones',`✓ ${rec.length.toLocaleString()} registros · Cartera: ${fmtM(totalCartera)}`,'var(--gdim)','var(--green)');
       // reclamaciones omitida del pill
     } catch(e) {
@@ -5233,7 +5240,7 @@ async function cargarDesdeDrive() {
     }
   } else {
     if(icon) icon.textContent = '⚠️';
-    if(lbl)  lbl.textContent  = 'Verificar permisos Drive';
+    if(lbl)  lbl.textContent  = 'Reconectar datos';
     const bd2=document.getElementById('btn-datos');if(bd2){bd2.style.background='var(--adim)';bd2.style.color='var(--amber)';bd2.style.borderColor='var(--amber)';}
   }
 
