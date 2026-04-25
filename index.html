@@ -463,7 +463,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div class="logo-icon">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="#0d1117" stroke-width="1.5"/><path d="M9 5v4l2.5 2.5" stroke="#0d1117" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div><div class="logo-name">RedSalud</div><div class="logo-sub">Monitor · v2</div></div>
+      <div><div class="logo-name">RedSalud</div><div class="logo-sub">Monitor · v3.1</div></div>
     </div>
   </div>
   <div class="nav">
@@ -5993,24 +5993,27 @@ function aplicarPrestadores() {
   const prest = DATOS_CARGADOS.prestadores;
   if(!prest || !prest.length) return;
 
-  // ── Cálculos base ──────────────────────────────────────────────────
-  const total       = prest.length;
-  const conContrato = prest.filter(p=>p.tiene_contrato==='Si').length;
-  const habilitados = prest.filter(p=>p.habilitacion==='Si').length;
-  const sinHab      = total - habilitados;
-  const redSeg      = prest.filter(p=>p.red_seguimiento==='SI'||p.red_seguimiento==='Si').length;
-  const modelos     = [...new Set(prest.map(p=>p.modelo).filter(Boolean))];
-  const regionales  = [...new Set(prest.map(p=>p.regional).filter(Boolean))];
-  const ciudades    = [...new Set(prest.map(p=>p.ciudad).filter(Boolean))];
+  // ── Cálculos base ─────────────────────────────────────────────────
+  const total         = prest.length;
+  const conContrato   = total;
+  const modelos       = [...new Set(prest.map(p=>p.modelo).filter(Boolean))];
+  const regionales    = [...new Set(prest.map(p=>p.regional).filter(Boolean))];
+  const departamentos = [...new Set(prest.map(p=>p.departamento).filter(Boolean))];
+  const ciudades2     = [...new Set(prest.map(p=>p.ciudad).filter(Boolean))];
+  // ciudades ya declarada arriba como ciudades2
+  const conHabInfo   = prest.filter(p=>p.hab_cumple!==null&&p.hab_cumple!==undefined).length;
+  const habCumple    = conHabInfo>0 ? prest.filter(p=>p.hab_cumple===true).length : total;
+  const habilitados  = habCumple;
+  const sinHab       = total - habCumple;
+  const pctHab       = Math.round(habCumple/total*100);
+  const pctContrato  = 100;
+  const redSeg       = 0;
 
-  const fact2024  = prest.reduce((a,p)=>a+p.fact_2024,0);
-  const fact2025  = prest.reduce((a,p)=>a+p.fact_2025,0);
-  const fact2026  = prest.reduce((a,p)=>a+p.fact_2026,0);
-  const factMar26 = prest.reduce((a,p)=>a+p.fact_mar26,0);
-
-  const pctHab    = Math.round(habilitados/total*100);
-  const pctContrato = Math.round(conContrato/total*100);
-  const varFact   = fact2024>0 ? ((fact2025-fact2024)/fact2024*100).toFixed(1) : 0;
+  const fact2025  = prest.reduce((a,p)=>a+(p.facturacion||0),0);
+  const fact2024  = 0;
+  const fact2026  = 0;
+  const factMar26 = 0;
+  const varFact   = 0;
 
   const fmtM = v => v>=1e12?'$'+(v/1e12).toFixed(1)+'T':v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
   const fmtN = v => v.toLocaleString('es-CO');
