@@ -4632,7 +4632,15 @@ function actualizarGraficasResumen() {
   if(!prest || !prest.length) return;
 
   const filtrados = getPrestadoresFiltrados();
-  const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$0';
+  const fmtM = v=>{
+    if(!v||v===0) return '—';
+    const n=Math.abs(v);
+    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' Bill.';
+    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';
+    if(n>=1e6)  return '$'+(v/1e6).toFixed(1)+' M';
+    if(n>=1e3)  return '$'+(v/1e3).toFixed(0)+' K';
+    return '$'+v.toLocaleString('es-CO');
+  };
   const fmtN = v=>v.toLocaleString('es-CO');
 
   // ── Proyección gasto vs presupuesto ────────────────────────────────
@@ -5118,6 +5126,8 @@ async function cargaAutomatica() {
 async function cargarDesdeDrive() {
   if(cargandoDesdeDrive) return;
   cargandoDesdeDrive = true;
+  const lblC=document.getElementById('datos-estado-lbl');if(lblC)lblC.textContent='Cargando...';
+  const icnC=document.getElementById('datos-estado-icon');if(icnC)icnC.textContent='⏳';
   const btn = document.getElementById('btn-drive');
   if(btn){ btn.disabled=true; btn.innerHTML='<span style="font-size:18px">⏳</span> Cargando datos...'; }
 
@@ -5225,7 +5235,8 @@ async function cargarDesdeDrive() {
     }
   } else {
     if(icon) icon.textContent = '⚠️';
-    if(lbl)  lbl.textContent  = 'Sin datos · verifica permisos de Drive';
+    if(lbl)  lbl.textContent  = 'Verificar permisos Drive';
+    const bd2=document.getElementById('btn-datos');if(bd2){bd2.style.background='var(--adim)';bd2.style.color='var(--amber)';bd2.style.borderColor='var(--amber)';}
   }
 
   if(btn){
@@ -5360,7 +5371,10 @@ function parsearHomologacion(data) {
     if(!nit) return;
     const res = String(row[colRes]||'').trim().toUpperCase()
       .normalize('NFD').replace(/[̀-ͯ]/g,'');
-    const noCumple = res.includes('NO CUMPLE') || (res.startsWith('NO') && res.length < 15);
+    // Valores reales: 'SI HABILITADO','NO HABILITADO','CONTRATO EN PROCESO DE EXCLUSION',
+    //   'CONTRATO EXCLUIDO','NO REQUIERE HABILITACION'
+    if(res === 'NO REQUIERE HABILITACION') return; // neutral, no contar
+    const noCumple = res.includes('NO HABILITADO') || res.includes('EXCLUIDO') || res.includes('EXCLUSION');
     if(!idx[nit]) idx[nit] = { cumple: true, servicios: 0, noCumpleCount: 0 };
     idx[nit].servicios++;
     if(noCumple) { idx[nit].noCumpleCount++; idx[nit].cumple = false; }
@@ -5628,10 +5642,11 @@ function aplicarReclamaciones() {
 
   const fmtM = v=>{
     if(!v||v===0) return '—';
-    if(v>=1e12) return '$'+(v/1e12).toFixed(2)+'B';
-    if(v>=1e9)  return '$'+(v/1e9).toFixed(1)+'B';
-    if(v>=1e6)  return '$'+(v/1e6).toFixed(1)+'M';
-    if(v>=1e3)  return '$'+(v/1e3).toFixed(0)+'K';
+    const n = Math.abs(v);
+    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' Bill.';
+    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';   // miles de millones
+    if(n>=1e6)  return '$'+(v/1e6).toFixed(1)+' M';
+    if(n>=1e3)  return '$'+(v/1e3).toFixed(0)+' K';
     return '$'+v.toLocaleString('es-CO');
   };
   const fmtN = v=>Number(v).toLocaleString('es-CO');
@@ -6216,11 +6231,11 @@ function aplicarFiltro(tipo, valor, el) {
 
 function getPrestadoresFiltrados() {
   const prest = DATOS_CARGADOS.prestadores || [];
-  const toTitulo = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+  const norm = s => String(s||'').trim().toUpperCase();
   return prest.filter(p => {
-    if(FILTROS.departamento && toTitulo(p.departamento) !== FILTROS.departamento) return false;
-    if(FILTROS.regional     && toTitulo(p.regional)     !== FILTROS.regional)     return false;
-    if(FILTROS.modelo       && toTitulo(p.modelo)       !== FILTROS.modelo)       return false;
+    if(FILTROS.departamento && norm(p.departamento) !== norm(FILTROS.departamento)) return false;
+    if(FILTROS.regional     && norm(p.regional)     !== norm(FILTROS.regional))     return false;
+    if(FILTROS.modelo       && norm(p.modelo)       !== norm(FILTROS.modelo))       return false;
     return true;
   });
 }
@@ -6291,10 +6306,11 @@ function aplicarFiltrosGlobales() {
 
   const fmtM = v=>{
     if(!v||v===0) return '—';
-    if(v>=1e12) return '$'+(v/1e12).toFixed(2)+'B';
-    if(v>=1e9)  return '$'+(v/1e9).toFixed(1)+'B';
-    if(v>=1e6)  return '$'+(v/1e6).toFixed(1)+'M';
-    if(v>=1e3)  return '$'+(v/1e3).toFixed(0)+'K';
+    const n = Math.abs(v);
+    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' Bill.';
+    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';   // miles de millones
+    if(n>=1e6)  return '$'+(v/1e6).toFixed(1)+' M';
+    if(n>=1e3)  return '$'+(v/1e3).toFixed(0)+' K';
     return '$'+v.toLocaleString('es-CO');
   };
   const fmtN = v=>Number(v).toLocaleString('es-CO');
