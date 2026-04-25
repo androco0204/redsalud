@@ -4599,7 +4599,7 @@ function exportarPrestadoresExcel() {
     p.nit, p.nombre, p.ciudad, p.departamento, p.regional, p.especialidad,
     p.modelo, p.habilitacion, p.nivel, p.tipo,
     p.tiene_contrato, p.no_contrato, p.estado_tarifas,
-    fmtM(p.fact_2024), fmtM(p.fact_2025), fmtM(p.fact_mar26),
+    fmtM(p.fact_2024), fmtM(p.facturacion||p.fact_2025||0), fmtM(p.fact_mar26),
     p.responsable, p.red_seguimiento
   ]);
 
@@ -4633,13 +4633,14 @@ function actualizarGraficasResumen() {
   const fmtM = v=>{
     if(!v||v===0) return '—';
     const n=Math.abs(v);
-    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' Bill.';
-    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';
-    if(n>=1e6)  return '$'+(v/1e6).toFixed(1)+' M';
+    // Escala colombiana
+    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' bill.';      // billones
+    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' mil mill.';   // miles de millones
+    if(n>=1e6)  return '$'+(v/1e6).toFixed(0)+' M';           // millones
     if(n>=1e3)  return '$'+(v/1e3).toFixed(0)+' K';
-    return '$'+v.toLocaleString('es-CO');
+    return '$'+Number(v).toLocaleString('es-CO');
   };
-  const fmtN = v=>v.toLocaleString('es-CO');
+  const fmtN = v=>Number(v).toLocaleString('es-CO');
 
   // ── Proyección gasto vs presupuesto ────────────────────────────────
   const grafProy = document.getElementById('graf-proyeccion');
@@ -4687,7 +4688,7 @@ function actualizarGraficasResumen() {
           <div class="rank-name">${p.nombre?.substring(0,28)||p.nit}</div>
           <div class="rank-type" style="font-size:10.5px;color:var(--text2)">${p.modelo?.split(' ')[0]||'—'} · ${p.ciudad||'—'}</div>
         </div>
-        <div class="rank-pct" style="color:${color};font-size:11px">${fmtM(p.fact_2025)}</div>
+        <div class="rank-pct" style="color:${color};font-size:11px">${fmtM(p.facturacion||p.fact_2025||0)}</div>
         <div style="width:60px"><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
       </div>`;
     }).join('');
@@ -5187,8 +5188,8 @@ async function cargarDesdeDrive() {
       const fmtM = v=>{
         if(!v||v===0) return '$0';
         const n=Math.abs(v);
-        if(n>=1e12) return '$'+(v/1e12).toFixed(2)+' Bill.';
-        if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';
+        if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' bill.';
+        if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' mil mill.';
         if(n>=1e6)  return '$'+(v/1e6).toFixed(0)+' M';
         return '$'+v.toLocaleString('es-CO');
       };
@@ -5647,12 +5648,13 @@ function aplicarReclamaciones() {
 
   const fmtM = v=>{
     if(!v||v===0) return '—';
-    const n = Math.abs(v);
-    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' Bill.';
-    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';   // miles de millones
-    if(n>=1e6)  return '$'+(v/1e6).toFixed(1)+' M';
+    const n=Math.abs(v);
+    // Escala colombiana
+    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' bill.';      // billones
+    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' mil mill.';   // miles de millones
+    if(n>=1e6)  return '$'+(v/1e6).toFixed(0)+' M';           // millones
     if(n>=1e3)  return '$'+(v/1e3).toFixed(0)+' K';
-    return '$'+v.toLocaleString('es-CO');
+    return '$'+Number(v).toLocaleString('es-CO');
   };
   const fmtN = v=>Number(v).toLocaleString('es-CO');
 
@@ -6038,7 +6040,7 @@ function aplicarPrestadores() {
         <td style="font-size:11px;color:var(--text2)">${p.ciudad||'—'}</td>
         <td style="font-size:11px;color:var(--text2)">${p.regional||'—'}</td>
         <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:${modColor};font-weight:500">${p.modelo||'—'}</span></td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.fact_2025)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.facturacion||p.fact_2025||0)}</td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${fmtM(p.fact_mar26)}</td>
         <td><span style="font-size:10.5px;padding:2px 8px;border-radius:4px;background:${semBg};color:${semColor};font-weight:500">${hab?'✓ Activo':'✗ Inactivo'}</span></td>
         <td style="font-size:11px;color:var(--text2)">${p.estado_tarifas||'—'}</td>
@@ -6311,12 +6313,13 @@ function aplicarFiltrosGlobales() {
 
   const fmtM = v=>{
     if(!v||v===0) return '—';
-    const n = Math.abs(v);
-    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' Bill.';
-    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' MM';   // miles de millones
-    if(n>=1e6)  return '$'+(v/1e6).toFixed(1)+' M';
+    const n=Math.abs(v);
+    // Escala colombiana
+    if(n>=1e12) return '$'+(v/1e12).toFixed(1)+' bill.';      // billones
+    if(n>=1e9)  return '$'+(v/1e9).toFixed(1)+' mil mill.';   // miles de millones
+    if(n>=1e6)  return '$'+(v/1e6).toFixed(0)+' M';           // millones
     if(n>=1e3)  return '$'+(v/1e3).toFixed(0)+' K';
-    return '$'+v.toLocaleString('es-CO');
+    return '$'+Number(v).toLocaleString('es-CO');
   };
   const fmtN = v=>Number(v).toLocaleString('es-CO');
 
@@ -6404,7 +6407,7 @@ function aplicarFiltrosGlobales() {
         <td style="font-size:11px;color:var(--text2)">${p.ciudad||'—'}</td>
         <td><span class="badge ${modBadge}">${p.modelo?.split(' ')[0]||'—'}</span></td>
         <td><span class="badge ${badgeClass}"><span class="bd"></span>${badgeLabel}</span></td>
-        <td style="font-family:'DM Mono',monospace;font-size:11px">${fmtM(p.fact_2025)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${fmtM(p.facturacion||p.fact_2025||0)}</td>
       </tr>`;
     }).join('');
     // Actualizar subtítulo
@@ -6428,7 +6431,7 @@ function aplicarFiltrosGlobales() {
         <td style="font-size:11px;color:var(--text2)">${p.ciudad||'—'}</td>
         <td style="font-size:11px;color:var(--text2)">${p.regional||'—'}</td>
         <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:${modColor};font-weight:500">${p.modelo||'—'}</span></td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.fact_2025)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.facturacion||p.fact_2025||0)}</td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${fmtM(p.fact_mar26)}</td>
         <td><span style="font-size:10.5px;padding:2px 8px;border-radius:4px;background:${semBg};color:${semColor};font-weight:500">${hab?'✓ Activo':'✗ Inactivo'}</span></td>
         <td style="font-size:11px;color:var(--text2)">${p.estado_tarifas||'—'}</td>
@@ -6556,7 +6559,7 @@ function filtrarTablaPrestadores(tipo, tabEl) {
         <td style="font-size:11px;color:var(--text2)">${p.ciudad||'—'}</td>
         <td style="font-size:11px;color:var(--text2)">${p.regional||'—'}</td>
         <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:${modColor};font-weight:500">${p.modelo||'—'}</span></td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.fact_2025)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text)">${fmtM(p.facturacion||p.fact_2025||0)}</td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${fmtM(p.fact_mar26)}</td>
         <td><span style="font-size:10.5px;padding:2px 8px;border-radius:4px;background:${semBg};color:${semColor};font-weight:500">${hab?'✓ Activo':'✗ Inactivo'}</span></td>
         <td style="font-size:11px;color:var(--text2)">${p.estado_tarifas||'—'}</td>
