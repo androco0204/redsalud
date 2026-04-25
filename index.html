@@ -577,6 +577,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas activas</div><div class="kpi-value" id="kpi-alertas-valor" style="color:var(--amber)">—</div><div class="kpi-delta" id="kpi-alertas-delta">Pendiente fuente de datos</div></div>
     <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">—</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Score cumplimiento</div><div class="kpi-value" id="kpi-score-valor" style="color:var(--purple)">—</div><div class="kpi-delta" id="kpi-score-delta">Pendiente fuente de datos</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Habilitación red</div><div class="kpi-value" id="kpi-hab-red-valor" style="color:var(--teal)">—</div><div class="kpi-delta" id="kpi-hab-red-delta">Cargando...</div></div>
   </div>
   <div class="grid-2">
     <div class="card" style="margin-bottom:0">
@@ -603,19 +604,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       </div>
     </div>
   </div>
-  <div class="grid-3" style="margin-bottom:0">
+  <div class="grid-2" style="margin-bottom:0">
     <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Proyección gasto vs. presupuesto</div><div class="card-sub" id="proy-sub">Todos los modelos · Facturación real 2025</div></div></div>
+      <div class="card-head"><div><div class="card-title">Facturación por modelo</div><div class="card-sub" id="proy-sub">Distribución real · Contratos vigentes</div></div></div>
       <div class="card-body" id="graf-proyeccion"><div style="color:var(--text2);font-size:12px;padding:20px 0;text-align:center">Cargando datos reales...</div></div>
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Ranking rápido — Prestadores</div></div><div class="card-act" onclick="navigate('ranking')" style="cursor:pointer">Ver ranking →</div></div>
       <div class="card-body" style="padding:10px 16px" id="graf-ranking-rapido"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px;grid-column:1/-1">⏳ Conectando a Drive...</div></div></div><div class="rank-pct" style="color:var(--green)">91</div><div class="rank-trend up">↑+2</div></div>
     </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Cumplimiento global</div></div></div>
-      <div class="card-body" id="graf-cumplimiento-global" style="min-height:80px"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">⏳ Conectando a Drive...</div></div>
-          </div>
+<!-- cumplimiento global movido al kpi strip -->
         </div>
       </div>
     </div>
@@ -4651,13 +4649,12 @@ function actualizarGraficasResumen() {
     const entries = Object.entries(porModelo).sort((a,b)=>b[1].fact25-a[1].fact25);
     const maxFact = entries[0]?.[1]?.fact25 || 1;
     grafProy.innerHTML = entries.map(([mod,v]) => {
-      const presupuesto = v.fact25 * 1.05;
       const pct = Math.min(Math.round(v.fact25/maxFact*100), 100);
       const color = COLORS[mod] || 'var(--text2)';
       return `<div style="margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;margin-bottom:3px;align-items:center">
           <span style="font-size:11px;color:var(--text2);font-weight:500">${mod} <span style="color:var(--text2);font-weight:400">(${v.count})</span></span>
-          <span style="font-family:'DM Mono',monospace;font-size:10.5px;color:${color}">${fmtM(v.fact25)} → ${fmtM(presupuesto)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10.5px;color:${color}">${fmtM(v.fact25)}</span>
         </div>
         <div style="height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
           <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width .5s"></div>
@@ -5207,6 +5204,7 @@ async function cargarDesdeDrive() {
   if(DATOS_CARGADOS.reclamaciones)  aplicarReclamaciones();
   construirFiltros();
   aplicarFiltrosGlobales();
+  generarAlertasHabilitacion(getPrestadoresFiltrados());
   actualizarGraficasResumen();
 
   datosListos = resultados.length > 0;
@@ -5215,8 +5213,9 @@ async function cargarDesdeDrive() {
   const icon = document.getElementById('datos-estado-icon');
   const lbl  = document.getElementById('datos-estado-lbl');
   if(resultados.length > 0) {
-    if(icon) icon.textContent = '✅';
+    if(icon) icon.textContent = '✓';
     if(lbl)  lbl.textContent  = resultados.join(' · ');
+    const bd=document.getElementById('btn-datos');if(bd){bd.style.background='var(--gdim)';bd.style.color='var(--green)';bd.style.borderColor='var(--green)';}
     cerrarCargador();
     const toast = document.getElementById('notif-toast');
     if(toast){
@@ -5226,7 +5225,7 @@ async function cargarDesdeDrive() {
     }
   } else {
     if(icon) icon.textContent = '⚠️';
-    if(lbl)  lbl.textContent  = 'Error al cargar — verifica permisos';
+    if(lbl)  lbl.textContent  = 'Sin datos · verifica permisos de Drive';
   }
 
   if(btn){
@@ -6224,6 +6223,60 @@ function getPrestadoresFiltrados() {
     if(FILTROS.modelo       && toTitulo(p.modelo)       !== FILTROS.modelo)       return false;
     return true;
   });
+}
+
+function generarAlertasHabilitacion(filtrados) {
+  const el = document.getElementById('alertas-list-resumen');
+  const kpiVal = document.getElementById('kpi-alertas-valor');
+  const kpiDelta = document.getElementById('kpi-alertas-delta');
+  const habEl = document.getElementById('kpi-hab-red-valor');
+  const habDelta = document.getElementById('kpi-hab-red-delta');
+
+  // Calcular habilitación real
+  const conInfo = filtrados.filter(p=>p.hab_cumple!==null&&p.hab_cumple!==undefined);
+  const cumple = conInfo.filter(p=>p.hab_cumple===true).length;
+  const noCumple = conInfo.filter(p=>p.hab_cumple===false).length;
+  const pctHabReal = conInfo.length>0 ? Math.round(cumple/conInfo.length*100) : null;
+
+  // KPI habilitación
+  if(habEl) habEl.textContent = pctHabReal!==null ? pctHabReal+'%' : '—';
+  if(habDelta) habDelta.textContent = pctHabReal!==null
+    ? `${cumple} cumplen · ${noCumple} alertas`
+    : 'Conectando homologación...';
+
+  // KPI alertas
+  if(kpiVal) kpiVal.textContent = noCumple > 0 ? noCumple : (conInfo.length>0?'0':'—');
+  if(kpiDelta) kpiDelta.textContent = noCumple>0
+    ? `${noCumple} prestadores con hallazgos`
+    : conInfo.length>0 ? 'Sin hallazgos activos' : 'Homologación cargando...';
+
+  if(!el) return;
+  if(conInfo.length===0){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">⏳ Cargando base de habilitación...</div>';
+    return;
+  }
+  // Prestadores con No Cumple — ordenar por más servicios afectados
+  const alertas = filtrados
+    .filter(p=>p.hab_cumple===false)
+    .sort((a,b)=>(b.hab_no_cumple||0)-(a.hab_no_cumple||0))
+    .slice(0,5);
+  if(alertas.length===0){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">✅ Sin hallazgos de habilitación en la selección actual</div>';
+    return;
+  }
+  el.innerHTML = alertas.map(p=>{
+    const svcs = p.hab_no_cumple||0;
+    const total = p.hab_servicios||0;
+    const pct = total>0?Math.round(svcs/total*100):0;
+    const color = pct>50?'var(--red)':'var(--amber)';
+    return `<div class="al-item" style="--alc:${color}">
+      <div>
+        <div class="al-title">${p.nombre?.substring(0,45)||p.nit}</div>
+        <div class="al-meta">${p.regional||''} · ${p.ciudad||''} · ${svcs} de ${total} servicios no cumplen (${pct}%)</div>
+      </div>
+      <div class="al-time" style="color:${color};font-size:10px;white-space:nowrap">${pct}%</div>
+    </div>`;
+  }).join('');
 }
 
 function aplicarFiltrosGlobales() {
