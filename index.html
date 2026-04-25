@@ -474,7 +474,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="nav-sec">Análisis</div>
     <div class="nav-item" data-screen="ranking"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1 3h3l-2.5 2 1 3L7 7.5 4.5 9l1-3L3 4h3z" stroke="currentColor" stroke-width="1.2"/></svg>Ranking y cumplimiento</div>
     <div class="nav-item" data-screen="financiero"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="9" r="1" fill="currentColor"/></svg>Módulo financiero</div>
-    <!-- Modelos de contratación: integrado en Red de prestadores -->
+    <div class="nav-item" data-screen="contratacion"><svg viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 5h4M5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Modelos de contratación</div>
     <div class="nav-item" data-screen="indicadores"><svg viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Indicadores</div>
     <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
     <div class="nav-item" data-screen="cobertura"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 5.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Requerimientos</div>
@@ -566,7 +566,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
 <!-- ══ RESUMEN ══ -->
 <div class="screen active" id="screen-resumen">
-  <div id="banner-provisional-resumen" style="display:none;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,rgba(245,158,11,0.12),transparent);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12px">
+  <div id="banner-provisional-resumen" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,rgba(245,158,11,0.12),transparent);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12px">
     <span style="font-size:16px">⚠️</span>
     <div><span style="color:var(--amber);font-weight:600">Datos provisionales</span><span style="color:var(--text2)"> — Base de contratos vigentes en proceso de actualización. Los valores serán reemplazados al recibir la nueva base oficial.</span></div>
     <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
@@ -1006,7 +1006,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
 <!-- ══ PRESTADORES ══ -->
 <div class="screen" id="screen-prestadores">
-  <div id="banner-provisional" style="display:none;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,rgba(245,158,11,0.12),transparent);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12px">
+  <div id="banner-provisional" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,rgba(245,158,11,0.12),transparent);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12px">
   <span style="font-size:16px">⚠️</span>
   <div>
     <span style="color:var(--amber);font-weight:600">Datos provisionales</span>
@@ -2508,6 +2508,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
           <div style="font-size:10.5px;color:var(--text2);margin-top:1px">Google Sheets · Pestaña "Datos" · Cartera · Glosas · Pagos por cuotas</div>
         </div>
         <div id="estado-drive-reclamaciones" style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--bg4);color:var(--text2)">Sin cargar</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="font-size:11px;color:var(--text2)">🔍 Homologación servicios</span>
+          <div id="estado-drive-homologacion" style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--bg4);color:var(--text2)">Sin cargar</div>
+        </div>
       </div>
 
     </div>
@@ -5162,9 +5166,15 @@ const DRIVE_CONFIG = {
     nombre: 'Registro Único de Reclamaciones',
     icono: '📋'
   },
+  homologacion: {
+    id: '1s3V02sw-E_8NKcDRJM1Ya_v0pAR-1Cz-xKDvxEKvRYo',
+    hoja: 'DETALLADO VALIDACION',
+    nombre: 'Homologación Servicios — Evaluación Red',
+    icono: '🔍'
+  },
 };
 
-const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null };
+const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null, homologacion: null };
 let datosListos = false;
 let cargandoDesdeDrive = false;
 
@@ -5215,11 +5225,12 @@ async function cargarDesdeDrive() {
   actualizarEstadoFuente('reclamaciones', '⏳ Cargando...','var(--bdim)','var(--blue)');
 
   // ── Cargar las 4 fuentes EN PARALELO ─────────────────────────────────
-  const [resPrest, resNIT, resDANE, resRec] = await Promise.allSettled([
+  const [resPrest, resNIT, resDANE, resRec, resHab] = await Promise.allSettled([
     fetchViaAppsScript(DRIVE_CONFIG.prestadores.id,       DRIVE_CONFIG.prestadores.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_nit.id,  DRIVE_CONFIG.medicamentos_nit.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_dane.id, DRIVE_CONFIG.medicamentos_dane.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
+    fetchViaAppsScript(DRIVE_CONFIG.homologacion.id,      DRIVE_CONFIG.homologacion.hoja),
   ]);
 
   const resultados = [];
@@ -5230,7 +5241,6 @@ async function cargarDesdeDrive() {
       const prest = parsearArrayPrestadores(resPrest.value);
       DATOS_CARGADOS.prestadores = prest;
       actualizarEstadoFuente('prestadores',`✓ ${prest.length.toLocaleString('es-CO')} contratos`,'var(--gdim)','var(--green)');
-      resultados.push(`${prest.length.toLocaleString('es-CO')} contratos`);
     } catch(e) {
       actualizarEstadoFuente('prestadores',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
       console.error('Prestadores parser:', e);
@@ -5245,7 +5255,7 @@ async function cargarDesdeDrive() {
       const {gestores, cobertura} = parsearArrayGestores(resNIT.value, resDANE.value);
       DATOS_CARGADOS.gestores = { gestores, cobertura };
       actualizarEstadoFuente('medicamentos',`✓ ${gestores.length} gestores · ${cobertura.length.toLocaleString()} municipios`,'var(--gdim)','var(--green)');
-      resultados.push(`${gestores.length} gestores farmacéuticos`);
+      resultados.push(`${gestores.length} gestores`);
     } catch(e) {
       actualizarEstadoFuente('medicamentos',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
       console.error('Gestores parser:', e);
@@ -5267,13 +5277,28 @@ async function cargarDesdeDrive() {
       }, 0);
       const fmtM = v=>v>=1e12?'$'+(v/1e12).toFixed(1)+'B':v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$0';
       actualizarEstadoFuente('reclamaciones',`✓ ${rec.length.toLocaleString()} registros · Cartera: ${fmtM(totalCartera)}`,'var(--gdim)','var(--green)');
-      // reclamaciones omitida del pill topbar
+      resultados.push(`${rec.length.toLocaleString()} reclamaciones`);
     } catch(e) {
       actualizarEstadoFuente('reclamaciones',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
       console.error('Reclamaciones parser:', e);
     }
   } else {
     actualizarEstadoFuente('reclamaciones',`⚠ Error: ${resRec.reason?.message||'Sin respuesta'}`,'var(--adim)','var(--amber)');
+  }
+
+  // ── Procesar Homologación de Servicios ────────────────────────────
+  if(resHab && resHab.status === 'fulfilled') {
+    try {
+      DATOS_CARGADOS.homologacion = parsearHomologacion(resHab.value);
+      const n = Object.keys(DATOS_CARGADOS.homologacion).length;
+      actualizarEstadoFuente('homologacion', `✓ ${n.toLocaleString('es-CO')} prestadores evaluados`, 'var(--gdim)', 'var(--green)');
+      console.log('[Homologación] NITs indexados:', n);
+    } catch(e) {
+      actualizarEstadoFuente('homologacion', `⚠ Error: ${e.message}`, 'var(--adim)', 'var(--amber)');
+      console.error('[Homologación]', e);
+    }
+  } else if(resHab) {
+    actualizarEstadoFuente('homologacion', `⚠ Sin respuesta`, 'var(--adim)', 'var(--amber)');
   }
 
   // ── Aplicar al tablero ─────────────────────────────────────────────
@@ -5384,7 +5409,6 @@ function parsearArrayPrestadores(data) {
   };
 
   const result = data.slice(1).map(row => {
-    row = row.slice(0, 19); // Solo columnas A–S (0–18)
     const nombre = get(row, cols.nombre);
     const nit = get(row, cols.nit);
     if(!nit || !nombre) return null;
@@ -5406,7 +5430,7 @@ function parsearArrayPrestadores(data) {
       fact_2024:       getNum(row, cols.fact_2024),
       fact_2025:       getNum(row, cols.fact_2025),
       fact_2026:       getNum(row, cols.fact_2026),
-      fact_mar26:      0,
+      fact_mar26:      getNum(row, fact_mar26_col),
     };
   }).filter(Boolean);
 
@@ -5415,6 +5439,69 @@ function parsearArrayPrestadores(data) {
     console.log('[RedSalud] Muestra primer prestador:', result[0]);
   }
   return result;
+}
+
+// ── Parser Homologación de Servicios ────────────────────────────────────
+// Indexa por NIT → { cumple: bool, servicios: N, detalle: [{cups, resultado}] }
+// Lógica: si CUALQUIER fila del NIT dice "No cumple" → No cumple (conservador)
+function parsearHomologacion(data) {
+  if(!data || data.length < 2) return {};
+  const headers = data[0].map(h => String(h||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+
+  const findCol = (...kws) => {
+    for(const kw of kws){
+      const i = headers.findIndex(h => h.includes(kw));
+      if(i >= 0) return i;
+    }
+    return -1;
+  };
+
+  const colNIT      = findCol('NIT');
+  const colResultado = findCol('RESULTADO FINAL VALIDACION', 'RESULTADO FINAL VALIDACI');
+  const colCups     = findCol('DESCRIPCION CUPS');
+  const colEstado   = findCol('ESTADO DE LA VERIFICACION', 'ESTADO VERIFICACION');
+  const colFechaAtt = findCol('FECHA DE VERIFICACION DEL ATT', 'FECHA VERIFICACION ATT');
+
+  console.log('[Homologación] cols → NIT:', colNIT, '| Resultado:', colResultado, '| CUPS:', colCups);
+
+  const idx = {};
+  data.slice(1).forEach(row => {
+    const nit = String(row[colNIT]||'').replace(/\.0$/,'').trim();
+    if(!nit) return;
+    const res = String(row[colResultado]||'').trim().toUpperCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const cups = String(row[colCups]||'').trim();
+    const noCumple = res.includes('NO CUMPLE') || res.includes('NO') && res.length < 10;
+
+    if(!idx[nit]) {
+      idx[nit] = { cumple: true, servicios: 0, noCumpleCount: 0,
+                   estado: String(row[colEstado]||'').trim(),
+                   fechaAtt: String(row[colFechaAtt]||'').trim() };
+    }
+    idx[nit].servicios++;
+    if(noCumple) {
+      idx[nit].noCumpleCount++;
+      idx[nit].cumple = false;
+    }
+  });
+  return idx;
+}
+
+function enriquecerConHab(prestadores) {
+  const hab = DATOS_CARGADOS.homologacion;
+  if(!hab) return prestadores;
+  return prestadores.map(p => {
+    const h = hab[p.nit] || hab[p.nit?.replace(/\.0$/,'')];
+    return {
+      ...p,
+      hab_cumple:    h ? h.cumple    : null,
+      hab_servicios: h ? h.servicios : 0,
+      hab_no_cumple: h ? h.noCumpleCount : 0,
+      hab_estado:    h ? h.estado    : '',
+      hab_fecha_att: h ? h.fechaAtt  : '',
+    };
+  });
 }
 
 function parsearArrayGestores(dataNIT, dataDANE) {
@@ -5938,7 +6025,9 @@ function aplicarDatos() {
 }
 
 function aplicarPrestadores() {
-  const prest = DATOS_CARGADOS.prestadores;
+  const prestBruto = DATOS_CARGADOS.prestadores;
+  const prest = enriquecerConHab(prestBruto);
+  DATOS_CARGADOS.prestadores = prest; // guardar enriquecido
   if(!prest || !prest.length) return;
 
   // ── Cálculos base ──────────────────────────────────────────────────
@@ -6007,7 +6096,7 @@ function aplicarPrestadores() {
   const pctContrato2 = total>0 ? Math.round(conContrato/total*100) : 0;
   actualizarKPI('kpi-prest-total',           fmtN(total));
   actualizarKPI('kpi-prest-hab',             fmtN(habilitados));
-  actualizarKPI('kpi-prest-hab-delta',       `${pctHab}% de la red · ${regionales.length} regionales`);
+  actualizarKPI('kpi-prest-hab-delta',       conHabInfo>0?`${pctHab}% cumplen habilitación`:'Contratos vigentes Marzo 2026');
   actualizarKPI('kpi-prest-contrato',        fmtN(conContrato));
   actualizarKPI('kpi-prest-contrato-delta',  `${pctContrato2}% legalizados`);
   actualizarKPI('kpi-prest-sincontrato',     fmtN(sinContrato));
@@ -6284,7 +6373,7 @@ function aplicarFiltrosGlobales() {
   const sinContrato2  = total - conContrato;
   actualizarKPI('kpi-prest-total',             fmtN(total));
   actualizarKPI('kpi-prest-hab',               fmtN(habilitados));
-  actualizarKPI('kpi-prest-hab-delta',         `${pctHab}% de la red · ${regionales.length} regionales`);
+  actualizarKPI('kpi-prest-hab-delta',         conHabInfo>0?`${pctHab}% cumplen habilitación`:'Contratos vigentes Marzo 2026');
   actualizarKPI('kpi-prest-contrato',          fmtN(conContrato));
   actualizarKPI('kpi-prest-contrato-delta',    `${pctContrato2}% legalizados`);
   actualizarKPI('kpi-prest-sincontrato',       fmtN(sinContrato2));
@@ -6335,9 +6424,10 @@ function aplicarFiltrosGlobales() {
   if(tablaResumen) {
     const top8 = [...filtrados].sort((a,b)=>b.fact_2025-a.fact_2025).slice(0,8);
     tablaResumen.innerHTML = top8.map(p => {
-      const hab = p.habilitacion === 'Si';
-      const badgeClass = hab ? 'bg-g' : 'bg-r';
-      const badgeLabel = hab ? 'Activo' : 'Inactivo';
+      // Semáforo habilitación real desde homologación
+      const habCumple = p.hab_cumple;
+      const badgeClass = habCumple === true ? 'bg-g' : habCumple === false ? 'bg-r' : 'bg-n';
+      const badgeLabel = habCumple === true ? '● Cumple' : habCumple === false ? '● No cumple' : 'Sin eval.';
       const modKey = p.modelo?.split(' ')[0]||'';
       const modBadge = {CAPITA:'bg-b',EVENTO:'bg-g',MRC:'bg-t',PGP:'bg-p',TECHO:'bg-a'}[modKey]||'';
       return `<tr>
