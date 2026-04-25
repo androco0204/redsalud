@@ -574,9 +574,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   <div class="kpi-strip cols-5">
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--green)" id="kpi-resumen-prestadores">—</div><div class="kpi-delta up" id="kpi-resumen-prestadores-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">—</div><div class="kpi-delta up" id="kpi-resumen-cobertura-delta">Cargando...</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas activas</div><div class="kpi-value" style="color:var(--amber)">7</div><div class="kpi-delta warn">3 críticas · 4 medias</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas activas</div><div class="kpi-value" id="kpi-alertas-valor" style="color:var(--amber)">—</div><div class="kpi-delta" id="kpi-alertas-delta">Pendiente fuente de datos</div></div>
     <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">—</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">Cargando...</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Score cumplimiento</div><div class="kpi-value" style="color:var(--purple)">81.3</div><div class="kpi-delta up">↑ 2.4pts vs T4 2025</div></div>
+    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Score cumplimiento</div><div class="kpi-value" id="kpi-score-valor" style="color:var(--purple)">—</div><div class="kpi-delta" id="kpi-score-delta">Pendiente fuente de datos</div></div>
   </div>
   <div class="grid-2">
     <div class="card" style="margin-bottom:0">
@@ -597,9 +597,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
         <div class="card-act" onclick="navigate('alertas')" style="cursor:pointer">Gestionar →</div>
       </div>
       <div class="card-body">
-        <div class="al-item" style="--alc:var(--red)"><div><div class="al-title">Clínica Palermo — Habilitación vencida</div><div class="al-meta">+ cartera vencida 67 días · $842 M en riesgo</div></div><div class="al-time">Hoy</div></div>
-        <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">IPS San Rafael — Score bajo umbral</div><div class="al-meta">Pago pendiente 32 días · Contrato en revisión</div></div><div class="al-time">Lun</div></div>
-        <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">Techo presupuestal capita — 94.1% ejecutado</div><div class="al-meta">Riesgo de sobreejecutar antes de fin de mes</div></div><div class="al-time">Lun</div></div>
+
+
+
       </div>
     </div>
   </div>
@@ -614,7 +614,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Cumplimiento global</div></div></div>
-      <div class="card-body" id="graf-cumplimiento-global"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px;grid-column:1/-1">⏳ Conectando a Drive...</div></div>
+      <div class="card-body" id="graf-cumplimiento-global" style="min-height:80px"><div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">⏳ Conectando a Drive...</div></div>
           </div>
         </div>
       </div>
@@ -955,9 +955,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div class="card-body" style="padding:0 20px"><div class="scroll" style="max-height:400px">
         <table class="table">
           <thead><tr><th>Prestador</th><th>NIT</th><th>Ciudad</th><th>Regional</th><th>Modelo</th><th>Fact. 2025</th><th>Fact. Mar 2026</th><th>Habilitación</th><th>Estado tarifas</th></tr></thead>
-          <tbody id="tabla-prestadores-body">
-            <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2);font-size:13px">⏳ Cargando datos desde Google Drive...</td></tr>
-          </tbody>
+          <tbody id="tabla-prestadores-body"><tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text2);font-size:12px">⏳ Conectando a Drive...</td></tr></tbody>
         </table>
       </div></div>
     </div>
@@ -1125,15 +1123,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   </div>
   <div class="card"><div class="card-head"><div><div class="card-title">Centro de alertas</div><div class="card-sub">Todas · ordenadas por criticidad · incluye impacto financiero</div></div></div>
   <div class="card-body">
-    <div class="al-item" style="--alc:var(--red)"><div><div class="al-title">🔴 Clínica Palermo — Habilitación vencida + mora 67 días</div><div class="al-meta">$842 M en riesgo · Suspensión contractual inmediata recomendada</div></div><div class="al-time">Hoy</div></div>
-    <div class="al-item" style="--alc:var(--red)"><div><div class="al-title">🔴 Pharmos Domicilios — ANS 63% + mora 45 días + 3 tutelas</div><div class="al-meta">$1,240 M cartera vencida · Plan de mejora urgente o terminación contrato</div></div><div class="al-time">Ayer</div></div>
-    <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">🟡 MRC — Siniestralidad real supera esperada en 6.8%</div><div class="al-meta">Desviación activa · EPS asume 60% del exceso · Ajuste de prima requerido en próxima liquidación</div></div><div class="al-time">Ayer</div></div>
-    <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">🟡 Capita — Ejecución al 97% del techo mensual</div><div class="al-meta">$560 M margen restante · Monitoreo diario recomendado</div></div><div class="al-time">Lun</div></div>
-    <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">🟡 IPS San Rafael — Score 67 + pago pendiente 32 días</div><div class="al-meta">$440 M en cartera · Score en descenso por tercer período consecutivo</div></div><div class="al-time">Lun</div></div>
-    <div class="al-item" style="--alc:var(--amber)"><div><div class="al-title">🟡 Cruz Verde — PQRS vencidas + mora 18 días</div><div class="al-meta">$880 M pendientes · 12 PQRS sin respuesta · ANS en riesgo</div></div><div class="al-time">Dom</div></div>
-  </div></div>
-</div>
-
 <div class="screen" id="screen-cobertura">
 
   <!-- KPIs superiores -->
@@ -5170,7 +5159,7 @@ async function cargarDesdeDrive() {
       const {gestores, cobertura} = parsearArrayGestores(resNIT.value, resDANE.value);
       DATOS_CARGADOS.gestores = { gestores, cobertura };
       actualizarEstadoFuente('medicamentos',`✓ ${gestores.length} gestores · ${cobertura.length.toLocaleString()} municipios`,'var(--gdim)','var(--green)');
-      resultados.push(`${gestores.length} gestores farmacéuticos`);
+      // gestores omitidos del pill
     } catch(e) {
       actualizarEstadoFuente('medicamentos',`⚠ Error parser: ${e.message}`,'var(--adim)','var(--amber)');
       console.error('Gestores parser:', e);
@@ -5638,8 +5627,15 @@ function aplicarReclamaciones() {
   const rec = DATOS_CARGADOS.reclamaciones;
   if(!rec || !rec.length) return;
 
-  const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
-  const fmtN = v=>v.toLocaleString('es-CO');
+  const fmtM = v=>{
+    if(!v||v===0) return '—';
+    if(v>=1e12) return '$'+(v/1e12).toFixed(2)+'B';
+    if(v>=1e9)  return '$'+(v/1e9).toFixed(1)+'B';
+    if(v>=1e6)  return '$'+(v/1e6).toFixed(1)+'M';
+    if(v>=1e3)  return '$'+(v/1e3).toFixed(0)+'K';
+    return '$'+v.toLocaleString('es-CO');
+  };
+  const fmtN = v=>Number(v).toLocaleString('es-CO');
 
   // Cálculos
   const MAX_COP = 100_000_000_000; // 100B COP máximo razonable
@@ -6240,8 +6236,15 @@ function aplicarFiltrosGlobales() {
     return;
   }
 
-  const fmtM = v=>v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
-  const fmtN = v=>v.toLocaleString('es-CO');
+  const fmtM = v=>{
+    if(!v||v===0) return '—';
+    if(v>=1e12) return '$'+(v/1e12).toFixed(2)+'B';
+    if(v>=1e9)  return '$'+(v/1e9).toFixed(1)+'B';
+    if(v>=1e6)  return '$'+(v/1e6).toFixed(1)+'M';
+    if(v>=1e3)  return '$'+(v/1e3).toFixed(0)+'K';
+    return '$'+v.toLocaleString('es-CO');
+  };
+  const fmtN = v=>Number(v).toLocaleString('es-CO');
 
   // Todos en B_Contratos Vigentes son vigentes por definición
   const regionales   = [...new Set(filtrados.map(p=>p.regional).filter(Boolean))];
