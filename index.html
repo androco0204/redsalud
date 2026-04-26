@@ -4589,7 +4589,7 @@ function exportarPrestadoresExcel() {
   const filtrados = getPrestadoresFiltrados();
   if(!filtrados.length) return;
 
-  const fmtM = v => v>0 ? v.toLocaleString('es-CO') : '';
+  const fmtM = v=>{const n=Math.abs(v||0);if(!v||v===0)return '—';if(n>=1e12)return '$'+(v/1e12).toFixed(1)+' bill.';if(n>=1e9)return '$'+(v/1e9).toFixed(1)+' mil mill.';if(n>=1e6)return '$'+(v/1e6).toFixed(0)+' M';return '$'+Number(v).toLocaleString('es-CO');};
   const headers = ['NIT','Nombre Prestador','Ciudad','Departamento','Regional','Especialidad',
     'Modelo Contratación','Habilitación REPS','Nivel Complejidad','Tipo Prestador',
     'Tiene Contrato','No. Contrato','Estado Tarifas 2026','Facturación 2024',
@@ -5957,7 +5957,7 @@ function aplicarPrestadores() {
   const factMar26 = 0;
   const varFact   = 0;
 
-  const fmtM = v => v>=1e12?'$'+(v/1e12).toFixed(1)+'T':v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
+  const fmtM = v=>{const n=Math.abs(v||0);if(!v||v===0)return '—';if(n>=1e12)return '$'+(v/1e12).toFixed(1)+' bill.';if(n>=1e9)return '$'+(v/1e9).toFixed(1)+' mil mill.';if(n>=1e6)return '$'+(v/1e6).toFixed(0)+' M';return '$'+Number(v).toLocaleString('es-CO');};
   const fmtN = v => v.toLocaleString('es-CO');
 
   // ── Por modelo ─────────────────────────────────────────────────────
@@ -6502,7 +6502,7 @@ function filtrarTablaPrestadores(tipo, tabEl) {
   tabEl.classList.add('active');
 
   const filtrados = getPrestadoresFiltrados();
-  const fmtM = v => v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+v.toLocaleString('es-CO'):'—';
+  const fmtM = v=>{const n=Math.abs(v||0);if(!v||v===0)return '—';if(n>=1e12)return '$'+(v/1e12).toFixed(1)+' bill.';if(n>=1e9)return '$'+(v/1e9).toFixed(1)+' mil mill.';if(n>=1e6)return '$'+(v/1e6).toFixed(0)+' M';return '$'+Number(v).toLocaleString('es-CO');};
 
   // Filtrar según pestaña
   let subset;
