@@ -5317,6 +5317,12 @@ function parsearArrayPrestadores(data) {
     docs_2025:       findCol('2025'),
   };
   console.log('[RedSalud] Contratos — mapeo cols:', cols);
+  // DEBUG: ver valor raw de facturacion en primeras 3 filas
+  data.slice(1,4).forEach((row,i)=>{
+    const raw = row[cols.facturacion];
+    const parsed = parseFloat(String(raw||'').replace(/[$,.]/g,'').replace(',','.'));
+    console.log(`[Facturacion fila ${i+1}] raw="${raw}" → parsed=${parsed}`);
+  });
 
   const get = (row, col) => col >= 0 && col < row.length ? String(row[col]||'').trim() : '';
   const getNum = (row, col) => {
