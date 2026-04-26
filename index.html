@@ -1115,7 +1115,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Resueltas hoy</div><div class="kpi-value" style="color:var(--green)">5</div><div class="kpi-delta up">↑ vs ayer</div></div>
   </div>
   <div class="card"><div class="card-head"><div><div class="card-title">Centro de alertas</div><div class="card-sub">Todas · ordenadas por criticidad · incluye impacto financiero</div></div></div>
-  <div class="card-body" style="padding:20px;color:var(--text2);font-size:13px">Alertas generadas automáticamente.</div>
+  <div class="card-body" style="padding:20px;color:var(--text2)">Alertas generadas automáticamente.</div>
   </div>
 </div><!-- /screen-alertas -->
 <div class="screen" id="screen-cobertura">
@@ -6846,7 +6846,7 @@ function renderRequerimientos(datos) {
         <td style="font-size:11px;color:var(--text2)">${regional}</td>
         <td style="font-size:11px;color:var(--text2)">${depto}</td>
         <td style="font-size:11px;color:var(--text2)">${ciudad}</td>
-        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${clrItem}">${estado}</span></td>
+        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${clrEst}">${estado}</span></td>
         <td style="font-family:'DM Mono',monospace;font-weight:600">${n}</td>
         <td style="font-family:'DM Mono',monospace;color:var(--text2)">${fmtP(n,total)}</td>
       </tr>`;
@@ -6952,9 +6952,9 @@ function dibujarTorta(datos, titulo) {
     const clrPaleta=PALETA_ESTADOS[lbl]||'#6b7280';
     const pct=Math.round(n/totalT*100);
     return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <div style="width:10px;height:10px;border-radius:2px;background:${clrItem};flex-shrink:0"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:${clrPaleta};flex-shrink:0"></div>
       <span style="font-size:11px;color:var(--text2);flex:1">${lbl}</span>
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrItem}">${n} · ${pct}%</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrPaleta}">${n} · ${pct}%</span>
     </div>`;
   }).join('');
 }
