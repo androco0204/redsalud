@@ -6381,7 +6381,7 @@ function aplicarFiltrosGlobales() {
     const maxFact = sorted[0]?.[1]?.fact || 1;
     grafMod.innerHTML = sorted.map(([mod, v]) => {
       const pct = Math.round(v.fact/maxFact*100);
-      const col = COLORES[mod] || 'var(--text2)';
+      const colFmt = COLORES[mod] || 'var(--text2)';
       return `<div class="hist-bar-row">
         <span class="hist-bar-lbl" style="width:65px;font-size:10.5px">${mod}</span>
         <div class="hist-bar-track" style="flex:1"><div class="hist-bar-fill" style="width:${pct}%;background:${col}"></div></div>
