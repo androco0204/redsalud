@@ -6381,11 +6381,11 @@ function aplicarFiltrosGlobales() {
     const maxFact = sorted[0]?.[1]?.fact || 1;
     grafMod.innerHTML = sorted.map(([mod, v]) => {
       const pct = Math.round(v.fact/maxFact*100);
-      const colFmt = COLORES[mod] || 'var(--text2)';
+      const color = COLORES[mod] || 'var(--text2)';
       return `<div class="hist-bar-row">
         <span class="hist-bar-lbl" style="width:65px;font-size:10.5px">${mod}</span>
-        <div class="hist-bar-track" style="flex:1"><div class="hist-bar-fill" style="width:${pct}%;background:${col}"></div></div>
-        <span class="hist-bar-val" style="color:${col};font-size:10.5px;width:110px;text-align:right">${fmtM(v.fact)} · ${v.count}</span>
+        <div class="hist-bar-track" style="flex:1"><div class="hist-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="hist-bar-val" style="color:${color};font-size:10.5px;width:110px;text-align:right">${fmtM(v.fact)} · ${v.count}</span>
       </div>`;
     }).join('');
   }
@@ -6840,14 +6840,14 @@ function renderRequerimientos(datos) {
     const COLS_EST={'Cerrado':'var(--green)','Cerrado por correo':'var(--green)','En gestión':'var(--amber)','Devuelto':'var(--blue)','Pendiente':'#f97316'};
     tb1.innerHTML=Object.entries(grupTipo).sort((a,b)=>b[1]-a[1]).map(([key,n])=>{
       const [tipo,gestor,regional,depto,ciudad,estado]=key.split('||');
-      const col=COLS_EST[estado]||'var(--text2)';
+      const clrEst=COLS_EST[estado]||'var(--text2)';
       return `<tr>
         <td style="font-size:11.5px">${tipo}</td>
         <td style="font-size:11px;color:var(--text2)">${gestor}</td>
         <td style="font-size:11px;color:var(--text2)">${regional}</td>
         <td style="font-size:11px;color:var(--text2)">${depto}</td>
         <td style="font-size:11px;color:var(--text2)">${ciudad}</td>
-        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${col}">${estado}</span></td>
+        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${clrItem}">${estado}</span></td>
         <td style="font-family:'DM Mono',monospace;font-weight:600">${n}</td>
         <td style="font-family:'DM Mono',monospace;color:var(--text2)">${fmtP(n,total)}</td>
       </tr>`;
@@ -6863,14 +6863,14 @@ function renderRequerimientos(datos) {
     const mx=sorted[0]?.[1]||1;
     const COLS=['var(--blue)','var(--teal)','var(--green)','var(--amber)','var(--purple)','var(--red)'];
     bEl.innerHTML=sorted.map(([t,n],i)=>{
-      const col=COLS[i%COLS.length];
+      const clrItem=COLS[i%COLS.length];
       return `<div style="margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;margin-bottom:3px">
           <span style="font-size:11px;color:var(--text2);flex:1;margin-right:8px">${t.substring(0,42)}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col};flex-shrink:0">${n} · ${fmtP(n,total)}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrItem};flex-shrink:0">${n} · ${fmtP(n,total)}</span>
         </div>
         <div style="height:6px;background:var(--bg4);border-radius:3px">
-          <div style="height:100%;width:${Math.round(n/mx*100)}%;background:${col};border-radius:3px;transition:width .4s"></div>
+          <div style="height:100%;width:${Math.round(n/mx*100)}%;background:${clrItem};border-radius:3px;transition:width .4s"></div>
         </div>
       </div>`;
     }).join('');
@@ -6933,9 +6933,9 @@ function dibujarTorta(datos, titulo) {
   const entries=Object.entries(grupos).sort((a,b)=>b[1]-a[1]);
   entries.forEach(([lbl,n])=>{
     const slice=(n/totalT)*Math.PI*2;
-    const col=PALETA_ESTADOS[lbl]||'#6b7280';
+    const clrPaleta=PALETA_ESTADOS[lbl]||'#6b7280';
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+slice);ctx.closePath();
-    ctx.fillStyle=col;ctx.fill();
+    ctx.fillStyle=clrPaleta;ctx.fill();
     ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.5;ctx.stroke();
     ang+=slice;
   });
@@ -6950,12 +6950,12 @@ function dibujarTorta(datos, titulo) {
   ctx.fillText('casos',cx,cy+10);
 
   if(leyEl) leyEl.innerHTML=entries.map(([lbl,n])=>{
-    const col=PALETA_ESTADOS[lbl]||'#6b7280';
+    const clrPaleta=PALETA_ESTADOS[lbl]||'#6b7280';
     const pct=Math.round(n/totalT*100);
     return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <div style="width:10px;height:10px;border-radius:2px;background:${col};flex-shrink:0"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:${clrItem};flex-shrink:0"></div>
       <span style="font-size:11px;color:var(--text2);flex:1">${lbl}</span>
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${col}">${n} · ${pct}%</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrItem}">${n} · ${pct}%</span>
     </div>`;
   }).join('');
 }
