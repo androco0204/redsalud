@@ -60,7 +60,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .date-chip{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px;}
 
 /* SCREENS */
-.screen{display:none;padding:22px 26px;}.screen.active{display:block;}
+.screen{display:none;padding:22px 26px;animation:fadeUp .3s ease both;}
+.screen.active{display:block;}
 /* VALIDADOR Y CONSTRUCTOR */
 .upload-zone{border:2px dashed var(--border2);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative;}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:var(--gdim);}
@@ -613,9 +614,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- cumplimiento global movido al kpi strip -->
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
 <!-- ══ RANKING ══ -->
 <div class="screen" id="screen-ranking">
@@ -1117,8 +1115,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Resueltas hoy</div><div class="kpi-value" style="color:var(--green)">5</div><div class="kpi-delta up">↑ vs ayer</div></div>
   </div>
   <div class="card"><div class="card-head"><div><div class="card-title">Centro de alertas</div><div class="card-sub">Todas · ordenadas por criticidad · incluye impacto financiero</div></div></div>
-  <div class="card-body" style="padding:20px;color:var(--text2);font-size:13px">Alertas generadas desde datos de habilitación y contratos.</div>
-  </div></div><!-- /screen-alertas -->
+  <div class="card-body" style="padding:20px;color:var(--text2);font-size:13px">Alertas generadas automáticamente.</div>
+  </div>
+</div><!-- /screen-alertas -->
 <div class="screen" id="screen-cobertura">
 
   <!-- KPIs superiores -->
@@ -3044,26 +3043,10 @@ const titles = {
 };
 
 function navigate(screen){
-  // Hide all screens with explicit inline style (bulletproof)
-  document.querySelectorAll('.screen').forEach(s=>{
-    s.style.display='none';
-    s.classList.remove('active');
-  });
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const sc=document.getElementById('screen-'+screen);
-  if(sc){
-    sc.style.display='block';
-    sc.style.position='fixed';
-    sc.style.top='54px';
-    sc.style.left='228px';
-    sc.style.right='0';
-    sc.style.bottom='0';
-    sc.style.overflowY='auto';
-    sc.style.background='var(--bg)';
-    sc.style.zIndex='10';
-    sc.style.padding='22px 26px';
-    sc.classList.add('active');
-  }
+  if(sc){sc.classList.add('active');}
   const ni=document.querySelector(`[data-screen="${screen}"]`);
   if(ni){ni.classList.add('active');}
   if(titles[screen]){
@@ -8502,14 +8485,12 @@ document.querySelectorAll('.nav-item[data-screen]').forEach(function(item){
 
 // ── CARGA AUTOMÁTICA AL ABRIR LA PÁGINA ───────────────────────────────
 window.addEventListener('load', function() {
-  // Ensure resumen screen is positioned correctly on initial load
-  const rs = document.getElementById('screen-resumen');
-  if(rs){ rs.style.display='block'; rs.style.position='fixed'; rs.style.top='54px'; rs.style.left='228px'; rs.style.right='0'; rs.style.bottom='0'; rs.style.overflowY='auto'; rs.style.background='var(--bg)'; rs.style.zIndex='10'; rs.style.padding='22px 26px'; }
   // Inicializar validador con batería real
   inicializarValidador();
   // Cargar datos desde Drive
   setTimeout(cargaAutomatica, 800);
 });
 </script>
+</div><!-- /.main -->
 </body>
 </html>
