@@ -453,6 +453,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- SheetJS para lectura de Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+// ESTRUCTURAL: mover todos los .screen dentro de .main al cargar
+document.addEventListener('DOMContentLoaded', function() {
+  var main = document.querySelector('.main');
+  if (!main) return;
+  var screens = document.querySelectorAll('.screen');
+  screens.forEach(function(s) {
+    if (s.parentElement !== main) {
+      main.appendChild(s);
+    }
+  });
+  console.log('[INIT] Screens reubicados en .main:', screens.length);
+});
+</script>
 </head>
 <body>
 
@@ -614,6 +629,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 <!-- cumplimiento global movido al kpi strip -->
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ RANKING ══ -->
 <div class="screen" id="screen-ranking">
@@ -1117,7 +1135,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   <div class="card"><div class="card-head"><div><div class="card-title">Centro de alertas</div><div class="card-sub">Todas · ordenadas por criticidad · incluye impacto financiero</div></div></div>
   <div class="card-body" style="padding:20px;color:var(--text2)">Alertas generadas automáticamente.</div>
   </div>
-</div><!-- /screen-alertas -->
+</div>
 <div class="screen" id="screen-cobertura">
 
   <!-- KPIs superiores -->
@@ -6952,9 +6970,9 @@ function dibujarTorta(datos, titulo) {
     const clrPaleta=PALETA_ESTADOS[lbl]||'#6b7280';
     const pct=Math.round(n/totalT*100);
     return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <div style="width:10px;height:10px;border-radius:2px;background:${clrPaleta};flex-shrink:0"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:${clrItem};flex-shrink:0"></div>
       <span style="font-size:11px;color:var(--text2);flex:1">${lbl}</span>
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrPaleta}">${n} · ${pct}%</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrItem}">${n} · ${pct}%</span>
     </div>`;
   }).join('');
 }
@@ -8491,6 +8509,5 @@ window.addEventListener('load', function() {
   setTimeout(cargaAutomatica, 800);
 });
 </script>
-</div><!-- /.main -->
 </body>
 </html>
