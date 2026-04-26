@@ -5524,8 +5524,8 @@ function parsearArrayReclamaciones(data) {
     const direct = parseFloat(s);
     if(!isNaN(direct) && !s.includes(',')) return direct;
     // Intento 2: formato colombiano (punto=miles, coma=decimal)
-    const col = parseFloat(s.replace(/\./g,'').replace(',','.'));
-    return isNaN(col) ? 0 : col;
+    const colFmt = parseFloat(s.replace(/\./g,'').replace(',','.'));
+    return isNaN(colFmt) ? 0 : colFmt;
   };
 
   const result = data.slice(headerRowIdx + 1).map(row=>{
