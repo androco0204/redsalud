@@ -5518,15 +5518,14 @@ function parsearArrayReclamaciones(data) {
     if(col < 0) return 0;
     const raw = get(row, col);
     if(!raw || raw === '' || raw === '#N/A' || raw === 'null') return 0;
-    // Handle Colombian number format: 1.234.567,89 or 1234567.89 or 1234567
-    const cleaned = raw
-      .replace(/\$/g,'')
-      .replace(/\s/g,'')
-      .replace(/,(\d{2})$/, '.__DECIMAL__$1') // protect last comma as decimal
-      .replace(/[.,]/g,'')                     // remove all dots and commas
-      .replace('__DECIMAL__', '.');            // restore decimal
-    const n = parseFloat(cleaned);
-    return isNaN(n) ? 0 : n;
+    // Formato: valor numérico directo "14571568.625" o colombiano "1.234.567,89"
+    const s = raw.replace(/[$\s]/g,'');
+    // Intento 1: número directo con punto decimal
+    const direct = parseFloat(s);
+    if(!isNaN(direct) && !s.includes(',')) return direct;
+    // Intento 2: formato colombiano (punto=miles, coma=decimal)
+    const col = parseFloat(s.replace(/\./g,'').replace(',','.'));
+    return isNaN(col) ? 0 : col;
   };
 
   const result = data.slice(headerRowIdx + 1).map(row=>{
