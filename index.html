@@ -452,12 +452,32 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 
 
 .nav-parent{justify-content:space-between;}
-.nav-arrow{font-size:10px;opacity:0.45;transition:transform .2s;margin-left:auto;flex-shrink:0;}
+.nav-arrow{font-size:10px;opacity:.45;transition:transform .2s;margin-left:auto;flex-shrink:0;}
 .nav-submenu{max-height:0;overflow:hidden;transition:max-height .28s ease;padding-left:4px;}
 .nav-submenu.open{max-height:500px;}
 .nav-sub{font-size:11.5px !important;padding:5px 10px 5px 22px !important;color:rgba(255,255,255,0.52) !important;}
 .nav-sub:hover{color:#fff !important;background:rgba(255,255,255,0.07) !important;}
 .nav-sub.active{color:#0099D1 !important;background:rgba(0,153,209,0.18) !important;}
+/* Habilitación table */
+.hab-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.hab-table th{background:var(--brand-mid);color:#fff;padding:7px 10px;text-align:left;font-weight:600;font-size:11px;position:sticky;top:0;z-index:2;}
+.hab-table td{padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.hab-table tr:hover td{background:var(--bg3);cursor:pointer;}
+.badge-si{background:#D1EFF9;color:#003D53;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-no{background:#FDECEA;color:#B50303;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-proceso{background:#FEF3E2;color:#7A4000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-excluido{background:#F5E6E6;color:#7A0000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-norequiere{background:#E8F5E9;color:#1B5E20;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-cumple{background:#D1EFF9;color:#003D53;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-nocumple{background:#FDECEA;color:#B50303;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-intersi{background:#E8F5FB;color:#0069A7;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-interna{background:#F5F5F5;color:#666;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+/* Modal */
+.hab-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center;}
+.hab-modal-bg.open{display:flex;}
+.hab-modal{background:#fff;border-radius:12px;padding:28px 32px;max-width:540px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;}
+.hab-modal h3{font-size:15px;font-weight:700;color:var(--brand-dark);margin-bottom:6px;}
+.hab-modal .modal-close{position:absolute;top:14px;right:18px;cursor:pointer;font-size:20px;color:var(--text2);line-height:1;}
 </style>
 <!-- SheetJS para lectura de Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -478,6 +498,16 @@ document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.screen').forEach(function(s){
     if(s.parentElement!==main)main.appendChild(s);
   });
+  // Trigger habilitacion render after data loads
+  const origCA = window.cargaAutomatica;
+  if(origCA){
+    window.cargaAutomatica = async function(){
+      await origCA();
+      if(document.getElementById('screen-red-habilitacion')?.classList.contains('active')){
+        window.renderizarHabilitacion && window.renderizarHabilitacion();
+      }
+    };
+  }
 });
 </script>
 </head>
@@ -5138,7 +5168,7 @@ const DRIVE_CONFIG = {
   },
 };
 
-const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null, homologacion: null };
+const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null, homologacion: null, homologacion_rows: [] };
 let datosListos = false;
 let cargandoDesdeDrive = false;
 
@@ -5262,8 +5292,10 @@ async function cargarDesdeDrive() {
   // ── Procesar Homologación de Servicios ────────────────────────────
   if(resHab && resHab.status === 'fulfilled') {
     try {
-      DATOS_CARGADOS.homologacion = parsearHomologacion(resHab.value);
-      const n = Object.keys(DATOS_CARGADOS.homologacion).length;
+      const habData = parsearHomologacion(resHab.value);
+      DATOS_CARGADOS.homologacion = habData.idx;
+      DATOS_CARGADOS.homologacion_rows = habData.rows;
+      const n = Object.keys(habData.idx).length;
       actualizarEstadoFuente('homologacion',`✓ ${n.toLocaleString('es-CO')} prestadores evaluados`,'var(--gdim)','var(--green)');
     } catch(e) {
       actualizarEstadoFuente('homologacion',`⚠ Error: ${e.message}`,'var(--adim)','var(--amber)');
@@ -5424,29 +5456,61 @@ function parsearArrayPrestadores(data) {
 }
 
 function parsearHomologacion(data) {
-  if(!data || data.length < 2) return {};
-  const hdr = data[0].map(h => String(h||'').trim().toUpperCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g,''));
-  const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(kw)); if(i>=0)return i; } return -1; };
-  const colNIT = fi('NIT');
-  const colRes = fi('RESULTADO FINAL VALIDACION','RESULTADO FINAL VALIDACI');
-  const colCups = fi('DESCRIPCION CUPS');
-  console.log('[Homologación] NIT:',colNIT,'| Resultado:',colRes,'| CUPS:',colCups);
+  if(!data || data.length < 2) return { idx: {}, rows: [] };
+  const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const hdr = data[0].map(h => norm(h));
+  const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(norm(kw))); if(i>=0)return i; } return -1; };
+  const get = (row,i) => i>=0&&i<row.length ? String(row[i]||'').trim() : '';
+
+  const cols = {
+    nit:           fi('NIT PRESTADOR','NIT'),
+    razon_social:  fi('RAZON SOCIAL','NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR'),
+    sucursal:      fi('NOMBRE SUCURSAL','SUCURSAL'),
+    regional:      fi('REGIONAL'),
+    departamento:  fi('DEPARTAMENTO'),
+    municipio:     fi('MUNICIPIO','CIUDAD'),
+    interdep:      fi('INTERDEPENDENCIA'),
+    cups:          fi('DESCRIPCION CUPS','DESCRIPCION DE CUPS','CUPS'),
+    fecha_inicio:  fi('FECHA DE INICIO','FECHA INICIO'),
+    semaforo:      fi('SEMAFORO VALIDACION','SEMAFORO'),
+    resultado:     fi('RESULTADO FINAL VALIDACION','RESULTADO FINAL VALIDACI'),
+    observacion:   fi('OBSERVACION EVA RED','OBSERVACION'),
+  };
+  console.log('[Homologación] cols:', cols);
+
+  const rows = [];
   const idx = {};
+
   data.slice(1).forEach(row => {
-    const nit = String(row[colNIT]||'').replace(/\.0$/,'').trim();
+    const nit = get(row, cols.nit).replace(/\.0$/,'');
     if(!nit) return;
-    const res = String(row[colRes]||'').trim().toUpperCase()
-      .normalize('NFD').replace(/[̀-ͯ]/g,'');
-    // Valores reales: 'SI HABILITADO','NO HABILITADO','CONTRATO EN PROCESO DE EXCLUSION',
-    //   'CONTRATO EXCLUIDO','NO REQUIERE HABILITACION'
-    if(res === 'NO REQUIERE HABILITACION') return; // neutral, no contar
-    const noCumple = res.includes('NO HABILITADO') || res.includes('EXCLUIDO') || res.includes('EXCLUSION');
+    const resultado = norm(get(row, cols.resultado));
+    const semaforo  = norm(get(row, cols.semaforo));
+    const noCumple  = resultado.includes('NO HABILITADO') || resultado.includes('EXCLUIDO') || resultado.includes('EXCLUSION');
+    const cumple    = semaforo.includes('CUMPLE') && !semaforo.includes('NO');
+
+    const record = {
+      nit, 
+      razon_social:  get(row, cols.razon_social),
+      sucursal:      get(row, cols.sucursal),
+      regional:      get(row, cols.regional),
+      departamento:  get(row, cols.departamento),
+      municipio:     get(row, cols.municipio),
+      interdep:      get(row, cols.interdep),
+      cups:          get(row, cols.cups),
+      fecha_inicio:  get(row, cols.fecha_inicio),
+      semaforo:      get(row, cols.semaforo),
+      resultado:     get(row, cols.resultado),
+      observacion:   get(row, cols.observacion),
+    };
+    rows.push(record);
+
     if(!idx[nit]) idx[nit] = { cumple: true, servicios: 0, noCumpleCount: 0 };
     idx[nit].servicios++;
     if(noCumple) { idx[nit].noCumpleCount++; idx[nit].cumple = false; }
   });
-  return idx;
+
+  return { idx, rows };
 }
 
 function enriquecerConHab(prestadores) {
@@ -6058,7 +6122,7 @@ function aplicarPrestadores() {
   actualizarKPI('kpi-resumen-cobertura', '100%');
   actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(soloVigentes.length)} contratos vigentes`);
   const sinSoporte = prest.filter(p => (p.observacion||'').toUpperCase().includes('SIN SOPORTE')).length;
-  const pctSinSop = soloVigentes.length > 0 ? Math.round(sinSoporte / (soloVigentes.length + 100) * 100) : 0;
+  const pctSinSop = soloVigentes.length > 0 ? Math.round(sinSoporte/(soloVigentes.length+100)*100) : 0;
   actualizarKPI('kpi-sin-soporte', sinSoporte);
   actualizarKPI('kpi-sin-soporte-delta', `${pctSinSop}% del total · requiere gestión`);
   // Módulo financiero
@@ -8557,3 +8621,321 @@ window.addEventListener('load', function() {
 </script>
 </body>
 </html>
+<!-- ══ HABILITACIÓN RED DE PRESTADORES ══ -->
+<div class="screen" id="screen-red-habilitacion">
+
+  <!-- KPIs -->
+  <div class="kpi-strip cols-5" id="hab-kpi-strip">
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total evaluados</div><div class="kpi-value" style="color:var(--green)" id="hab-kpi-total">—</div><div class="kpi-delta up" id="hab-kpi-total-d">Cargando...</div></div>
+    <div class="kpi" style="--kc:#0099D1"><div class="kpi-label">✅ Si habilitado</div><div class="kpi-value" style="color:#0099D1" id="hab-kpi-si">—</div><div class="kpi-delta up" id="hab-kpi-si-d">— servicios</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">❌ No habilitado</div><div class="kpi-value" style="color:var(--red)" id="hab-kpi-no">—</div><div class="kpi-delta dn" id="hab-kpi-no-d">— servicios</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">⚠️ En proceso exclusión</div><div class="kpi-value" style="color:var(--amber)" id="hab-kpi-proceso">—</div><div class="kpi-delta warn" id="hab-kpi-proceso-d">— servicios</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">🚫 Excluido</div><div class="kpi-value" style="color:var(--teal)" id="hab-kpi-excluido">—</div><div class="kpi-delta" id="hab-kpi-excluido-d">— servicios</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Gráfica por prestadores -->
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Distribución por resultado de evaluación</div><div class="card-sub">N° de prestadores y % por estado de habilitación</div></div></div>
+      <div class="card-body" style="padding:16px 20px">
+        <canvas id="hab-chart-resultado" height="160"></canvas>
+        <div id="hab-leyenda-resultado" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:11px"></div>
+      </div>
+    </div>
+    <!-- Semaforización CUMPLE / NO CUMPLE -->
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Semáforo de validación</div><div class="card-sub">CUMPLE vs NO CUMPLE por N° de servicios evaluados</div></div></div>
+      <div class="card-body" style="padding:16px 20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div style="background:#D1EFF9;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;color:#003D53;font-weight:600;margin-bottom:4px">✅ CUMPLE</div>
+            <div style="font-size:28px;font-weight:700;color:#003D53" id="hab-sem-cumple">—</div>
+            <div style="font-size:10px;color:#4A7A95" id="hab-sem-cumple-pct">— %</div>
+          </div>
+          <div style="background:#FDECEA;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;color:#B50303;font-weight:600;margin-bottom:4px">❌ NO CUMPLE</div>
+            <div style="font-size:28px;font-weight:700;color:#B50303" id="hab-sem-nocumple">—</div>
+            <div style="font-size:10px;color:#B50303" id="hab-sem-nocumple-pct">— %</div>
+          </div>
+        </div>
+        <canvas id="hab-chart-semaforo" height="90"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros + Tabla -->
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+      <div><div class="card-title">Detalle por prestador</div><div class="card-sub">Regional · Departamento · Municipio · Sucursal · Interdependencia · CUPS</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="hab-buscar" placeholder="🔍 Buscar prestador o CUPS..." oninput="habFiltrar()"
+          style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;width:220px;background:var(--bg3);color:var(--text);outline:none">
+        <select id="hab-filtro-regional" onchange="habFiltrar()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Todas las regionales</option>
+        </select>
+        <select id="hab-filtro-resultado" onchange="habFiltrar()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Todos los resultados</option>
+          <option value="SI HABILITADO">✅ Si habilitado</option>
+          <option value="NO HABILITADO">❌ No habilitado</option>
+          <option value="CONTRATO EN PROCESO DE EXCLUSION">⚠️ En proceso exclusión</option>
+          <option value="CONTRATO EXCLUIDO">🚫 Contrato excluido</option>
+          <option value="NO REQUIERE HABILITACION">ℹ️ No requiere habilitación</option>
+        </select>
+        <select id="hab-filtro-semaforo" onchange="habFiltrar()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Semáforo: todos</option>
+          <option value="CUMPLE">✅ Cumple</option>
+          <option value="NO CUMPLE">❌ No cumple</option>
+        </select>
+        <span style="font-size:11px;color:var(--text2)" id="hab-count-label">— registros</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto;max-height:400px;overflow-y:auto">
+      <table class="hab-table" id="hab-tabla">
+        <thead>
+          <tr>
+            <th>Regional</th>
+            <th>Departamento</th>
+            <th>Municipio</th>
+            <th>Razón social</th>
+            <th>Sucursal</th>
+            <th>Interdep.</th>
+            <th>Fecha inicio</th>
+            <th>CUPS</th>
+            <th>Semáforo</th>
+            <th>Resultado evaluación</th>
+            <th>Obs.</th>
+          </tr>
+        </thead>
+        <tbody id="hab-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal observaciones -->
+  <div class="hab-modal-bg" id="hab-modal">
+    <div class="hab-modal">
+      <span class="modal-close" onclick="document.getElementById('hab-modal').classList.remove('open')">✕</span>
+      <h3 id="hab-modal-titulo">Observaciones</h3>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px" id="hab-modal-sub"></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px;font-size:12px;color:var(--text);line-height:1.6;min-height:60px" id="hab-modal-obs"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ JS HABILITACIÓN ══ -->
+<script>
+(function(){
+  const COLORES_RESULTADO = {
+    'SI HABILITADO':                    '#0099D1',
+    'NO HABILITADO':                    '#B50303',
+    'CONTRATO EN PROCESO DE EXCLUSION': '#B86C00',
+    'CONTRATO EXCLUIDO':                '#7A0000',
+    'NO REQUIERE HABILITACION':         '#2E7300',
+  };
+
+  function norm(s){ return String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+  function badgeResultado(r){
+    const n = norm(r);
+    if(n.includes('SI HABILITADO')) return `<span class="badge-si">✅ Si habilitado</span>`;
+    if(n.includes('NO HABILITADO')) return `<span class="badge-no">❌ No habilitado</span>`;
+    if(n.includes('PROCESO DE EXCLUSION')) return `<span class="badge-proceso">⚠️ En proceso exclusión</span>`;
+    if(n.includes('EXCLUIDO')) return `<span class="badge-excluido">🚫 Excluido</span>`;
+    if(n.includes('NO REQUIERE')) return `<span class="badge-norequiere">ℹ️ No requiere</span>`;
+    return `<span style="color:var(--text2)">${r||'—'}</span>`;
+  }
+
+  function badgeSemaforo(s){
+    const n = norm(s);
+    if(n.includes('NO CUMPLE')) return `<span class="badge-nocumple">❌ No cumple</span>`;
+    if(n.includes('CUMPLE')) return `<span class="badge-cumple">✅ Cumple</span>`;
+    return `<span style="color:var(--text2)">${s||'—'}</span>`;
+  }
+
+  function badgeInterdep(v){
+    const n = norm(v);
+    if(n.includes('SI') || n === 'S') return `<span class="badge-intersi">SI aplica</span>`;
+    return `<span class="badge-interna">NO aplica</span>`;
+  }
+
+  let HAB_DATA = [];
+  let HAB_FILTRADO = [];
+
+  window.renderizarHabilitacion = function(){
+    HAB_DATA = DATOS_CARGADOS.homologacion_rows || [];
+    if(!HAB_DATA.length){
+      document.getElementById('hab-tbody').innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text2)">⏳ Cargando datos de habilitación...</td></tr>';
+      return;
+    }
+
+    // KPIs por resultado
+    const byRes = {};
+    HAB_DATA.forEach(r => {
+      const k = norm(r.resultado);
+      byRes[k] = (byRes[k]||0) + 1;
+    });
+    const total = HAB_DATA.length;
+    const si    = byRes['SI HABILITADO'] || 0;
+    const no    = byRes['NO HABILITADO'] || 0;
+    const proc  = byRes['CONTRATO EN PROCESO DE EXCLUSION'] || 0;
+    const excl  = byRes['CONTRATO EXCLUIDO'] || 0;
+    const norq  = byRes['NO REQUIERE HABILITACION'] || 0;
+
+    document.getElementById('hab-kpi-total').textContent   = total.toLocaleString('es-CO');
+    document.getElementById('hab-kpi-total-d').textContent = `${((si/total)*100).toFixed(1)}% habilitados`;
+    document.getElementById('hab-kpi-si').textContent      = si.toLocaleString('es-CO');
+    document.getElementById('hab-kpi-si-d').textContent    = `${((si/total)*100).toFixed(1)}% del total`;
+    document.getElementById('hab-kpi-no').textContent      = no.toLocaleString('es-CO');
+    document.getElementById('hab-kpi-no-d').textContent    = `${((no/total)*100).toFixed(1)}% del total`;
+    document.getElementById('hab-kpi-proceso').textContent = proc.toLocaleString('es-CO');
+    document.getElementById('hab-kpi-proceso-d').textContent = `${((proc/total)*100).toFixed(1)}% del total`;
+    document.getElementById('hab-kpi-excluido').textContent = excl.toLocaleString('es-CO');
+    document.getElementById('hab-kpi-excluido-d').textContent = `${((excl/total)*100).toFixed(1)}% del total`;
+
+    // Semáforo
+    const cumple   = HAB_DATA.filter(r=>norm(r.semaforo).includes('CUMPLE')&&!norm(r.semaforo).includes('NO')).length;
+    const noCumple = HAB_DATA.filter(r=>norm(r.semaforo).includes('NO CUMPLE')).length;
+    const totSem   = cumple + noCumple || 1;
+    document.getElementById('hab-sem-cumple').textContent      = cumple.toLocaleString('es-CO');
+    document.getElementById('hab-sem-cumple-pct').textContent  = `${((cumple/totSem)*100).toFixed(1)}%`;
+    document.getElementById('hab-sem-nocumple').textContent    = noCumple.toLocaleString('es-CO');
+    document.getElementById('hab-sem-nocumple-pct').textContent= `${((noCumple/totSem)*100).toFixed(1)}%`;
+
+    // Poblar select regional
+    const regionales = [...new Set(HAB_DATA.map(r=>r.regional).filter(Boolean))].sort();
+    const selReg = document.getElementById('hab-filtro-regional');
+    selReg.innerHTML = '<option value="">Todas las regionales</option>' +
+      regionales.map(r=>`<option value="${r}">${r}</option>`).join('');
+
+    // Gráficas
+    dibujarGraficaResultado(byRes, total);
+    dibujarGraficaSemaforo(cumple, noCumple);
+
+    habFiltrar();
+  };
+
+  function dibujarGraficaResultado(byRes, total){
+    const canvas = document.getElementById('hab-chart-resultado');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth || 400;
+    canvas.height = 160;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const entries = Object.entries(byRes).sort((a,b)=>b[1]-a[1]);
+    const maxV = entries[0]?.[1] || 1;
+    const barH = 22, gap = 8, startX = 220, w = canvas.width - startX - 10;
+
+    entries.forEach(([k,v],i)=>{
+      const y = i*(barH+gap)+4;
+      const color = COLORES_RESULTADO[k] || '#888';
+      const bw = Math.max(2, (v/maxV)*w);
+      // Label
+      ctx.fillStyle = '#212121';
+      ctx.font = '10px Figtree, sans-serif';
+      const label = k.length > 30 ? k.substring(0,28)+'…' : k;
+      ctx.fillText(label, 0, y+15);
+      // Bar
+      ctx.fillStyle = color+'22';
+      ctx.beginPath(); ctx.roundRect(startX, y+2, w, barH-4, 4); ctx.fill();
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.roundRect(startX, y+2, bw, barH-4, 4); ctx.fill();
+      // Count + pct
+      ctx.fillStyle = '#003D53';
+      ctx.font = 'bold 10px Figtree, sans-serif';
+      ctx.fillText(`${v.toLocaleString('es-CO')} (${((v/total)*100).toFixed(1)}%)`, startX+bw+4, y+15);
+    });
+
+    // Leyenda
+    const ley = document.getElementById('hab-leyenda-resultado');
+    if(ley) ley.innerHTML = entries.map(([k,v])=>
+      `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${COLORES_RESULTADO[k]||'#888'};flex-shrink:0;display:inline-block"></span><span style="color:var(--text2)">${k}: <b style="color:var(--text)">${v}</b></span></span>`
+    ).join('');
+  }
+
+  function dibujarGraficaSemaforo(cumple, noCumple){
+    const canvas = document.getElementById('hab-chart-semaforo');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth || 400;
+    canvas.height = 90;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const total = cumple + noCumple || 1;
+    const data = [{v:cumple,c:'#0099D1',l:'Cumple'},{v:noCumple,c:'#B50303',l:'No cumple'}];
+    const barW = (canvas.width - 40) / data.length - 10;
+    data.forEach((d,i)=>{
+      const x = 20 + i*(barW+10);
+      const maxH = 60;
+      const h = Math.max(4,(d.v/total)*maxH);
+      ctx.fillStyle = d.c+'22';
+      ctx.beginPath(); ctx.roundRect(x, 5, barW, maxH, 4); ctx.fill();
+      ctx.fillStyle = d.c;
+      ctx.beginPath(); ctx.roundRect(x, 5+maxH-h, barW, h, 4); ctx.fill();
+      ctx.fillStyle = '#212121';
+      ctx.font = 'bold 11px Figtree';
+      ctx.textAlign = 'center';
+      ctx.fillText(d.v.toLocaleString('es-CO'), x+barW/2, 80);
+    });
+    ctx.textAlign = 'left';
+  }
+
+  window.habFiltrar = function(){
+    const buscar  = (document.getElementById('hab-buscar')?.value||'').toLowerCase();
+    const filtReg = document.getElementById('hab-filtro-regional')?.value||'';
+    const filtRes = (document.getElementById('hab-filtro-resultado')?.value||'').toUpperCase();
+    const filtSem = (document.getElementById('hab-filtro-semaforo')?.value||'').toUpperCase();
+
+    HAB_FILTRADO = HAB_DATA.filter(r => {
+      const texto = `${r.razon_social} ${r.sucursal} ${r.cups} ${r.nit}`.toLowerCase();
+      if(buscar && !texto.includes(buscar)) return false;
+      if(filtReg && r.regional !== filtReg) return false;
+      if(filtRes && !norm(r.resultado).includes(filtRes)) return false;
+      if(filtSem && !norm(r.semaforo).includes(filtSem)) return false;
+      return true;
+    });
+
+    document.getElementById('hab-count-label').textContent = `${HAB_FILTRADO.length.toLocaleString('es-CO')} registros`;
+
+    const tbody = document.getElementById('hab-tbody');
+    if(!tbody) return;
+    const MAX = 500;
+    tbody.innerHTML = HAB_FILTRADO.slice(0, MAX).map((r,i)=>`
+      <tr onclick="habAbrirModal(${i})">
+        <td>${r.regional||'—'}</td>
+        <td>${r.departamento||'—'}</td>
+        <td>${r.municipio||'—'}</td>
+        <td style="font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.razon_social||'—'}</td>
+        <td style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.sucursal||'—'}</td>
+        <td>${badgeInterdep(r.interdep)}</td>
+        <td style="white-space:nowrap">${r.fecha_inicio||'—'}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;color:var(--text2)">${r.cups||'—'}</td>
+        <td>${badgeSemaforo(r.semaforo)}</td>
+        <td>${badgeResultado(r.resultado)}</td>
+        <td><span style="cursor:pointer;color:var(--blue);font-size:13px" title="Ver observaciones">💬</span></td>
+      </tr>`).join('') + (HAB_FILTRADO.length > MAX ? `<tr><td colspan="11" style="text-align:center;padding:10px;color:var(--text2);font-size:11px">Mostrando primeros ${MAX} de ${HAB_FILTRADO.length} registros. Use los filtros para acotar.</td></tr>` : '');
+  };
+
+  window.habAbrirModal = function(i){
+    const r = HAB_FILTRADO[i];
+    if(!r) return;
+    document.getElementById('hab-modal-titulo').textContent = r.razon_social || r.nit;
+    document.getElementById('hab-modal-sub').textContent = `${r.sucursal||''} · ${r.regional||''} · ${r.municipio||''}`;
+    document.getElementById('hab-modal-obs').textContent = r.observacion || 'Sin observaciones registradas.';
+    document.getElementById('hab-modal').classList.add('open');
+  };
+
+  // Trigger on navigate
+  const _origNav = window.navigate;
+  if(typeof _origNav === 'function'){
+    window.navigate = function(screen){
+      _origNav(screen);
+      if(screen === 'red-habilitacion') setTimeout(window.renderizarHabilitacion, 80);
+    };
+  }
+
+  // Also trigger when data loads
+  document.addEventListener('DOMContentLoaded', function(){
+    const _orig = window.cargaAutomatica;
+  });
+})();
+</script>
