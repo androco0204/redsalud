@@ -5160,6 +5160,12 @@ const DRIVE_CONFIG = {
     nombre: 'Registro Único de Reclamaciones',
     icono: '📋'
   },
+  satisfaccion: {
+    id: '1-djyBUMoIlIqxXnoU6JPWe3P7E9ZkI-HF9mWii5IJ7c',
+    hoja: 'Satisfaccion_0256 - Marzo 2026',
+    nombre: 'Satisfacción Red de Prestadores',
+    icono: '😊'
+  },
   homologacion: {
     id: '1s3V02sw-E_8NKcDRJM1Ya_v0pAR-1Cz-xKDvxEKvRYo',
     hoja: 'DETALLADO VALIDACION',
@@ -5168,7 +5174,7 @@ const DRIVE_CONFIG = {
   },
 };
 
-const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null, homologacion: null, homologacion_rows: [] };
+const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null, homologacion: null, homologacion_rows: [], satisfaccion: [] };
 let datosListos = false;
 let cargandoDesdeDrive = false;
 
@@ -5221,12 +5227,13 @@ async function cargarDesdeDrive() {
   actualizarEstadoFuente('reclamaciones', '⏳ Cargando...','var(--bdim)','var(--blue)');
 
   // ── Cargar las 4 fuentes EN PARALELO ─────────────────────────────────
-  const [resPrest, resNIT, resDANE, resRec, resHab] = await Promise.allSettled([
+  const [resPrest, resNIT, resDANE, resRec, resHab, resSat] = await Promise.allSettled([
     fetchViaAppsScript(DRIVE_CONFIG.prestadores.id,       DRIVE_CONFIG.prestadores.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_nit.id,  DRIVE_CONFIG.medicamentos_nit.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_dane.id, DRIVE_CONFIG.medicamentos_dane.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.homologacion.id,      DRIVE_CONFIG.homologacion.hoja),
+    fetchViaAppsScript(DRIVE_CONFIG.satisfaccion.id,      DRIVE_CONFIG.satisfaccion.hoja),
   ]);
 
   const resultados = [];
@@ -5296,6 +5303,17 @@ async function cargarDesdeDrive() {
       DATOS_CARGADOS.homologacion = habData.idx;
       DATOS_CARGADOS.homologacion_rows = habData.rows;
       const n = Object.keys(habData.idx).length;
+  // ── Satisfacción ────────────────────────────────────────────
+  if(resSat.status === 'fulfilled') {
+    try {
+      DATOS_CARGADOS.satisfaccion = parsearSatisfaccion(resSat.value);
+      actualizarEstadoFuente && actualizarEstadoFuente('satisfaccion',
+        `✓ ${DATOS_CARGADOS.satisfaccion.length.toLocaleString('es-CO')} registros de satisfacción`,
+        'var(--gdim)','var(--green)');
+    } catch(e) { console.error('Satisfacción parser:', e); }
+  } else {
+    console.warn('Satisfacción no cargó:', resSat.reason?.message);
+  }
       actualizarEstadoFuente('homologacion',`✓ ${n.toLocaleString('es-CO')} prestadores evaluados`,'var(--gdim)','var(--green)');
     } catch(e) {
       actualizarEstadoFuente('homologacion',`⚠ Error: ${e.message}`,'var(--adim)','var(--amber)');
@@ -8619,6 +8637,331 @@ window.addEventListener('load', function() {
   setTimeout(cargaAutomatica, 800);
 });
 </script>
+
+<script>
+
+// ═══════════════════════════════════════════════════════════
+// SATISFACCIÓN — Parser + Screen
+// ═══════════════════════════════════════════════════════════
+function parsearSatisfaccion(data) {
+  if(!data || data.length < 2) return [];
+  const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const hdr = data[0].map(h => norm(h));
+  const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(norm(kw))); if(i>=0)return i; } return -1; };
+  const get = (row,i) => i>=0&&i<row.length ? String(row[i]||'').trim() : '';
+  const getNum = (row,i) => { const v=get(row,i); const n=parseFloat(v.replace(',','.')); return isNaN(n)?null:n; };
+
+  const cols = {
+    nit:         fi('NIT'),
+    nombre:      fi('NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR','RAZON SOCIAL','NOMBRE'),
+    departamento:fi('DEPARTAMENTO'),
+    municipio:   fi('MUNICIPIO','CIUDAD'),
+    regional:    fi('REGIONAL'),
+    resultado:   fi('RESULTADO','PORCENTAJE','% SATISFACCION','SATISFACCION','CALIFICACION'),
+    periodo:     fi('PERIODO','MES','FECHA'),
+    encuestas:   fi('ENCUESTAS','N ENCUESTAS','TOTAL ENCUESTAS','CANTIDAD'),
+  };
+  console.log('[Satisfacción] cols:', cols, '| headers:', hdr.slice(0,15));
+
+  return data.slice(1).map(row => {
+    const nit = get(row, cols.nit).replace(/\.0$/,'');
+    if(!nit && !get(row, cols.nombre)) return null;
+    return {
+      nit,
+      nombre:       get(row, cols.nombre),
+      departamento: get(row, cols.departamento),
+      municipio:    get(row, cols.municipio),
+      regional:     get(row, cols.regional),
+      resultado:    getNum(row, cols.resultado),
+      periodo:      get(row, cols.periodo),
+      encuestas:    getNum(row, cols.encuestas),
+    };
+  }).filter(Boolean);
+}
+
+
+</script>
+
+<div class="screen" id="screen-red-satisfaccion">
+
+  <!-- KPIs -->
+  <div class="kpi-strip cols-4">
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total prestadores</div><div class="kpi-value" style="color:var(--green)" id="sat-kpi-total">—</div><div class="kpi-delta up" id="sat-kpi-total-d">Encuestados</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Satisfacción promedio</div><div class="kpi-value" style="color:var(--blue)" id="sat-kpi-prom">—</div><div class="kpi-delta up" id="sat-kpi-prom-d">% general</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">✅ Meta cumplida (≥80%)</div><div class="kpi-value" style="color:var(--green)" id="sat-kpi-ok">—</div><div class="kpi-delta up" id="sat-kpi-ok-d">prestadores</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">⚠️ Por debajo de meta</div><div class="kpi-value" style="color:var(--red)" id="sat-kpi-nok">—</div><div class="kpi-delta dn" id="sat-kpi-nok-d">prestadores</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Ranking top/bottom -->
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Ranking de satisfacción</div><div class="card-sub">Top 5 mejor y peor calificados</div></div></div>
+      <div class="card-body" style="padding:16px 20px">
+        <div style="margin-bottom:12px">
+          <div style="font-size:10.5px;font-weight:600;color:var(--green);margin-bottom:6px;letter-spacing:.5px">▲ TOP 5 — MAYOR SATISFACCIÓN</div>
+          <div id="sat-top5"></div>
+        </div>
+        <div>
+          <div style="font-size:10.5px;font-weight:600;color:var(--red);margin-bottom:6px;letter-spacing:.5px">▼ TOP 5 — MENOR SATISFACCIÓN</div>
+          <div id="sat-bot5"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Distribución por rango -->
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Distribución por rango de satisfacción</div><div class="card-sub">N° prestadores por nivel de resultado</div></div></div>
+      <div class="card-body" style="padding:16px 20px">
+        <canvas id="sat-chart-dist" height="180"></canvas>
+        <div id="sat-chart-ley" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:10.5px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros + tabla -->
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+      <div><div class="card-title">Detalle por prestador</div><div class="card-sub">Departamento · Municipio · NIT · Nombre · % Satisfacción</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="sat-buscar" placeholder="🔍 NIT o nombre prestador..." oninput="satFiltrar()"
+          style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;width:210px;background:var(--bg3);color:var(--text);outline:none">
+        <select id="sat-filtro-depto" onchange="satFiltrar()"
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Todos los departamentos</option>
+        </select>
+        <select id="sat-filtro-muni" onchange="satFiltrar()"
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Todos los municipios</option>
+        </select>
+        <select id="sat-filtro-rango" onchange="satFiltrar()"
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Todos los rangos</option>
+          <option value="90">≥ 90% Excelente</option>
+          <option value="80">80–89% Bueno</option>
+          <option value="70">70–79% Regular</option>
+          <option value="0">< 70% Crítico</option>
+        </select>
+        <span style="font-size:11px;color:var(--text2)" id="sat-count-lbl">— registros</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto;max-height:420px;overflow-y:auto">
+      <table class="hab-table" id="sat-tabla">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>NIT</th>
+            <th>Nombre prestador</th>
+            <th>Departamento</th>
+            <th>Municipio</th>
+            <th>Período</th>
+            <th>Encuestas</th>
+            <th>% Satisfacción</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="sat-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const RANGOS = [
+    { min:90, max:100, label:'≥ 90% Excelente', color:'#0099D1' },
+    { min:80, max:90,  label:'80–89% Bueno',    color:'#2E7300' },
+    { min:70, max:80,  label:'70–79% Regular',   color:'#B86C00' },
+    { min:0,  max:70,  label:'< 70% Crítico',    color:'#B50303' },
+  ];
+
+  function getColor(v){
+    if(v===null||v===undefined) return '#999';
+    if(v>=90) return '#0099D1';
+    if(v>=80) return '#2E7300';
+    if(v>=70) return '#B86C00';
+    return '#B50303';
+  }
+  function getLabel(v){
+    if(v===null||v===undefined) return '—';
+    if(v>=90) return '✅ Excelente';
+    if(v>=80) return '✅ Bueno';
+    if(v>=70) return '⚠️ Regular';
+    return '❌ Crítico';
+  }
+  function fmtPct(v){ return v===null||v===undefined ? '—' : v.toFixed(1)+'%'; }
+
+  function barInline(v, color){
+    if(v===null) return '—';
+    const w = Math.min(100, Math.max(0, v));
+    return `<div style="display:flex;align-items:center;gap:8px">
+      <div style="flex:1;background:${color}18;border-radius:4px;height:8px;min-width:80px">
+        <div style="width:${w}%;height:100%;background:${color};border-radius:4px;transition:width .3s"></div>
+      </div>
+      <span style="font-weight:700;color:${color};font-size:12px;white-space:nowrap;min-width:44px">${v.toFixed(1)}%</span>
+    </div>`;
+  }
+
+  let SAT_DATA = [];
+  let SAT_FILTRADO = [];
+
+  window.renderizarSatisfaccion = function(){
+    SAT_DATA = DATOS_CARGADOS.satisfaccion || [];
+    if(!SAT_DATA.length){
+      document.getElementById('sat-tbody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2)">⏳ Cargando datos de satisfacción...</td></tr>';
+      return;
+    }
+
+    const conResultado = SAT_DATA.filter(r => r.resultado !== null);
+    const total = SAT_DATA.length;
+    const prom = conResultado.length ? (conResultado.reduce((a,r)=>a+r.resultado,0)/conResultado.length) : 0;
+    const ok  = conResultado.filter(r=>r.resultado>=80).length;
+    const nok = conResultado.filter(r=>r.resultado<80).length;
+
+    document.getElementById('sat-kpi-total').textContent = total.toLocaleString('es-CO');
+    document.getElementById('sat-kpi-prom').textContent  = prom.toFixed(1)+'%';
+    document.getElementById('sat-kpi-prom-d').textContent= prom>=80 ? '✅ Sobre meta' : '⚠️ Bajo meta';
+    document.getElementById('sat-kpi-ok').textContent    = ok.toLocaleString('es-CO');
+    document.getElementById('sat-kpi-ok-d').textContent  = `${((ok/total)*100).toFixed(1)}% del total`;
+    document.getElementById('sat-kpi-nok').textContent   = nok.toLocaleString('es-CO');
+    document.getElementById('sat-kpi-nok-d').textContent = `${((nok/total)*100).toFixed(1)}% del total`;
+
+    // Top / Bottom 5
+    const sorted = [...conResultado].sort((a,b)=>b.resultado-a.resultado);
+    const renderMini = (arr) => arr.map((r,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:10px;color:var(--text2);width:16px;text-align:right">${i+1}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre||r.nit}</div>
+          <div style="font-size:10px;color:var(--text2)">${r.municipio||''} ${r.departamento?'· '+r.departamento:''}</div>
+        </div>
+        <span style="font-weight:700;color:${getColor(r.resultado)};font-size:13px;flex-shrink:0">${fmtPct(r.resultado)}</span>
+      </div>`).join('');
+
+    document.getElementById('sat-top5').innerHTML = renderMini(sorted.slice(0,5));
+    document.getElementById('sat-bot5').innerHTML = renderMini(sorted.slice(-5).reverse());
+
+    // Distribución por rangos
+    dibujarDistSatisfaccion(conResultado, total);
+
+    // Poblar filtros
+    const deptos = [...new Set(SAT_DATA.map(r=>r.departamento).filter(Boolean))].sort();
+    const selD = document.getElementById('sat-filtro-depto');
+    selD.innerHTML = '<option value="">Todos los departamentos</option>' +
+      deptos.map(d=>`<option value="${d}">${d}</option>`).join('');
+
+    satFiltrar();
+  };
+
+  function dibujarDistSatisfaccion(data, total){
+    const canvas = document.getElementById('sat-chart-dist');
+    if(!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.parentElement?.offsetWidth - 40 || 400;
+    const H = 180;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0,0,W,H);
+
+    const counts = RANGOS.map(r => data.filter(d=>d.resultado>=r.min&&d.resultado<r.max).length);
+    const maxC = Math.max(...counts, 1);
+    const barW = (W - 40) / RANGOS.length - 12;
+    const maxH = 120;
+
+    RANGOS.forEach((r,i)=>{
+      const x = 20 + i*(barW+12);
+      const h = Math.max(4, (counts[i]/maxC)*maxH);
+      const y = 10 + maxH - h;
+      // Bar
+      ctx.fillStyle = r.color+'22';
+      ctx.beginPath(); ctx.roundRect(x, 10, barW, maxH, 5); ctx.fill();
+      ctx.fillStyle = r.color;
+      ctx.beginPath(); ctx.roundRect(x, y, barW, h, 5); ctx.fill();
+      // Count
+      ctx.fillStyle = '#212121';
+      ctx.font = 'bold 12px Figtree, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(counts[i].toLocaleString('es-CO'), x+barW/2, y-4);
+      // Pct
+      ctx.fillStyle = '#4A7A95';
+      ctx.font = '10px Figtree, sans-serif';
+      ctx.fillText(total>0?((counts[i]/total)*100).toFixed(1)+'%':'0%', x+barW/2, 148);
+      // Label
+      ctx.fillStyle = r.color;
+      ctx.font = 'bold 9.5px Figtree, sans-serif';
+      const lbl = r.label.split(' ');
+      ctx.fillText(lbl[0], x+barW/2, 160);
+      if(lbl[1]) ctx.fillText(lbl.slice(1).join(' '), x+barW/2, 172);
+    });
+    ctx.textAlign = 'left';
+
+    // Leyenda
+    const ley = document.getElementById('sat-chart-ley');
+    if(ley) ley.innerHTML = RANGOS.map((r,i)=>
+      `<span style="display:flex;align-items:center;gap:4px">
+        <span style="width:10px;height:10px;border-radius:2px;background:${r.color};display:inline-block;flex-shrink:0"></span>
+        <span style="color:var(--text2)">${r.label}: <b style="color:var(--text)">${counts[i]}</b></span>
+      </span>`
+    ).join('');
+  }
+
+  window.satFiltrar = function(){
+    const buscar   = (document.getElementById('sat-buscar')?.value||'').toLowerCase();
+    const depto    = document.getElementById('sat-filtro-depto')?.value||'';
+    const muni     = document.getElementById('sat-filtro-muni')?.value||'';
+    const rango    = document.getElementById('sat-filtro-rango')?.value;
+
+    // Update municipios when depto changes
+    const deptoSel = depto;
+    const munis = [...new Set(SAT_DATA.filter(r=>!deptoSel||r.departamento===deptoSel).map(r=>r.municipio).filter(Boolean))].sort();
+    const selM = document.getElementById('sat-filtro-muni');
+    const curMuni = selM?.value || '';
+    if(selM) selM.innerHTML = '<option value="">Todos los municipios</option>' + munis.map(m=>`<option value="${m}"${m===curMuni?' selected':''}>${m}</option>`).join('');
+
+    SAT_FILTRADO = SAT_DATA.filter(r => {
+      if(buscar && !`${r.nit} ${r.nombre}`.toLowerCase().includes(buscar)) return false;
+      if(depto && r.departamento !== depto) return false;
+      if(muni  && r.municipio !== muni) return false;
+      if(rango !== undefined && rango !== '') {
+        const rv = parseFloat(rango);
+        if(rv === 90  && !(r.resultado >= 90)) return false;
+        if(rv === 80  && !(r.resultado >= 80 && r.resultado < 90)) return false;
+        if(rv === 70  && !(r.resultado >= 70 && r.resultado < 80)) return false;
+        if(rv === 0   && !(r.resultado < 70)) return false;
+      }
+      return true;
+    }).sort((a,b)=>(b.resultado||0)-(a.resultado||0));
+
+    document.getElementById('sat-count-lbl').textContent = `${SAT_FILTRADO.length.toLocaleString('es-CO')} registros`;
+
+    const tbody = document.getElementById('sat-tbody');
+    tbody.innerHTML = SAT_FILTRADO.map((r,i)=>`
+      <tr>
+        <td style="color:var(--text2);font-size:11px">${i+1}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit||'—'}</td>
+        <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre||'—'}</td>
+        <td>${r.departamento||'—'}</td>
+        <td>${r.municipio||'—'}</td>
+        <td style="font-size:11px;color:var(--text2)">${r.periodo||'—'}</td>
+        <td style="text-align:center">${r.encuestas?.toLocaleString('es-CO')||'—'}</td>
+        <td style="min-width:160px">${barInline(r.resultado, getColor(r.resultado))}</td>
+        <td><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${getColor(r.resultado)}18;color:${getColor(r.resultado)}">${getLabel(r.resultado)}</span></td>
+      </tr>`).join('');
+  };
+
+  // Hook navigate
+  document.addEventListener('DOMContentLoaded', function(){
+    const origNav = window.navigate;
+    if(typeof origNav === 'function'){
+      window.navigate = function(scr){
+        origNav(scr);
+        if(scr === 'red-satisfaccion') setTimeout(window.renderizarSatisfaccion, 80);
+      };
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
 <!-- ══ HABILITACIÓN RED DE PRESTADORES ══ -->
@@ -8818,38 +9161,52 @@ window.addEventListener('load', function() {
     const canvas = document.getElementById('hab-chart-resultado');
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth || 400;
-    canvas.height = 160;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.parentElement?.offsetWidth - 40 || 460;
+    const H = 200;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0,0,W,H);
 
     const entries = Object.entries(byRes).sort((a,b)=>b[1]-a[1]);
     const maxV = entries[0]?.[1] || 1;
-    const barH = 22, gap = 8, startX = 220, w = canvas.width - startX - 10;
+    const barH = 26, gap = 10;
+    const labelW = 185, valW = 90;
+    const barZone = W - labelW - valW - 8;
 
     entries.forEach(([k,v],i)=>{
       const y = i*(barH+gap)+4;
       const color = COLORES_RESULTADO[k] || '#888';
-      const bw = Math.max(2, (v/maxV)*w);
+      const bw = Math.max(4, (v/maxV)*barZone);
+
       // Label
       ctx.fillStyle = '#212121';
-      ctx.font = '10px Figtree, sans-serif';
-      const label = k.length > 30 ? k.substring(0,28)+'…' : k;
-      ctx.fillText(label, 0, y+15);
-      // Bar
-      ctx.fillStyle = color+'22';
-      ctx.beginPath(); ctx.roundRect(startX, y+2, w, barH-4, 4); ctx.fill();
+      ctx.font = '10.5px Figtree, sans-serif';
+      const label = k.length > 26 ? k.substring(0,24)+'…' : k;
+      ctx.fillText(label, 0, y+18);
+
+      // Background track
+      ctx.fillStyle = color+'18';
+      ctx.beginPath(); ctx.roundRect(labelW, y+3, barZone, barH-6, 4); ctx.fill();
+      // Bar fill
       ctx.fillStyle = color;
-      ctx.beginPath(); ctx.roundRect(startX, y+2, bw, barH-4, 4); ctx.fill();
-      // Count + pct
+      ctx.beginPath(); ctx.roundRect(labelW, y+3, bw, barH-6, 4); ctx.fill();
+
+      // Value ALWAYS at fixed position after bar zone
+      const vx = labelW + barZone + 8;
       ctx.fillStyle = '#003D53';
-      ctx.font = 'bold 10px Figtree, sans-serif';
-      ctx.fillText(`${v.toLocaleString('es-CO')} (${((v/total)*100).toFixed(1)}%)`, startX+bw+4, y+15);
+      ctx.font = 'bold 11px Figtree, sans-serif';
+      ctx.fillText(v.toLocaleString('es-CO'), vx, y+14);
+      ctx.fillStyle = '#4A7A95';
+      ctx.font = '10px Figtree, sans-serif';
+      ctx.fillText('(' + ((v/total)*100).toFixed(1) + '%)', vx, y+27);
     });
 
     // Leyenda
     const ley = document.getElementById('hab-leyenda-resultado');
     if(ley) ley.innerHTML = entries.map(([k,v])=>
-      `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${COLORES_RESULTADO[k]||'#888'};flex-shrink:0;display:inline-block"></span><span style="color:var(--text2)">${k}: <b style="color:var(--text)">${v}</b></span></span>`
+      `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${COLORES_RESULTADO[k]||'#888'};flex-shrink:0;display:inline-block"></span><span style="color:var(--text2);font-size:10.5px">${k}: <b style="color:var(--text)">${v.toLocaleString('es-CO')}</b></span></span>`
     ).join('');
   }
 
