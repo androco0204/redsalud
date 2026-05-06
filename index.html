@@ -30,17 +30,17 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .logo-name{font-family:'Fraunces',serif;font-size:17px;font-weight:600;letter-spacing:-.3px;}
 .logo-sub{font-size:10px;color:var(--text2);margin-top:1px;letter-spacing:.5px;text-transform:uppercase;}
 .nav{padding:12px 10px;flex:1;}
-.nav-sec{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:.8px;text-transform:uppercase;padding:0 8px;margin:12px 0 4px;}
+.nav-sec{font-size:10px;color:rgba(255,255,255,0.38);letter-spacing:.8px;text-transform:uppercase;padding:0 8px;margin:12px 0 4px;}
 .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.65);transition:all .15s;margin-bottom:2px;font-size:12.5px;user-select:none;}
 .nav-item:hover{background:rgba(255,255,255,0.08);color:#fff;}
-.nav-item.active{background:rgba(0,153,209,0.20);color:#0099D1;font-weight:500;}
+.nav-item.active{background:rgba(0,153,209,0.22);color:#0099D1;font-weight:500;}
 .nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.7;}
 .nav-item.active svg{opacity:1;}
 .nav-badge{margin-left:auto;font-size:10px;font-family:'DM Mono',monospace;background:var(--rdim);color:var(--red);padding:2px 6px;border-radius:4px;}
 .nav-badge.ok{background:var(--gdim);color:var(--green);}
 .nav-badge.new{background:var(--pdim);color:var(--purple);}
 .sb-footer{padding:14px;border-top:1px solid var(--border);flex-shrink:0;}
-.live-pill{display:flex;align-items:center;gap:8px;background:#EEF5FA;border-radius:8px;padding:9px 12px;}
+.live-pill{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:9px 12px;}
 .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);position:relative;flex-shrink:0;}
 .pulse::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid var(--green);opacity:.5;animation:pulse 2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.5);opacity:0}}
@@ -49,29 +49,29 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 
 /* MAIN */
 .main{margin-left:228px;min-height:100vh;display:flex;flex-direction:column;}
-.topbar{position:sticky;top:0;z-index:100;background:rgba(244,248,251,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 26px;height:54px;display:flex;align-items:center;justify-content:space-between;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(244,248,251,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 26px;height:54px;display:flex;align-items:center;justify-content:space-between;}
 .tb-left{display:flex;align-items:center;gap:8px;}
 .tb-title{font-size:14px;font-weight:500;}
 .tb-sub{font-size:12px;color:var(--text2);}
 .sep{color:var(--border2);margin:0 4px;}
 .tb-right{display:flex;align-items:center;gap:10px;}
-.btn{display:flex;align-items:center;gap:6px;background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .15s;}
+.btn{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .15s;}
 .btn:hover{color:var(--text);}
 .btn.pri{background:var(--gdim);border-color:var(--green);color:var(--green);}
-.date-chip{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);background:#EEF5FA;border:1px solid var(--border);padding:5px 10px;border-radius:6px;}
+.date-chip{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px;}
 
 /* SCREENS */
 .screen{display:none;padding:22px 26px;animation:fadeUp .3s ease both;}
 .screen.active{display:block;}
 /* VALIDADOR Y CONSTRUCTOR */
-.upload-zone{border:2px dashed var(--border2);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#EEF5FA;position:relative;}
+.upload-zone{border:2px dashed var(--border2);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative;}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:var(--gdim);}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
 .upload-icon{font-size:32px;margin-bottom:12px;}
 .upload-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;}
 .upload-sub{font-size:12px;color:var(--text2);}
 .val-result{display:flex;flex-direction:column;gap:8px;}
-.val-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;background:#EEF5FA;}
+.val-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;background:var(--bg3);}
 .val-item.ok{border-left:3px solid var(--green);}
 .val-item.missing{border-left:3px solid var(--red);}
 .val-item.extra{border-left:3px solid var(--amber);}
@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .val-ind-name{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:3px;}
 .val-ind-meta{font-size:11px;color:var(--text2);}
 .val-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
-.val-sum-card{background:#EEF5FA;border-radius:10px;padding:14px;text-align:center;}
+.val-sum-card{background:var(--bg3);border-radius:10px;padding:14px;text-align:center;}
 .val-sum-val{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:4px;}
 .val-sum-lbl{font-size:11px;color:var(--text2);}
 .step-bar{display:flex;gap:0;margin-bottom:24px;}
@@ -90,19 +90,19 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;transition:all .2s;}
 .step-dot.done{background:var(--green);color:var(--bg);}
 .step-dot.active{background:var(--blue);color:var(--bg);}
-.step-dot.pending{background:#EEF5FA;color:var(--text2);}
+.step-dot.pending{background:var(--bg3);color:var(--text2);}
 .step-label{font-size:11px;color:var(--text2);margin-left:8px;white-space:nowrap;}
 .step-label.active{color:var(--blue);font-weight:500;}
 .step-line{flex:1;height:1px;background:var(--border2);margin:0 8px;}
 .selector-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.sel-card{background:#EEF5FA;border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;border:1px solid transparent;user-select:none;}
+.sel-card{background:var(--bg3);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;border:1px solid transparent;user-select:none;}
 .sel-card:hover{border-color:var(--border2);}
 .sel-card.selected{border-color:var(--green);background:var(--gdim);}
 .sel-card-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
 .sel-card-meta{font-size:11px;color:var(--text2);}
 .sel-card-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);float:right;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;}
 .sel-card.selected .sel-card-check{background:var(--green);border-color:var(--green);color:var(--bg);}
-.bat-preview{background:#EEF5FA;border-radius:12px;overflow:hidden;}
+.bat-preview{background:var(--bg3);border-radius:12px;overflow:hidden;}
 .bat-preview-head{padding:12px 16px;background:var(--bg4);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
 .bat-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);}
 .bat-row:last-child{border-bottom:none;}
@@ -111,7 +111,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .bat-meta{font-family:'DM Mono',monospace;font-size:11px;flex-shrink:0;}
 .bat-sancion{font-size:10.5px;flex-shrink:0;}
 .regional-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-.reg-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:#EEF5FA;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;user-select:none;}
+.reg-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;user-select:none;}
 .reg-chip:hover{border-color:var(--border2);color:var(--text);}
 .reg-chip.sel{background:var(--bdim);border-color:var(--blue);color:var(--blue);}
 /* SANCIONES */
@@ -120,7 +120,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .san-estado.validada{background:var(--adim);color:var(--amber);}
 .san-estado.aplicada{background:var(--gdim);color:var(--green);}
 .san-row{display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 1.2fr 110px;gap:0;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);transition:background .12s;}
-.san-row:hover{background:#EEF5FA;}
+.san-row:hover{background:var(--bg3);}
 .san-row.head{background:var(--bg4);font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;padding:8px 16px;border-bottom:2px solid var(--border2);}
 .san-valor{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--red);}
 .san-modelo{font-size:10.5px;padding:2px 8px;border-radius:4px;font-weight:500;}
@@ -129,7 +129,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .san-modelo.pgp{background:var(--tdim);color:var(--teal);}
 .san-modelo.techo{background:var(--adim);color:var(--amber);}
 .san-modelo.evento{background:var(--gdim);color:var(--green);}
-.san-accion{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);cursor:pointer;background:#EEF5FA;color:var(--text);transition:all .15s;white-space:nowrap;}
+.san-accion{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);cursor:pointer;background:var(--bg3);color:var(--text);transition:all .15s;white-space:nowrap;}
 .san-accion:hover{border-color:var(--blue);color:var(--blue);}
 .san-accion.validar{border-color:var(--amber);color:var(--amber);background:var(--adim);}
 .san-accion.aplicar{border-color:var(--green);color:var(--green);background:var(--gdim);}
@@ -143,14 +143,14 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .param-row:last-child{border-bottom:none;}
 .param-name{font-size:13px;color:var(--text);}
 .param-sub{font-size:11px;color:var(--text2);margin-top:2px;}
-.param-input{font-family:'DM Mono',monospace;font-size:13px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);width:100px;text-align:right;}
+.param-input{font-family:'DM Mono',monospace;font-size:13px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);width:100px;text-align:right;}
 .param-input:focus{outline:none;border-color:var(--blue);}
 /* ADMINISTRACIÓN */
 .admin-section{margin-bottom:20px;}
 .admin-section-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;padding:10px 0 8px;border-bottom:2px solid var(--border2);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .admin-section-title span{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;}
 .admin-param-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.admin-param-card{background:#EEF5FA;border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+.admin-param-card{background:var(--bg3);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
 .admin-param-card:hover{border-color:var(--border2);}
 .admin-param-label{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:3px;}
 .admin-param-desc{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.4;}
@@ -160,7 +160,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .admin-input:focus{outline:none;border-color:var(--blue);}
 .admin-input.changed{border-color:var(--amber);background:var(--adim);}
 .admin-toggle{display:flex;gap:0;border:1px solid var(--border2);border-radius:6px;overflow:hidden;}
-.admin-toggle-opt{padding:4px 12px;font-size:11.5px;cursor:pointer;transition:all .15s;background:#EEF5FA;color:var(--text2);}
+.admin-toggle-opt{padding:4px 12px;font-size:11.5px;cursor:pointer;transition:all .15s;background:var(--bg3);color:var(--text2);}
 .admin-toggle-opt.on{background:var(--green);color:var(--bg);font-weight:500;}
 .admin-toggle-opt.off{background:var(--rdim);color:var(--red);font-weight:500;}
 .log-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;}
@@ -200,11 +200,11 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .up{color:var(--green);}.dn{color:var(--red);}.warn{color:var(--amber);}.neu{color:var(--text2);}
 
 /* CARD */
-.card{background:#FFFFFF;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
 .card-head{padding:15px 20px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
 .card-title{font-size:13px;font-weight:500;}
 .card-sub{font-size:11px;color:var(--text2);margin-top:2px;}
-.card-act{font-size:11px;color:var(--text2);cursor:pointer;padding:4px 10px;border-radius:6px;background:#EEF5FA;border:1px solid var(--border);white-space:nowrap;}
+.card-act{font-size:11px;color:var(--text2);cursor:pointer;padding:4px 10px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);white-space:nowrap;}
 .card-body{padding:16px 20px;}
 
 /* TABS */
@@ -233,7 +233,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .bg-c{background:var(--cdim);color:var(--coral);}
 
 /* BARS */
-.bar-track{flex:1;height:4px;background:#EEF5FA;border-radius:2px;overflow:hidden;}
+.bar-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
 .bar-fill{height:100%;border-radius:2px;}
 .bar-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);width:30px;text-align:right;flex-shrink:0;}
 .score-row{display:flex;align-items:center;gap:8px;}
@@ -243,7 +243,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 /* SCROLL */
 .scroll{max-height:300px;overflow-y:auto;}
 .scroll::-webkit-scrollbar{width:4px;}
-.scroll::-webkit-scrollbar-thumb{background:#EEF5FA;border-radius:2px;}
+.scroll::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
 
 /* SPARKLINE */
 .spark{display:flex;align-items:flex-end;gap:3px;height:28px;}
@@ -255,7 +255,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .stat-row:last-child{border-bottom:none;}
 
 /* ALERT */
-.al-item{display:flex;gap:12px;padding:10px 13px;background:#EEF5FA;border-radius:10px;border-left:3px solid var(--alc,var(--border2));cursor:pointer;margin-bottom:8px;}
+.al-item{display:flex;gap:12px;padding:10px 13px;background:var(--bg3);border-radius:10px;border-left:3px solid var(--alc,var(--border2));cursor:pointer;margin-bottom:8px;}
 .al-item:last-child{margin-bottom:0;}
 .al-title{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:3px;}
 .al-meta{font-size:11px;color:var(--text2);}
@@ -274,13 +274,13 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .g-sl{font-size:10px;color:var(--text2);}
 .g-body{padding:12px 16px;}
 .ans-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
-.ans-cell{background:#EEF5FA;border-radius:7px;padding:8px 9px;}
+.ans-cell{background:var(--bg3);border-radius:7px;padding:8px 9px;}
 .ans-lbl{font-size:10px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
 .ans-v{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
 .ans-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:5px;overflow:hidden;}
 .ans-bf{height:100%;border-radius:2px;}
 .g-fin{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;border-top:1px solid var(--border);padding-top:10px;}
-.fin-cell{background:#EEF5FA;border-radius:7px;padding:8px 9px;}
+.fin-cell{background:var(--bg3);border-radius:7px;padding:8px 9px;}
 .fin-lbl{font-size:10px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px;}
 .fin-v{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:500;}
 .g-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
@@ -316,7 +316,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .modelo-kpis{display:grid;gap:8px;margin-bottom:12px;}
 .m3{grid-template-columns:repeat(3,1fr);}
 .m4{grid-template-columns:repeat(4,1fr);}
-.mkpi{background:#EEF5FA;border-radius:8px;padding:10px 12px;}
+.mkpi{background:var(--bg3);border-radius:8px;padding:10px 12px;}
 .mkpi-l{font-size:10px;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
 .mkpi-v{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;}
 .mkpi-s{font-size:10px;color:var(--text2);margin-top:2px;}
@@ -327,7 +327,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 
 /* FINANCIERO */
 .fin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.fin-card{background:#EEF5FA;border-radius:10px;padding:14px;}
+.fin-card{background:var(--bg3);border-radius:10px;padding:14px;}
 .fin-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
 .fin-main{font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin-bottom:4px;}
 .fin-sub{font-size:11px;color:var(--text2);}
@@ -352,7 +352,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 
 /* MAP */
-.map-wrap{background:#EEF5FA;border-radius:10px;overflow:hidden;position:relative;}
+.map-wrap{background:var(--bg3);border-radius:10px;overflow:hidden;position:relative;}
 .map-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:28px 28px;}
 .map-dot{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;cursor:pointer;transition:transform .2s;}
 .map-dot:hover{transform:scale(1.3);}
@@ -360,7 +360,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .dep-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
 .dep-row:last-child{border-bottom:none;}
 .dep-name{font-size:12px;color:var(--text);width:130px;flex-shrink:0;}
-.dep-bar{flex:1;height:6px;background:#EEF5FA;border-radius:3px;overflow:hidden;}
+.dep-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
 .dep-fill{height:100%;border-radius:3px;}
 .dep-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);width:36px;text-align:right;flex-shrink:0;}
 
@@ -371,7 +371,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 
 /* SEGUIMIENTO */
 .periodo-selector{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
-.periodo-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border2);background:#EEF5FA;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;}
+.periodo-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;}
 .periodo-btn:hover{color:var(--text);}
 .periodo-btn.active{background:var(--gdim);border-color:var(--green);color:var(--green);}
 .cronograma{display:flex;flex-direction:column;gap:0;}
@@ -386,7 +386,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .cron-meta{font-size:11px;color:var(--text2);}
 .cron-chips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
 .cron-chip{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border2);color:var(--text2);}
-.notif-form{background:#EEF5FA;border-radius:12px;padding:18px;margin-bottom:14px;}
+.notif-form{background:var(--bg3);border-radius:12px;padding:18px;margin-bottom:14px;}
 .notif-field{margin-bottom:12px;}
 .notif-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
 .notif-select{width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:12.5px;font-family:'Figtree',sans-serif;outline:none;}
@@ -398,11 +398,11 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .notif-chip.sel{background:var(--gdim);border-color:var(--green);color:var(--green);}
 .send-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:var(--gdim);border:1px solid var(--green);border-radius:10px;color:var(--green);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-top:14px;}
 .send-btn:hover{background:var(--green);color:var(--bg);}
-.notif-item{display:flex;gap:12px;padding:12px 14px;background:#EEF5FA;border-radius:10px;border-left:3px solid var(--nc,var(--border2));margin-bottom:8px;}
+.notif-item{display:flex;gap:12px;padding:12px 14px;background:var(--bg3);border-radius:10px;border-left:3px solid var(--nc,var(--border2));margin-bottom:8px;}
 .notif-item:last-child{margin-bottom:0;}
 .notif-item-title{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:3px;}
 .notif-item-meta{font-size:11px;color:var(--text2);}
-.informe-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#EEF5FA;border-radius:12px;cursor:pointer;transition:background .15s;margin-bottom:10px;border:1px solid var(--border);}
+.informe-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg3);border-radius:12px;cursor:pointer;transition:background .15s;margin-bottom:10px;border:1px solid var(--border);}
 .informe-card:hover{background:var(--bg4);border-color:var(--border2);}
 .informe-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .informe-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
@@ -411,7 +411,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .dl-btn.pri{background:var(--gdim);border-color:var(--green);color:var(--green);}
 
 /* PERIODO SELECTOR */
-.periodo-opt{background:#EEF5FA;border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;}
+.periodo-opt{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;}
 .periodo-opt:hover{border-color:var(--border2);color:var(--text);}
 .periodo-opt.active-per{background:var(--gdim);border-color:var(--green);color:var(--green);}
 
@@ -430,11 +430,11 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .notif-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:26px;width:520px;max-width:90vw;}
 .notif-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;margin-top:14px;}
 .notif-label:first-child{margin-top:0;}
-.notif-input{width:100%;background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Figtree',sans-serif;font-size:13px;resize:vertical;}
+.notif-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Figtree',sans-serif;font-size:13px;resize:vertical;}
 .notif-check-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12.5px;color:var(--text2);cursor:pointer;}
 .notif-check-row input{accent-color:var(--green);width:14px;height:14px;}
 .notif-btns{display:flex;gap:10px;margin-top:18px;}
-.notif-cancel{flex:1;background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:9px;text-align:center;font-size:12px;color:var(--text2);cursor:pointer;}
+.notif-cancel{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px;text-align:center;font-size:12px;color:var(--text2);cursor:pointer;}
 .notif-send{flex:2;background:var(--gdim);border:1px solid var(--green);border-radius:8px;padding:9px;text-align:center;font-size:12px;color:var(--green);cursor:pointer;font-weight:500;}
 .notif-toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--green);color:var(--green);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;z-index:600;display:none;}
 
@@ -445,23 +445,32 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .hallazgo-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
 .hallazgo-meta{font-size:11px;color:var(--text2);}
 .hallazgo-btns{display:flex;gap:6px;flex-shrink:0;}
-.h-btn{font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border2);color:var(--text2);background:#EEF5FA;white-space:nowrap;transition:all .15s;}
+.h-btn{font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border2);color:var(--text2);background:var(--bg3);white-space:nowrap;transition:all .15s;}
 .h-btn:hover{color:var(--text);}
 .h-btn.notify{background:var(--gdim);border-color:var(--green);color:var(--green);}
 .h-btn.download{background:var(--bdim);border-color:var(--blue);color:var(--blue);}
 
 
-.nav-parent{justify-content:space-between;position:relative;}
-.nav-parent .nav-arrow{font-size:10px;opacity:0.5;transition:transform .2s;margin-left:auto;}
-.nav-submenu{max-height:0;overflow:hidden;transition:max-height .25s ease;padding-left:8px;}
-.nav-submenu.open{max-height:400px;}
-.nav-sub{font-size:11.5px;padding:6px 10px;color:rgba(255,255,255,0.55);}
-.nav-sub:hover{color:#fff;background:rgba(255,255,255,0.08);}
-.nav-sub.active{color:#0099D1;background:rgba(0,153,209,0.18);}
+.nav-parent{justify-content:space-between;}
+.nav-arrow{font-size:10px;opacity:0.45;transition:transform .2s;margin-left:auto;flex-shrink:0;}
+.nav-submenu{max-height:0;overflow:hidden;transition:max-height .28s ease;padding-left:4px;}
+.nav-submenu.open{max-height:500px;}
+.nav-sub{font-size:11.5px !important;padding:5px 10px 5px 22px !important;color:rgba(255,255,255,0.52) !important;}
+.nav-sub:hover{color:#fff !important;background:rgba(255,255,255,0.07) !important;}
+.nav-sub.active{color:#0099D1 !important;background:rgba(0,153,209,0.18) !important;}
 </style>
 <!-- SheetJS para lectura de Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var main=document.querySelector('.main');
+  if(!main)return;
+  document.querySelectorAll('.screen').forEach(function(s){
+    if(s.parentElement!==main)main.appendChild(s);
+  });
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   var main=document.querySelector('.main');
@@ -478,19 +487,17 @@ document.addEventListener('DOMContentLoaded',function(){
 <nav class="sidebar">
   <div class="logo">
     <div class="logo-mark">
-        <img src="EPS.png" alt="EPS Sanitas" style="height:36px;mix-blend-mode:normal;filter:brightness(0) invert(1);">
+        <img src="EPS.png" alt="EPS Sanitas" style="height:38px;filter:brightness(0) invert(1);display:block;">
       </div>
-      <div class="logo-sub" style="color:var(--brand-light);letter-spacing:.5px">MONITOR · V3.1</div></div>
+      </div>
     </div>
   </div>
   <div class="nav">
     <div class="nav-sec">Principal</div>
     <div class="nav-item active" data-screen="resumen"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>Resumen ejecutivo</div>
-    <!-- ─ RED DE PRESTADORES ─ -->
     <div class="nav-item nav-parent" data-screen="prestadores" onclick="toggleSubmenu('sub-red')">
       <svg viewBox="0 0 14 14" fill="none"><path d="M7 1L13 4v6l-6 3L1 10V4z" stroke="currentColor" stroke-width="1.2"/></svg>
-      Red de prestadores
-      <span class="nav-arrow" id="arrow-sub-red">▾</span>
+      Red de prestadores <span class="nav-arrow" id="arrow-sub-red">▾</span>
     </div>
     <div class="nav-submenu" id="sub-red">
       <div class="nav-item nav-sub" data-screen="red-habilitacion">✅ Habilitación</div>
@@ -502,17 +509,14 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="nav-item nav-sub" data-screen="red-nota-tecnica">📊 Nota técnica</div>
       <div class="nav-item nav-sub" data-screen="red-cuentas-medicas">💰 Cuentas médicas</div>
     </div>
-    <!-- ─ GESTORES FARMACÉUTICOS ─ -->
     <div class="nav-item nav-parent" data-screen="gestores" onclick="toggleSubmenu('sub-gestores')">
       <svg viewBox="0 0 14 14" fill="none"><circle cx="5" cy="4" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 12c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" stroke-width="1.2"/><path d="M10 5l1.5 1.5L14 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Gestores farmacéuticos
-      <span class="nav-arrow" id="arrow-sub-gestores">▾</span>
+      Gestores farmacéuticos <span class="nav-arrow" id="arrow-sub-gestores">▾</span>
     </div>
     <div class="nav-submenu" id="sub-gestores">
       <div class="nav-item nav-sub" data-screen="gest-oportunidad">🚚 Oportunidad</div>
       <div class="nav-item nav-sub" data-screen="gest-pendientes">📦 Pendientes</div>
-      <div class="nav-item nav-sub" data-screen="pqrs">📋 PQRS</div>
-      <div class="nav-item nav-sub" data-screen="gest-tutelas">⚖️ Tutelas</div>
+      <div class="nav-item nav-sub" data-screen="pqrs">📋 PQRS y Tutelas</div>
       <div class="nav-item nav-sub" data-screen="fallas">🔴 Fallas de acceso</div>
       <div class="nav-item nav-sub" data-screen="cobertura">📝 Requerimientos</div>
       <div class="nav-item nav-sub" data-screen="gest-financiero">💵 Seguimiento financiero</div>
@@ -523,9 +527,6 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- Modelos de contratación: integrado en Red de prestadores -->
     <div class="nav-item" data-screen="indicadores"><svg viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Indicadores</div>
     <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
-    <div class="nav-item" data-screen="cobertura"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 5.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Requerimientos</div>
-    <div class="nav-item" data-screen="fallas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.3 1.2 4L7 9 3.5 11.3l1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Fallas</div>
-    <div class="nav-item" data-screen="pqrs"><svg viewBox="0 0 14 14" fill="none"><path d="M12 2H2a1 1 0 00-1 1v7a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.2"/></svg>PQRS y Tutelas <span class="nav-badge" id="pqrs-nav-badge" style="display:none"></span></div>
     <div class="nav-sec">Auditoría</div>
     <div class="nav-item" data-screen="seguimiento"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12M5 2V1M9 2V1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="9" r="1" fill="currentColor"/><circle cx="7" cy="9" r="1" fill="currentColor"/><circle cx="10" cy="9" r="1" fill="currentColor"/></svg>Seguimiento y notif.</div>
     <div class="nav-item" data-screen="sanciones"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1L2 4v4c0 3 2.5 4.5 5 5 2.5-.5 5-2 5-5V4L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7l1.5 1.5L9 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sanciones</div>
@@ -542,7 +543,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- Selector de perfil (simulado para el prototipo) -->
     <div style="padding:8px 14px;border-top:1px solid var(--border);margin-bottom:6px">
       <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Perfil activo</div>
-      <select id="perfil-select" onchange="cambiarPerfil(this.value)" style="width:100%;font-size:12px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer">
+      <select id="perfil-select" onchange="cambiarPerfil(this.value)" style="width:100%;font-size:12px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer">
         <option value="analista">Analista</option>
         <option value="directivo">Directivo</option>
         <option value="auditor">Auditor</option>
@@ -600,9 +601,9 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Corte específico</div>
         <div style="display:flex;gap:8px;align-items:center">
-          <input type="month" id="corte-desde" value="2026-01" style="flex:1;background:#EEF5FA;border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px">
+          <input type="month" id="corte-desde" value="2026-01" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px">
           <span style="color:var(--text2);font-size:11px">→</span>
-          <input type="month" id="corte-hasta" value="2026-03" style="flex:1;background:#EEF5FA;border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px">
+          <input type="month" id="corte-hasta" value="2026-03" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px">
         </div>
         <div onclick="applyPeriodo()" style="margin-top:10px;background:var(--gdim);border:1px solid var(--green);color:var(--green);border-radius:7px;padding:7px;text-align:center;font-size:12px;cursor:pointer;font-weight:500">Aplicar período</div>
       </div>
@@ -620,7 +621,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="kpi-strip cols-4">
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--green)" id="kpi-resumen-prestadores">—</div><div class="kpi-delta up" id="kpi-resumen-prestadores-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">100%</div><div class="kpi-delta up" id="kpi-resumen-cobertura-delta">Basado en vigentes</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas sin soporte</div><div class="kpi-value" id="kpi-sin-soporte" style="color:var(--amber)">—</div><div class="kpi-delta warn" id="kpi-sin-soporte-delta">Cargando...</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas sin soporte</div><div class="kpi-value" style="color:var(--amber)" id="kpi-sin-soporte">—</div><div class="kpi-delta warn" id="kpi-sin-soporte-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">—</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">Pendiente fuente RUR</div></div>
   </div>
   <div class="grid-2">
@@ -702,7 +703,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="card-head"><div><div class="card-title">Comparativo mes a mes — Evolución del ranking</div><div class="card-sub">Últimos 4 meses · Gestores y prestadores clave</div></div></div>
     <div class="card-body">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
-        <div style="background:#EEF5FA;border-radius:10px;padding:14px">
+        <div style="background:var(--bg3);border-radius:10px;padding:14px">
           <div style="font-size:11px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Dic 2025</div>
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Facturación total 2025</div><div class="kpi-value" style="color:var(--blue)" id="kpi-fin-fact2025">$41,240 M</div><div class="kpi-delta neu">Mar 2026</div></div>
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Pagos al día</div><div class="kpi-value" style="color:var(--green)">$34,820 M</div><div class="kpi-delta up">84.4% del total</div></div>
@@ -825,10 +826,10 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="techo-labels"><span>$0</span><span style="color:var(--green)">$8,420 M actual</span><span>$11,000 M techo</span></div>
       </div>
       <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div style="background:#EEF5FA;border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Hospitalización</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)">12,840</div></div>
-        <div style="background:#EEF5FA;border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Consulta esp.</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">18,420</div></div>
-        <div style="background:#EEF5FA;border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Urgencias</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">9,241</div></div>
-        <div style="background:#EEF5FA;border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Diagnóstico</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--purple)">7,790</div></div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Hospitalización</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)">12,840</div></div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Consulta esp.</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">18,420</div></div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Urgencias</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">9,241</div></div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Diagnóstico</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--purple)">7,790</div></div>
       </div>
     </div>
   </div>
@@ -1045,11 +1046,11 @@ document.addEventListener('DOMContentLoaded',function(){
             📋 Catálogo
           </button>
           <button onclick="indTab('prestador',this)" id="tab-prestador"
-            style="font-size:12px;padding:6px 14px;border:none;cursor:pointer;background:#EEF5FA;color:var(--text2)">
+            style="font-size:12px;padding:6px 14px;border:none;cursor:pointer;background:var(--bg3);color:var(--text2)">
             🏥 Por prestador
           </button>
           <button onclick="indTab('regional',this)" id="tab-regional"
-            style="font-size:12px;padding:6px 14px;border:none;cursor:pointer;background:#EEF5FA;color:var(--text2)">
+            style="font-size:12px;padding:6px 14px;border:none;cursor:pointer;background:var(--bg3);color:var(--text2)">
             🗺 Por regional
           </button>
         </div>
@@ -1061,8 +1062,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
       <!-- ═══ PESTAÑA 1: CATÁLOGO ═══ -->
       <div id="ind-vista-catalogo">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--border);background:#EEF5FA">
-          <select id="f-modalidad" onchange="filtrarIndicadores()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg3)">
+          <select id="f-modalidad" onchange="filtrarIndicadores()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer">
             <option value="">Todas las modalidades</option>
             <option value="MRC">MRC — Riesgo Compartido</option>
             <option value="CAPITA">Capita</option>
@@ -1070,19 +1071,19 @@ document.addEventListener('DOMContentLoaded',function(){
             <option value="EVENTO">Evento</option>
             <option value="TECHO">Techo Presupuestal</option>
           </select>
-          <select id="f-clasificacion" onchange="filtrarIndicadores()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer">
+          <select id="f-clasificacion" onchange="filtrarIndicadores()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer">
             <option value="">Todas las clasificaciones</option>
             <option value="Habilitación">Habilitación</option>
             <option value="Calidad en la atención">Calidad en la atención</option>
             <option value="Gestión">Gestión</option>
             <option value="Resultados en Salud">Resultados en Salud</option>
           </select>
-          <select id="f-sancion" onchange="filtrarIndicadores()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer">
+          <select id="f-sancion" onchange="filtrarIndicadores()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer">
             <option value="">Todos los tipos</option>
             <option value="con">Con sanción económica</option>
             <option value="sin">Solo seguimiento</option>
           </select>
-          <input id="f-buscar" oninput="filtrarIndicadores()" placeholder="Buscar indicador..." style="font-size:12px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);flex:1;min-width:160px">
+          <input id="f-buscar" oninput="filtrarIndicadores()" placeholder="Buscar indicador..." style="font-size:12px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);flex:1;min-width:160px">
           <button class="btn" onclick="limpiarFiltrosInd()" style="font-size:11.5px">↺ Limpiar</button>
           <span id="ind-count-lbl" style="font-size:11.5px;color:var(--text2);align-self:center"></span>
         </div>
@@ -1094,8 +1095,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
       <!-- ═══ PESTAÑA 2: POR PRESTADOR ═══ -->
       <div id="ind-vista-prestador" style="display:none">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--border);background:#EEF5FA;align-items:center">
-          <select id="f-prestador" onchange="cargarIndicadoresPrestador()" style="font-size:12px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer;min-width:240px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg3);align-items:center">
+          <select id="f-prestador" onchange="cargarIndicadoresPrestador()" style="font-size:12px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer;min-width:240px">
             <option value="">— Selecciona un prestador —</option>
             <option value="Clínica El Bosque">Clínica El Bosque · CAPITA</option>
             <option value="Fundación Santa Fe">Fundación Santa Fe · MRC + TECHO</option>
@@ -1106,7 +1107,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <option value="IPS San Rafael">IPS San Rafael · CAPITA</option>
             <option value="Clínica Palermo">Clínica Palermo · EVENTO</option>
           </select>
-          <select id="f-prestador-periodo" onchange="cargarIndicadoresPrestador()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer">
+          <select id="f-prestador-periodo" onchange="cargarIndicadoresPrestador()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer">
             <option value="Mar 2026">Mar 2026</option>
             <option value="Feb 2026">Feb 2026</option>
             <option value="Ene 2026">Ene 2026</option>
@@ -1124,8 +1125,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
       <!-- ═══ PESTAÑA 3: POR REGIONAL ═══ -->
       <div id="ind-vista-regional" style="display:none">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--border);background:#EEF5FA;align-items:center">
-          <select id="f-regional" onchange="cargarIndicadoresRegional()" style="font-size:12px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer;min-width:200px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg3);align-items:center">
+          <select id="f-regional" onchange="cargarIndicadoresRegional()" style="font-size:12px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer;min-width:200px">
             <option value="">— Selecciona una regional —</option>
             <option value="Bogotá D.C.">Bogotá D.C.</option>
             <option value="Antioquia">Antioquia</option>
@@ -1136,7 +1137,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <option value="Nariño">Nariño</option>
             <option value="Eje Cafetero">Eje Cafetero</option>
           </select>
-          <select id="f-regional-periodo" onchange="cargarIndicadoresRegional()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);cursor:pointer">
+          <select id="f-regional-periodo" onchange="cargarIndicadoresRegional()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer">
             <option value="Mar 2026">Mar 2026</option>
             <option value="Feb 2026">Feb 2026</option>
             <option value="Ene 2026">Ene 2026</option>
@@ -1177,25 +1178,25 @@ document.addEventListener('DOMContentLoaded',function(){
 
   <!-- Filtros propios -->
   <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-    <select id="req-filtro-mes" onchange="aplicarFiltrosReq()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="req-filtro-mes" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los meses</option>
     </select>
-    <select id="req-filtro-gestor" onchange="aplicarFiltrosReq()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="req-filtro-gestor" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los gestores</option>
     </select>
-    <select id="req-filtro-regional" onchange="aplicarFiltrosReq()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="req-filtro-regional" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todas las regionales</option>
     </select>
-    <select id="req-filtro-depto" onchange="aplicarFiltrosReq()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="req-filtro-depto" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los departamentos</option>
     </select>
-    <select id="req-filtro-ciudad" onchange="aplicarFiltrosReq()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="req-filtro-ciudad" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todas las ciudades</option>
     </select>
-    <select id="req-filtro-tipo" onchange="aplicarFiltrosReq()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="req-filtro-tipo" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los tipos de caso</option>
     </select>
-    <select id="req-filtro-estado" onchange="aplicarFiltrosReq()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="req-filtro-estado" onchange="aplicarFiltrosReq()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los estados</option>
     </select>
     <button class="btn" onclick="limpiarFiltrosReq()" style="font-size:11.5px">✕ Limpiar</button>
@@ -1304,16 +1305,16 @@ document.addEventListener('DOMContentLoaded',function(){
 
   <!-- Filtros -->
   <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-    <select id="fallas-filtro-mes" onchange="aplicarFiltrosFallas()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="fallas-filtro-mes" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los meses</option>
     </select>
-    <select id="fallas-filtro-gestor" onchange="aplicarFiltrosFallas()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="fallas-filtro-gestor" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todos los gestores</option>
     </select>
-    <select id="fallas-filtro-regional" onchange="aplicarFiltrosFallas()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="fallas-filtro-regional" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todas las regionales</option>
     </select>
-    <select id="fallas-filtro-ciudad" onchange="aplicarFiltrosFallas()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+    <select id="fallas-filtro-ciudad" onchange="aplicarFiltrosFallas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
       <option value="">Todas las ciudades</option>
     </select>
     <button class="btn" onclick="limpiarFiltrosFallas()" style="font-size:11.5px">✕ Limpiar</button>
@@ -1400,10 +1401,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- Filtros -->
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-      <select id="pqrs-filtro-mes" onchange="aplicarFiltrosPqrs()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los meses</option></select>
-      <select id="pqrs-filtro-gestor" onchange="aplicarFiltrosPqrs()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los gestores</option></select>
-      <select id="pqrs-filtro-depto" onchange="aplicarFiltrosPqrs()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los departamentos</option></select>
-      <select id="pqrs-filtro-ciudad" onchange="aplicarFiltrosPqrs()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todas las ciudades</option></select>
+      <select id="pqrs-filtro-mes" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los meses</option></select>
+      <select id="pqrs-filtro-gestor" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los gestores</option></select>
+      <select id="pqrs-filtro-depto" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los departamentos</option></select>
+      <select id="pqrs-filtro-ciudad" onchange="aplicarFiltrosPqrs()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todas las ciudades</option></select>
       <button class="btn" onclick="limpiarFiltrosPqrs()" style="font-size:11.5px">✕ Limpiar</button>
       <button class="btn" onclick="cargarPqrs()" style="font-size:11.5px">↺ Recargar</button>
       <span id="pqrs-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
@@ -1443,7 +1444,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <div><div class="card-title">Oportunidad de respuesta</div><div class="card-sub">Solo PQR cerradas · % dentro del ANS</div></div>
           <div style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;color:var(--text2)">ANS:</span>
-            <input id="pqrs-ans-valor" type="number" value="15" min="1" max="90" onchange="aplicarFiltrosPqrs()" style="width:52px;font-size:12px;padding:4px 8px;border:1px solid var(--border2);border-radius:6px;background:#EEF5FA;color:var(--text);text-align:center">
+            <input id="pqrs-ans-valor" type="number" value="15" min="1" max="90" onchange="aplicarFiltrosPqrs()" style="width:52px;font-size:12px;padding:4px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);text-align:center">
             <span style="font-size:11px;color:var(--text2)">días</span>
           </div>
         </div>
@@ -1482,9 +1483,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- Filtros -->
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-      <select id="tut-filtro-mes" onchange="aplicarFiltrosTutelas()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los meses</option></select>
-      <select id="tut-filtro-gestor" onchange="aplicarFiltrosTutelas()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los gestores</option></select>
-      <select id="tut-filtro-ciudad" onchange="aplicarFiltrosTutelas()" style="background:#EEF5FA;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todas las ciudades</option></select>
+      <select id="tut-filtro-mes" onchange="aplicarFiltrosTutelas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los meses</option></select>
+      <select id="tut-filtro-gestor" onchange="aplicarFiltrosTutelas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todos los gestores</option></select>
+      <select id="tut-filtro-ciudad" onchange="aplicarFiltrosTutelas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none"><option value="">Todas las ciudades</option></select>
       <button class="btn" onclick="limpiarFiltrosTutelas()" style="font-size:11.5px">✕ Limpiar</button>
       <button class="btn" onclick="cargarTutelas()" style="font-size:11.5px">↺ Recargar</button>
       <span id="tut-estado-carga" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
@@ -1629,7 +1630,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <div class="cron-label"><div class="cron-label-text">Abr 2026</div></div>
             <div class="cron-line"><div class="cron-node" style="color:var(--text3)"></div></div>
             <div class="cron-content">
-              <div class="cron-title">Corte mensual · Abr 2026 <span class="badge" style="background:#EEF5FA;color:var(--text3);font-size:10px">Pendiente</span></div>
+              <div class="cron-title">Corte mensual · Abr 2026 <span class="badge" style="background:var(--bg3);color:var(--text3);font-size:10px">Pendiente</span></div>
               <div class="cron-meta">Programado · Inicia 01/04/2026</div>
             </div>
           </div>
@@ -1637,7 +1638,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <div class="cron-label"><div class="cron-label-text">May 2026</div></div>
             <div class="cron-line"><div class="cron-node" style="color:var(--text3)"></div></div>
             <div class="cron-content">
-              <div class="cron-title">Corte mensual · May 2026 <span class="badge" style="background:#EEF5FA;color:var(--text3);font-size:10px">Pendiente</span></div>
+              <div class="cron-title">Corte mensual · May 2026 <span class="badge" style="background:var(--bg3);color:var(--text3);font-size:10px">Pendiente</span></div>
               <div class="cron-meta">Programado · Inicia 01/05/2026</div>
             </div>
           </div>
@@ -1848,11 +1849,11 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
   <div class="card"><div class="card-head"><div><div class="card-title">Reportes disponibles</div></div><div class="card-act btn pri">+ Nuevo reporte</div></div>
   <div class="card-body">
-    <div class="rep-card"><div class="rep-icon" style="background:var(--rdim)">📋</div><div><div style="font-size:13px;font-weight:500">Informe mensual red de prestadores</div><div style="font-size:11px;color:var(--text2);margin-top:2px">SuperSalud · PDF · 01/03/2026 · Enviado</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:#EEF5FA;border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
-    <div class="rep-card"><div class="rep-icon" style="background:var(--tdim)">💊</div><div><div style="font-size:13px;font-weight:500">Cumplimiento ANS gestores farmacéuticos</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · 05/03/2026</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:#EEF5FA;border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
-    <div class="rep-card"><div class="rep-icon" style="background:var(--bdim)">💰</div><div><div style="font-size:13px;font-weight:500">Estado financiero y cartera vencida</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · Incluye modelos de contratación</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:#EEF5FA;border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
+    <div class="rep-card"><div class="rep-icon" style="background:var(--rdim)">📋</div><div><div style="font-size:13px;font-weight:500">Informe mensual red de prestadores</div><div style="font-size:11px;color:var(--text2);margin-top:2px">SuperSalud · PDF · 01/03/2026 · Enviado</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
+    <div class="rep-card"><div class="rep-icon" style="background:var(--tdim)">💊</div><div><div style="font-size:13px;font-weight:500">Cumplimiento ANS gestores farmacéuticos</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · 05/03/2026</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
+    <div class="rep-card"><div class="rep-icon" style="background:var(--bdim)">💰</div><div><div style="font-size:13px;font-weight:500">Estado financiero y cartera vencida</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · Incluye modelos de contratación</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
     <div class="rep-card"><div class="rep-icon" style="background:var(--adim)">⚠️</div><div><div style="font-size:13px;font-weight:500">Reporte PQRS y Tutelas</div><div style="font-size:11px;color:var(--amber);margin-top:2px">Min. Salud · PDF · Pendiente envío · Vence: 15/03</div></div><div style="margin-left:auto;font-size:11px;color:var(--amber);background:var(--adim);border:1px solid var(--amber);padding:5px 10px;border-radius:6px">Enviar</div></div>
-    <div class="rep-card"><div class="rep-icon" style="background:var(--pdim)">📊</div><div><div style="font-size:13px;font-weight:500">Ranking y cumplimiento · T1 2026</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · PDF · Gestores + Prestadores</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:#EEF5FA;border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
+    <div class="rep-card"><div class="rep-icon" style="background:var(--pdim)">📊</div><div><div style="font-size:13px;font-weight:500">Ranking y cumplimiento · T1 2026</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · PDF · Gestores + Prestadores</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
   </div></div>
 </div>
 
@@ -1924,13 +1925,13 @@ document.addEventListener('DOMContentLoaded',function(){
               <td style="text-align:left;font-weight:500;color:var(--text2)">Abril 2026</td>
               <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">30/04/2026</td>
               <td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td>
-              <td><span class="crono-pill" style="background:#EEF5FA;color:var(--text3)">Programado</span></td>
+              <td><span class="crono-pill" style="background:var(--bg3);color:var(--text3)">Programado</span></td>
             </tr>
             <tr style="opacity:.55">
               <td style="text-align:left;font-weight:500;color:var(--text2)">Mayo 2026</td>
               <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">31/05/2026</td>
               <td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td>
-              <td><span class="crono-pill" style="background:#EEF5FA;color:var(--text3)">Programado</span></td>
+              <td><span class="crono-pill" style="background:var(--bg3);color:var(--text3)">Programado</span></td>
             </tr>
             <tr style="opacity:.55">
               <td style="text-align:left;font-weight:500;color:var(--text2)">Junio 2026 · T2</td>
@@ -2182,7 +2183,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <input class="admin-input" id="p-sem-ambar" value="70" type="number" min="1" max="100" oninput="marcarCambio(this,70)">
             </div>
           </div>
-          <div style="margin-top:12px;font-size:11.5px;color:var(--text2);background:#EEF5FA;padding:10px 12px;border-radius:8px">
+          <div style="margin-top:12px;font-size:11.5px;color:var(--text2);background:var(--bg3);padding:10px 12px;border-radius:8px">
             Rojo: score &lt; <span id="sem-rojo-preview" style="font-weight:600;color:var(--red)">70</span> · Ámbar: <span id="sem-ambar-preview" style="color:var(--amber)">70–84</span> · Verde: ≥ <span id="sem-verde-preview" style="color:var(--green)">85</span>
           </div>
         </div>
@@ -2433,7 +2434,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- Estado de cada fuente -->
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
 
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#EEF5FA;border-radius:10px;border:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)">
         <span style="font-size:20px">🏥</span>
         <div style="flex:1">
           <div style="font-size:12.5px;font-weight:500;color:var(--text)">Base Prestadores Nacionales</div>
@@ -2442,7 +2443,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div id="estado-drive-prestadores" style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--bg4);color:var(--text2)">Sin cargar</div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#EEF5FA;border-radius:10px;border:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)">
         <span style="font-size:20px">💊</span>
         <div style="flex:1">
           <div style="font-size:12.5px;font-weight:500;color:var(--text)">Red Nacional de Medicamentos</div>
@@ -2451,7 +2452,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div id="estado-drive-medicamentos" style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--bg4);color:var(--text2)">Sin cargar</div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#EEF5FA;border-radius:10px;border:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)">
         <span style="font-size:20px">📋</span>
         <div style="flex:1">
           <div style="font-size:12.5px;font-weight:500;color:var(--text)">Registro Único de Reclamaciones</div>
@@ -2862,7 +2863,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
 
         <!-- También acepta PDF para referencia -->
-        <div style="margin-top:14px;padding:12px;background:#EEF5FA;border-radius:8px;font-size:11.5px;color:var(--text2)">
+        <div style="margin-top:14px;padding:12px;background:var(--bg3);border-radius:8px;font-size:11.5px;color:var(--text2)">
           📄 También puedes cargar el PDF del contrato como referencia visual mientras marcas los indicadores:
           <label style="display:inline-block;margin-top:6px;cursor:pointer">
             <input type="file" accept=".pdf" onchange="mostrarNombrePdf(this)" style="display:none">
@@ -2875,7 +2876,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <!-- PASO 3: Resultados -->
       <div id="val-step3" style="display:none">
         <!-- Datos del prestador para el repositorio -->
-        <div style="background:#EEF5FA;border-radius:10px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--border2)">
+        <div style="background:var(--bg3);border-radius:10px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--border2)">
           <div style="font-size:11.5px;font-weight:600;color:var(--text);margin-bottom:10px">📋 Datos del contrato — para guardar en repositorio</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
             <div>
@@ -3055,7 +3056,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <span id="const-total-badge" style="font-size:11px;color:var(--text2)"></span>
           </div>
           <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border);max-height:520px;overflow-y:auto" id="const-preview">
-            <div style="padding:40px;text-align:center;color:var(--text2);font-size:12.5px;background:#EEF5FA">
+            <div style="padding:40px;text-align:center;color:var(--text2);font-size:12.5px;background:var(--bg3)">
               ← Selecciona al menos un modelo para ver la batería generada
             </div>
           </div>
@@ -4998,7 +4999,7 @@ function renderPreviewBateria(){
   const container = document.getElementById('const-preview');
   const badge = document.getElementById('const-total-badge');
   if(constModelos.size===0){
-    if(container) container.innerHTML='<div style="padding:40px;text-align:center;color:var(--text2);font-size:12.5px;background:#EEF5FA">← Selecciona al menos un modelo para ver la batería generada</div>';
+    if(container) container.innerHTML='<div style="padding:40px;text-align:center;color:var(--text2);font-size:12.5px;background:var(--bg3)">← Selecciona al menos un modelo para ver la batería generada</div>';
     if(badge) badge.textContent='';
     return;
   }
@@ -5057,7 +5058,7 @@ function limpiarConstructor(){
   if(grid) grid.innerHTML='';
   // Reset preview
   const prev = document.getElementById('const-preview');
-  if(prev) prev.innerHTML='<div style="padding:40px;text-align:center;color:var(--text2);font-size:12.5px;background:#EEF5FA">← Selecciona al menos un modelo para ver la batería generada</div>';
+  if(prev) prev.innerHTML='<div style="padding:40px;text-align:center;color:var(--text2);font-size:12.5px;background:var(--bg3)">← Selecciona al menos un modelo para ver la batería generada</div>';
   const badge = document.getElementById('const-total-badge');
   if(badge) badge.textContent='';
 }
@@ -5385,7 +5386,7 @@ function parsearArrayPrestadores(data) {
   };
 
   const result = data.slice(1).map(row => {
-    // row sin slice para incluir OBSERVACION (col 29) y otros campos
+    // Sin slice — incluye OBSERVACION col 29
     const nombre = get(row, cols.nombre);
     const nit = get(row, cols.nit);
     if(!nit || !nombre) return null;
@@ -6051,13 +6052,11 @@ function aplicarPrestadores() {
   // KPIs con IDs directos en el HTML
   actualizarKPI('kpi-resumen-prestadores', fmtN(habilitados));
   actualizarKPI('kpi-resumen-prestadores-delta', `${regionales.length} regionales · ${departamentos.length} deptos`);
-  // Contratos vigentes reales (ESTADO DE CONTRATO = VIGENTE)
   const soloVigentes = prest.filter(p => (p.estado||'').toUpperCase().includes('VIGENTE'));
   actualizarKPI('kpi-resumen-prestadores', fmtN(soloVigentes.length));
   actualizarKPI('kpi-resumen-prestadores-delta', `${regionales.length} regionales · ${departamentos.length} deptos`);
   actualizarKPI('kpi-resumen-cobertura', '100%');
   actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(soloVigentes.length)} contratos vigentes`);
-  // SIN SOPORTE: conteo de OBSERVACION = "SIN SOPORTE"
   const sinSoporte = prest.filter(p => (p.observacion||'').toUpperCase().includes('SIN SOPORTE')).length;
   const pctSinSop = soloVigentes.length > 0 ? Math.round(sinSoporte / (soloVigentes.length + 100) * 100) : 0;
   actualizarKPI('kpi-sin-soporte', sinSoporte);
@@ -6911,7 +6910,7 @@ function renderRequerimientos(datos) {
         <td style="font-size:11px;color:var(--text2)">${regional}</td>
         <td style="font-size:11px;color:var(--text2)">${depto}</td>
         <td style="font-size:11px;color:var(--text2)">${ciudad}</td>
-        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:#EEF5FA;color:${clrEst}">${estado}</span></td>
+        <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${clrEst}">${estado}</span></td>
         <td style="font-family:'DM Mono',monospace;font-weight:600">${n}</td>
         <td style="font-family:'DM Mono',monospace;color:var(--text2)">${fmtP(n,total)}</td>
       </tr>`;
@@ -7038,7 +7037,7 @@ function renderDetalleReq(filas){
       <td style="font-size:11px;color:var(--text2)">${normalizeGestor(r[COL_REQ.gestor])}</td>
       <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.regional]||'—').trim()}</td>
       <td style="font-size:11px;color:var(--text2)">${String(r[COL_REQ.ciudad]||'—').trim()}</td>
-      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:#EEF5FA;color:${info.color}">${info.label}</span></td>
+      <td><span style="font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg3);color:${info.color}">${info.label}</span></td>
     </tr>`;
   }).join('');
 }
@@ -8367,7 +8366,7 @@ function cargarIndicadoresPrestador() {
   const header = `<div style="display:grid;grid-template-columns:140px 1fr 90px 90px 90px 120px;padding:8px 16px;background:var(--bg4);border-bottom:2px solid var(--border2);font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em"><span>Atributo</span><span>Indicador</span><span>Resultado</span><span>Meta</span><span>Estado</span><span>Sanción</span></div>`;
   const rows = data.resultados.map((r,i)=>{
     const sem = semColorInd(r.cumple, '');
-    const bg = i%2===0?'':'background:#EEF5FA';
+    const bg = i%2===0?'':'background:var(--bg3)';
     const hasSan = r.san && r.san!=='NA';
     return `<div style="display:grid;grid-template-columns:140px 1fr 90px 90px 90px 120px;padding:10px 16px;border-bottom:1px solid var(--border);align-items:center;${bg}">
       <span style="font-size:11.5px;color:var(--text2)">${r.atr}</span>
@@ -8400,7 +8399,7 @@ function cargarIndicadoresRegional() {
     const sc = p.score>=85?{c:'var(--green)',bg:'var(--gdim)'}:p.score>=70?{c:'var(--amber)',bg:'var(--adim)'}:{c:'var(--red)',bg:'var(--rdim)'};
     const pct = Math.round(p.cumple/p.total*100);
     const estado = p.score>=85?'● Verde':p.score>=70?'● Ámbar':'● Rojo';
-    const bg = i%2===0?'':'background:#EEF5FA';
+    const bg = i%2===0?'':'background:var(--bg3)';
     return `<div style="display:grid;grid-template-columns:1fr 80px 100px 100px 100px 100px;padding:10px 16px;border-bottom:1px solid var(--border);align-items:center;${bg}">
       <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">${p.nombre}</div><div style="font-size:10.5px;color:var(--text2)">${p.mod}</div></div>
       <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg4);color:var(--text2)">${p.mod.split('+')[0]}</span>
@@ -8467,7 +8466,7 @@ function renderIndicadores(data) {
     const mc = MOD_COLORS[i.mod] || {bg:'var(--bg3)',color:'var(--text2)'};
     const cc = CLAS_COLORS[i.clas] || {bg:'var(--bg3)',color:'var(--text2)'};
     const hasSan = i.san && i.san !== 'NA' && i.san !== 'nan';
-    const bg = idx % 2 === 0 ? '' : 'background:#EEF5FA';
+    const bg = idx % 2 === 0 ? '' : 'background:var(--bg3)';
     return `<div style="display:grid;grid-template-columns:90px 130px 120px 1fr 80px 90px 120px;gap:0;padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;${bg}">
       <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:${mc.bg};color:${mc.color};text-align:center">${i.mod}</span>
       <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${cc.bg};color:${cc.color}">${i.clas}</span>
@@ -8556,604 +8555,5 @@ window.addEventListener('load', function() {
   setTimeout(cargaAutomatica, 800);
 });
 </script>
-<div class="screen" id="screen-red-habilitacion">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">✅ Habilitación</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Estado REPS por prestador</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas de vencimiento de registros</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Histórico de habilitaciones y novedades</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Cruce con red contratada vigente</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Prestadores con habilitación vencida</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Nuevas habilitaciones en el período</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Habilitación</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-habilitacion">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-red-oportunidad">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--blue)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">⏱ Oportunidad</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tiempos de respuesta por especialidad</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Cumplimiento vs. estándares contractuales</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tendencia mensual por regional</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Ranking de oportunidad por prestador</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Citas asignadas vs. solicitadas</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tiempo promedio de espera</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Oportunidad</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-oportunidad">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-red-accesibilidad">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--teal)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">📍 Accesibilidad</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Cobertura geográfica por regional</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Brechas de red y zonas sin cobertura</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Distancia promedio al usuario</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas de prestadores inactivos</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Municipios sin prestador disponible</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Distribución por zona urbana/rural</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Accesibilidad</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-accesibilidad">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-red-riesgos">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">⚠️ Riesgos en salud</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Indicadores de riesgo por prestador</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Sanciones activas y en seguimiento</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Hallazgos de auditoría pendientes</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas automáticas por umbral</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Prestadores en proceso de exclusión</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Eventos adversos reportados</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Riesgos en salud</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-riesgos">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-red-pqrs">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--purple)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">📋 PQRS</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Volumen y tipología de PQRS por prestador</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tiempos de resolución vs. SLA</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tendencia y reincidencia por prestador</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas de PQRS próximas a vencer</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">PQRS con tutela asociada</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Ranking de prestadores con más PQRS</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · PQRS</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-pqrs">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-red-satisfaccion">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">😊 Satisfacción</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Resultados de encuestas por prestador</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">NPS y percepción del usuario</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Comparativo vs. meta corporativa</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Evolución histórica mensual</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Satisfacción por especialidad</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Quejas relacionadas con trato</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Satisfacción</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-satisfaccion">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-red-nota-tecnica">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--blue)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">📊 Nota técnica</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Indicadores de calidad técnica</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Resultados de auditoría clínica</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Evaluación de resultados en salud</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Cumplimiento de protocolos</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Indicadores trazadores por especialidad</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Desviaciones vs. referente</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Nota técnica</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-nota-tecnica">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-red-cuentas-medicas">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--red)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">💰 Cuentas médicas</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Facturación y radicación por prestador</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Glosas generadas y resueltas</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Estado de cartera y vencimientos</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas de deuda crítica</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Pagos realizados en el período</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Distribución por régimen</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Cuentas médicas</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-red-cuentas-medicas">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-gest-oportunidad">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">🚚 Oportunidad de entrega</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Entregas realizadas vs. programadas</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas de incumplimiento por ruta</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Gestión de pendientes y retrasos</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tendencia mensual de oportunidad</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tiempo promedio de entrega por gestor</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Entregas fallidas y motivos</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Oportunidad de entrega</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-gest-oportunidad">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-gest-pendientes">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">📦 Pendientes</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Solicitudes pendientes de entrega</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Antigüedad de pendientes por gestor</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas de pendientes críticos</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Causas raíz de pendientes</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Gestión semanal de pendientes</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Cierre de casos abiertos</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Pendientes</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-gest-pendientes">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-gest-tutelas">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--red)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">⚖️ Tutelas</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tutelas activas con fecha límite</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tutelas por gestor farmacéutico</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Tiempos de respuesta a tutelas</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Alertas de vencimiento próximo</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Histórico de tutelas resueltas</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Análisis de causas frecuentes</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Tutelas</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-gest-tutelas">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="screen-gest-financiero">
-  <div class="kpi-strip cols-3">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total registros</div><div class="kpi-value" style="color:var(--blue)">—</div><div class="kpi-delta">Pendiente fuente de datos</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cumplimiento</div><div class="kpi-value" style="color:var(--green)">—</div><div class="kpi-delta">% vs. meta</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas</div><div class="kpi-value" style="color:var(--amber)">—</div><div class="kpi-delta">Requieren atención</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">💵 Seguimiento financiero</div><div class="card-sub">Indicadores clave · Actualización automática</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Estado de pagos y facturas por gestor</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Facturación ejecutada vs. contratada</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Cartera vencida y alertas de deuda</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Proyección de pagos pendientes</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Distribución por modelo de contrato</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-        <span style="color:var(--text2);font-size:12px">Variación mensual de facturación</span>
-      </div>
-        <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;text-align:center;color:var(--text2);font-size:12px">
-          📊 Fuente de datos pendiente de conexión por parte de Keralty
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Ranking de cumplimiento</div><div class="card-sub">Por prestador · Seguimiento financiero</div></div></div>
-      <div class="card-body" style="padding:16px 20px" id="ranking-gest-financiero">
-        <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
-          ⏳ El ranking se generará automáticamente al conectar la fuente de datos
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 </html>
