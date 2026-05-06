@@ -553,7 +553,6 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="nav-sec">Análisis</div>
     <div class="nav-item" data-screen="ranking"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1 3h3l-2.5 2 1 3L7 7.5 4.5 9l1-3L3 4h3z" stroke="currentColor" stroke-width="1.2"/></svg>Ranking y cumplimiento</div>
-    <div class="nav-item" data-screen="financiero"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="9" r="1" fill="currentColor"/></svg>Módulo financiero</div>
     <!-- Modelos de contratación: integrado en Red de prestadores -->
     <div class="nav-item" data-screen="indicadores"><svg viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Indicadores</div>
     <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
@@ -5160,6 +5159,12 @@ const DRIVE_CONFIG = {
     nombre: 'Registro Único de Reclamaciones',
     icono: '📋'
   },
+  cuentas_medicas: {
+    id: '1vCh2IfU11JxB11OFDfBopfRsuLrwjwWSqBxKVjAK2Lk',
+    hoja: '0', // Ajustar con nombre exacto de la pestaña
+    nombre: 'Cuentas Médicas',
+    icono: '💰'
+  },
   satisfaccion: {
     id: '1-djyBUMoIlIqxXnoU6JPWe3P7E9ZkI-HF9mWii5IJ7c',
     hoja: 'Satisfaccion_0256 - Marzo 2026',
@@ -5174,7 +5179,7 @@ const DRIVE_CONFIG = {
   },
 };
 
-const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null, homologacion: null, homologacion_rows: [], satisfaccion: [] };
+const DATOS_CARGADOS = { prestadores: null, gestores: null, reclamaciones: null, homologacion: null, homologacion_rows: [], satisfaccion: [], cuentas_medicas: [] };
 let datosListos = false;
 let cargandoDesdeDrive = false;
 
@@ -5227,13 +5232,14 @@ async function cargarDesdeDrive() {
   actualizarEstadoFuente('reclamaciones', '⏳ Cargando...','var(--bdim)','var(--blue)');
 
   // ── Cargar las 4 fuentes EN PARALELO ─────────────────────────────────
-  const [resPrest, resNIT, resDANE, resRec, resHab, resSat] = await Promise.allSettled([
+  const [resPrest, resNIT, resDANE, resRec, resHab, resSat, resCM] = await Promise.allSettled([
     fetchViaAppsScript(DRIVE_CONFIG.prestadores.id,       DRIVE_CONFIG.prestadores.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_nit.id,  DRIVE_CONFIG.medicamentos_nit.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.medicamentos_dane.id, DRIVE_CONFIG.medicamentos_dane.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.homologacion.id,      DRIVE_CONFIG.homologacion.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.satisfaccion.id,      DRIVE_CONFIG.satisfaccion.hoja),
+    fetchViaAppsScript(DRIVE_CONFIG.cuentas_medicas.id,   DRIVE_CONFIG.cuentas_medicas.hoja),
   ]);
 
   const resultados = [];
@@ -5304,6 +5310,12 @@ async function cargarDesdeDrive() {
       DATOS_CARGADOS.homologacion_rows = habData.rows;
       const n = Object.keys(habData.idx).length;
   // ── Satisfacción ────────────────────────────────────────────
+  // ── Cuentas Médicas ──────────────────────────────────────────
+  if(resCM.status === 'fulfilled') {
+    try {
+      DATOS_CARGADOS.cuentas_medicas = parsearCuentasMedicas(resCM.value);
+    } catch(e) { console.error('CM parser:', e); }
+  }
   if(resSat.status === 'fulfilled') {
     try {
       DATOS_CARGADOS.satisfaccion = parsearSatisfaccion(resSat.value);
@@ -8711,7 +8723,7 @@ function parsearSatisfaccion(data) {
     <div class="card">
       <div class="card-head"><div><div class="card-title">Distribución por rango de satisfacción</div><div class="card-sub">N° prestadores por nivel de resultado</div></div></div>
       <div class="card-body" style="padding:16px 20px">
-        <canvas id="sat-chart-dist" height="180"></canvas>
+        <canvas id="sat-chart-dist" height="210"></canvas>
         <div id="sat-chart-ley" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:10.5px"></div>
       </div>
     </div>
@@ -8856,7 +8868,7 @@ function parsearSatisfaccion(data) {
     if(!canvas) return;
     const dpr = window.devicePixelRatio || 1;
     const W = canvas.parentElement?.offsetWidth - 40 || 400;
-    const H = 180;
+    const H = 210;
     canvas.width = W*dpr; canvas.height = H*dpr;
     canvas.style.width = W+'px'; canvas.style.height = H+'px';
     const ctx = canvas.getContext('2d');
@@ -8865,33 +8877,37 @@ function parsearSatisfaccion(data) {
 
     const counts = RANGOS.map(r => data.filter(d=>d.resultado>=r.min&&d.resultado<r.max).length);
     const maxC = Math.max(...counts, 1);
-    const barW = (W - 40) / RANGOS.length - 12;
-    const maxH = 120;
+    const barW = Math.floor((W - 60) / RANGOS.length - 14);
+    const topPad = 24, barZoneH = 110, bottomPad = 50;
 
     RANGOS.forEach((r,i)=>{
-      const x = 20 + i*(barW+12);
-      const h = Math.max(4, (counts[i]/maxC)*maxH);
-      const y = 10 + maxH - h;
+      const x = 20 + i*(barW+14);
+      const h = Math.max(4, (counts[i]/maxC)*barZoneH);
+      const y = topPad + barZoneH - h;
+      // Track
+      ctx.fillStyle = r.color+'18';
+      ctx.beginPath(); ctx.roundRect(x, topPad, barW, barZoneH, 5); ctx.fill();
       // Bar
-      ctx.fillStyle = r.color+'22';
-      ctx.beginPath(); ctx.roundRect(x, 10, barW, maxH, 5); ctx.fill();
       ctx.fillStyle = r.color;
       ctx.beginPath(); ctx.roundRect(x, y, barW, h, 5); ctx.fill();
-      // Count
+      // Count above bar
       ctx.fillStyle = '#212121';
       ctx.font = 'bold 12px Figtree, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(counts[i].toLocaleString('es-CO'), x+barW/2, y-4);
-      // Pct
+      ctx.fillText(counts[i].toLocaleString('es-CO'), x+barW/2, topPad+barZoneH-h-6 > 14 ? y-5 : y+14);
+      // Pct below bar zone
+      const baseY = topPad + barZoneH + 14;
       ctx.fillStyle = '#4A7A95';
       ctx.font = '10px Figtree, sans-serif';
-      ctx.fillText(total>0?((counts[i]/total)*100).toFixed(1)+'%':'0%', x+barW/2, 148);
-      // Label
+      ctx.fillText(total>0?((counts[i]/total)*100).toFixed(1)+'%':'0%', x+barW/2, baseY);
+      // Two-line label
       ctx.fillStyle = r.color;
       ctx.font = 'bold 9.5px Figtree, sans-serif';
-      const lbl = r.label.split(' ');
-      ctx.fillText(lbl[0], x+barW/2, 160);
-      if(lbl[1]) ctx.fillText(lbl.slice(1).join(' '), x+barW/2, 172);
+      const parts = r.label.split(' ');
+      const line1 = parts.slice(0,2).join(' ');
+      const line2 = parts.slice(2).join(' ');
+      ctx.fillText(line1, x+barW/2, baseY+14);
+      if(line2) ctx.fillText(line2, x+barW/2, baseY+26);
     });
     ctx.textAlign = 'left';
 
@@ -8956,6 +8972,277 @@ function parsearSatisfaccion(data) {
       window.navigate = function(scr){
         origNav(scr);
         if(scr === 'red-satisfaccion') setTimeout(window.renderizarSatisfaccion, 80);
+      };
+    }
+  });
+})();
+</script>
+
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CUENTAS MÉDICAS — Parser
+// ═══════════════════════════════════════════════════════════
+function parsearCuentasMedicas(data) {
+  if(!data || data.length < 2) return [];
+  const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const hdr = data[0].map(h => norm(h));
+  const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(norm(kw))); if(i>=0)return i; } return -1; };
+  const get = (row,i) => i>=0&&i<row.length ? String(row[i]||'').trim() : '';
+  const getNum = (row,i) => {
+    const v = get(row,i).replace(/[$. ]/g,'').replace(',','.');
+    const n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  };
+
+  const cols = {
+    fecha_radicacion: fi('FECHA RADICACION','FECHA DE RADICACION','FECHA RAD','FECHA'),
+    nit:              fi('NIT PRESTADOR','NIT'),
+    nombre:           fi('NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR','RAZON SOCIAL','NOMBRE'),
+    tipo_contrato:    fi('TIPO CONTRATO','TIPO DE CONTRATO','TIPO'),
+    validacion:       fi('VALIDACION','ESTADO VALIDACION','ESTADO'),
+    subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL'),
+    glosado:          fi('VALOR GLOSADO','GLOSADO GLOSA','GLOSA GLOSADO'),
+    glosa_real:       fi('GLOSA REAL'),
+    devoluciones:     fi('DEVOLUCIONES','DEVOLUCION'),
+  };
+  console.log('[CuentasMédicas] cols:', cols, '| hdr sample:', hdr.slice(0,12));
+
+  return data.slice(1).map(row => {
+    const nit = get(row, cols.nit).replace(/\.0$/,'');
+    if(!nit && !get(row, cols.nombre)) return null;
+    return {
+      nit,
+      nombre:           get(row, cols.nombre),
+      fecha_radicacion: get(row, cols.fecha_radicacion),
+      tipo_contrato:    get(row, cols.tipo_contrato),
+      validacion:       get(row, cols.validacion),
+      subtotal:         getNum(row, cols.subtotal),
+      glosado:          getNum(row, cols.glosado),
+      glosa_real:       getNum(row, cols.glosa_real),
+      devoluciones:     getNum(row, cols.devoluciones),
+    };
+  }).filter(Boolean);
+}
+</script>
+
+<div class="screen" id="screen-red-cuentas-medicas">
+
+  <!-- KPIs -->
+  <div class="kpi-strip cols-4">
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total radicado</div><div class="kpi-value" style="color:var(--blue)" id="cm-kpi-subtotal">—</div><div class="kpi-delta up" id="cm-kpi-subtotal-d">Subtotal acumulado</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Valor glosado</div><div class="kpi-value" style="color:var(--amber)" id="cm-kpi-glosado">—</div><div class="kpi-delta warn" id="cm-kpi-glosado-d">% del subtotal</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Glosa real</div><div class="kpi-value" style="color:var(--red)" id="cm-kpi-glosa-real">—</div><div class="kpi-delta dn" id="cm-kpi-glosa-real-d">% del subtotal</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Devoluciones</div><div class="kpi-value" style="color:var(--teal)" id="cm-kpi-dev">—</div><div class="kpi-delta dn" id="cm-kpi-dev-d">% del subtotal</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Resumen financiero por prestador top -->
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Top prestadores por valor radicado</div><div class="card-sub">Mayor subtotal acumulado en el período</div></div></div>
+      <div class="card-body" style="padding:16px 20px" id="cm-top-prest"></div>
+    </div>
+    <!-- Distribución por validación -->
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Distribución por estado de validación</div><div class="card-sub">N° registros y valor total por estado</div></div></div>
+      <div class="card-body" style="padding:16px 20px">
+        <canvas id="cm-chart-val" height="160"></canvas>
+        <div id="cm-ley-val" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:10.5px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros + tabla detalle -->
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+      <div><div class="card-title">Detalle de cuentas médicas</div><div class="card-sub">Fecha radicación · NIT · Nombre · Tipo contrato · Validación · Valores en COP</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="cm-buscar" placeholder="🔍 NIT o nombre prestador..." oninput="cmFiltrar()"
+          style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;width:210px;background:var(--bg3);color:var(--text);outline:none">
+        <select id="cm-filtro-tipo" onchange="cmFiltrar()"
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Todos los contratos</option>
+        </select>
+        <select id="cm-filtro-val" onchange="cmFiltrar()"
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Toda validación</option>
+        </select>
+        <span style="font-size:11px;color:var(--text2)" id="cm-count-lbl">— registros</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto;max-height:420px;overflow-y:auto">
+      <table class="hab-table" id="cm-tabla">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fecha radicación</th>
+            <th>NIT</th>
+            <th>Nombre prestador</th>
+            <th>Tipo contrato</th>
+            <th>Validación</th>
+            <th style="text-align:right">Subtotal</th>
+            <th style="text-align:right">V. Glosado</th>
+            <th style="text-align:right">Glosa real</th>
+            <th style="text-align:right">Devoluciones</th>
+          </tr>
+        </thead>
+        <tbody id="cm-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const CM_COLS_VAL = ['#0099D1','#2E7300','#B86C00','#B50303','#38637A','#8CC63F'];
+  let CM_DATA = [], CM_FILTRADO = [];
+
+  function fmtCOP(v){
+    if(!v) return '$0';
+    if(v>=1e12) return '$'+(v/1e12).toFixed(1)+' bill.';
+    if(v>=1e9)  return '$'+(v/1e9).toFixed(1)+' mil M';
+    if(v>=1e6)  return '$'+(v/1e6).toFixed(1)+' M';
+    if(v>=1e3)  return '$'+(v/1e3).toFixed(0)+' K';
+    return '$'+v.toLocaleString('es-CO');
+  }
+
+  function pct(part, total){ return total>0?((part/total)*100).toFixed(1)+'%':'0%'; }
+
+  window.renderizarCuentasMedicas = function(){
+    CM_DATA = DATOS_CARGADOS.cuentas_medicas || [];
+    if(!CM_DATA.length){
+      document.getElementById('cm-tbody').innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text2)">⏳ Cargando datos de cuentas médicas...</td></tr>';
+      return;
+    }
+
+    const totSub  = CM_DATA.reduce((a,r)=>a+r.subtotal,0);
+    const totGlos = CM_DATA.reduce((a,r)=>a+r.glosado,0);
+    const totGR   = CM_DATA.reduce((a,r)=>a+r.glosa_real,0);
+    const totDev  = CM_DATA.reduce((a,r)=>a+r.devoluciones,0);
+
+    document.getElementById('cm-kpi-subtotal').textContent   = fmtCOP(totSub);
+    document.getElementById('cm-kpi-subtotal-d').textContent = `${CM_DATA.length.toLocaleString('es-CO')} registros`;
+    document.getElementById('cm-kpi-glosado').textContent    = fmtCOP(totGlos);
+    document.getElementById('cm-kpi-glosado-d').textContent  = pct(totGlos, totSub)+' del subtotal';
+    document.getElementById('cm-kpi-glosa-real').textContent = fmtCOP(totGR);
+    document.getElementById('cm-kpi-glosa-real-d').textContent = pct(totGR, totSub)+' del subtotal';
+    document.getElementById('cm-kpi-dev').textContent        = fmtCOP(totDev);
+    document.getElementById('cm-kpi-dev-d').textContent      = pct(totDev, totSub)+' del subtotal';
+
+    // Top 6 prestadores por subtotal
+    const byPrest = {};
+    CM_DATA.forEach(r=>{
+      const k = r.nit||r.nombre;
+      if(!byPrest[k]) byPrest[k]={nit:r.nit,nombre:r.nombre,sub:0,glos:0,gr:0,dev:0,n:0};
+      byPrest[k].sub+=r.subtotal; byPrest[k].glos+=r.glosado;
+      byPrest[k].gr+=r.glosa_real; byPrest[k].dev+=r.devoluciones; byPrest[k].n++;
+    });
+    const topP = Object.values(byPrest).sort((a,b)=>b.sub-a.sub).slice(0,6);
+    const maxSub = topP[0]?.sub || 1;
+    document.getElementById('cm-top-prest').innerHTML = topP.map((p,i)=>`
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+          <span style="font-size:11px;font-weight:600;color:var(--text);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nombre||p.nit}</span>
+          <span style="font-size:11px;font-weight:700;color:var(--blue);white-space:nowrap">${fmtCOP(p.sub)}</span>
+        </div>
+        <div style="background:var(--bg3);border-radius:4px;height:7px">
+          <div style="width:${(p.sub/maxSub*100).toFixed(1)}%;height:100%;background:var(--blue);border-radius:4px"></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:3px;font-size:10px;color:var(--text2)">
+          <span>Glosado: <b style="color:var(--amber)">${fmtCOP(p.glos)}</b></span>
+          <span>Glosa real: <b style="color:var(--red)">${fmtCOP(p.gr)}</b></span>
+          <span>Dev: <b style="color:var(--teal)">${fmtCOP(p.dev)}</b></span>
+        </div>
+      </div>`).join('');
+
+    // Chart validación
+    const byVal = {};
+    CM_DATA.forEach(r=>{ const k=r.validacion||'Sin dato'; byVal[k]=(byVal[k]||0)+1; });
+    dibujarChartValidacion(byVal, CM_DATA.length);
+
+    // Poblar filtros
+    const tipos = [...new Set(CM_DATA.map(r=>r.tipo_contrato).filter(Boolean))].sort();
+    const vals  = [...new Set(CM_DATA.map(r=>r.validacion).filter(Boolean))].sort();
+    document.getElementById('cm-filtro-tipo').innerHTML = '<option value="">Todos los contratos</option>' + tipos.map(t=>`<option value="${t}">${t}</option>`).join('');
+    document.getElementById('cm-filtro-val').innerHTML  = '<option value="">Toda validación</option>'    + vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+
+    cmFiltrar();
+  };
+
+  function dibujarChartValidacion(byVal, total){
+    const canvas = document.getElementById('cm-chart-val');
+    if(!canvas) return;
+    const dpr = window.devicePixelRatio||1;
+    const W = canvas.parentElement?.offsetWidth-40||380, H = 160;
+    canvas.width=W*dpr; canvas.height=H*dpr;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,W,H);
+
+    const entries=Object.entries(byVal).sort((a,b)=>b[1]-a[1]);
+    const maxV=entries[0]?.[1]||1;
+    const barH=22, gap=8, labelW=160, valW=90, bZone=W-labelW-valW-8;
+
+    entries.forEach(([k,v],i)=>{
+      const y=i*(barH+gap)+4, color=CM_COLS_VAL[i%CM_COLS_VAL.length];
+      const bw=Math.max(4,(v/maxV)*bZone);
+      ctx.fillStyle='#212121'; ctx.font='10.5px Figtree,sans-serif';
+      ctx.fillText(k.length>22?k.substring(0,20)+'…':k, 0, y+16);
+      ctx.fillStyle=color+'18';
+      ctx.beginPath(); ctx.roundRect(labelW,y+2,bZone,barH-4,4); ctx.fill();
+      ctx.fillStyle=color;
+      ctx.beginPath(); ctx.roundRect(labelW,y+2,bw,barH-4,4); ctx.fill();
+      ctx.fillStyle='#003D53'; ctx.font='bold 10.5px Figtree,sans-serif';
+      ctx.fillText(v.toLocaleString('es-CO'), labelW+bZone+8, y+13);
+      ctx.fillStyle='#4A7A95'; ctx.font='10px Figtree,sans-serif';
+      ctx.fillText('('+((v/total)*100).toFixed(1)+'%)', labelW+bZone+8, y+26);
+    });
+
+    const ley=document.getElementById('cm-ley-val');
+    if(ley) ley.innerHTML=entries.map(([k,v],i)=>
+      `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${CM_COLS_VAL[i%CM_COLS_VAL.length]};display:inline-block;flex-shrink:0"></span><span style="color:var(--text2)">${k}: <b style="color:var(--text)">${v}</b></span></span>`
+    ).join('');
+  }
+
+  window.cmFiltrar = function(){
+    const buscar = (document.getElementById('cm-buscar')?.value||'').toLowerCase();
+    const tipo   = document.getElementById('cm-filtro-tipo')?.value||'';
+    const val    = document.getElementById('cm-filtro-val')?.value||'';
+
+    CM_FILTRADO = CM_DATA.filter(r=>{
+      if(buscar && !`${r.nit} ${r.nombre}`.toLowerCase().includes(buscar)) return false;
+      if(tipo && r.tipo_contrato!==tipo) return false;
+      if(val  && r.validacion!==val)     return false;
+      return true;
+    });
+
+    document.getElementById('cm-count-lbl').textContent = `${CM_FILTRADO.length.toLocaleString('es-CO')} registros`;
+
+    const tbody=document.getElementById('cm-tbody');
+    const MAX=500;
+    tbody.innerHTML = CM_FILTRADO.slice(0,MAX).map((r,i)=>`
+      <tr>
+        <td style="color:var(--text2);font-size:11px">${i+1}</td>
+        <td style="white-space:nowrap;font-size:11px">${r.fecha_radicacion||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit||'—'}</td>
+        <td style="font-weight:500;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre||'—'}</td>
+        <td style="font-size:11px">${r.tipo_contrato||'—'}</td>
+        <td><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:var(--bdim);color:var(--blue)">${r.validacion||'—'}</span></td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--blue)">${fmtCOP(r.subtotal)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">${fmtCOP(r.glosado)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">${fmtCOP(r.glosa_real)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--teal)">${fmtCOP(r.devoluciones)}</td>
+      </tr>`).join('') +
+      (CM_FILTRADO.length>MAX?`<tr><td colspan="10" style="text-align:center;padding:8px;color:var(--text2);font-size:11px">Mostrando primeros ${MAX} de ${CM_FILTRADO.length.toLocaleString('es-CO')} registros.</td></tr>`:'');
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const origNav=window.navigate;
+    if(typeof origNav==='function'){
+      window.navigate=function(scr){
+        origNav(scr);
+        if(scr==='red-cuentas-medicas') setTimeout(window.renderizarCuentasMedicas,80);
       };
     }
   });
