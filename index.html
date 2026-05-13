@@ -3150,6 +3150,9 @@ function navigate(screen){
   if(screen === 'pqrs' && DATOS_PQRS.length === 0) {
     cargarPqrs();
   }
+  if(screen === 'red-pqrs' && !window._pqrsRedCargado) {
+    cargarPqrsRed();
+  }
 }
 
 function setPeriodoBtnLegacy(btn){
@@ -6736,6 +6739,8 @@ const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v
 const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
 const PQRS_SCRIPT    = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEYRoKvTNKFsuXk_CUsIRb5UHDmgycJeiGLgA4LoT9G0fcRIphBvEfdA/exec';
 const TUTELAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzVt-Q5bggChVwxeM_Wew_QsLkweNZZiYh5aQxP16lxVeCAR0BiLMouZbJbzarSwJ0Kfg/exec';
+// ── PQRS Red de Prestadores ── desplegar Apps Script y reemplazar esta URL
+const PQRS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycbzu8xaxZo11EenmMfjvSaEL_Hny7UIccwoh0GrhSvmQyLBw-G3hL5J9dOEht7GZcPTu/exec';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -9614,6 +9619,445 @@ function parsearCuentasMedicas(data) {
   // Also trigger when data loads
   document.addEventListener('DOMContentLoaded', function(){
     const _orig = window.cargaAutomatica;
+  });
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PQRS RED DE PRESTADORES
+══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-red-pqrs">
+
+  <!-- KPIs -->
+  <div class="kpi-strip cols-4">
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Total quejas</div>
+      <div class="kpi-value" style="color:var(--blue)" id="pqr-kpi-total">—</div>
+      <div class="kpi-delta neu" id="pqr-kpi-total-d">Período seleccionado</div>
+    </div>
+    <div class="kpi" style="--kc:var(--red)">
+      <div class="kpi-label">Supersalud</div>
+      <div class="kpi-value" style="color:var(--red)" id="pqr-kpi-sup">—</div>
+      <div class="kpi-delta dn" id="pqr-kpi-sup-d">% del total</div>
+    </div>
+    <div class="kpi" style="--kc:var(--amber)">
+      <div class="kpi-label">Canales propios</div>
+      <div class="kpi-value" style="color:var(--amber)" id="pqr-kpi-can">—</div>
+      <div class="kpi-delta warn" id="pqr-kpi-can-d">% del total</div>
+    </div>
+    <div class="kpi" style="--kc:var(--teal)">
+      <div class="kpi-label">Prestadores</div>
+      <div class="kpi-value" style="color:var(--teal)" id="pqr-kpi-prest">—</div>
+      <div class="kpi-delta neu">Con quejas en período</div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-body" style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <select id="pqr-f-regional" onchange="renderPqrsRed()"
+        style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+        <option value="">Todas las regionales</option>
+        <option value="NACIONAL">Nacional</option>
+        <option value="Bogotá">Bogotá</option>
+        <option value="Barranquilla">Barranquilla</option>
+        <option value="Cali">Cali</option>
+        <option value="Bucaramanga">Bucaramanga</option>
+        <option value="Medellín">Medellín</option>
+        <option value="Centro Oriente">Centro Oriente</option>
+      </select>
+      <select id="pqr-f-año" onchange="renderPqrsRed()"
+        style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+        <option value="">Todos los años</option>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+      </select>
+      <select id="pqr-f-mes" onchange="renderPqrsRed()"
+        style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text);outline:none">
+        <option value="">Todos los meses</option>
+        <option value="1">Enero</option><option value="2">Febrero</option>
+        <option value="3">Marzo</option><option value="4">Abril</option>
+        <option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option>
+        <option value="9">Septiembre</option><option value="10">Octubre</option>
+        <option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+      <input id="pqr-f-buscar" placeholder="🔍 NIT o nombre prestador..."
+        oninput="renderPqrsRed()"
+        style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;width:220px;background:var(--bg3);color:var(--text);outline:none">
+      <button class="btn" onclick="limpiarFiltrosPqrRed()" style="font-size:11.5px">✕ Limpiar</button>
+      <button class="btn" onclick="cargarPqrsRed()" style="font-size:11.5px">↺ Recargar</button>
+      <span id="pqr-estado" style="font-size:11px;color:var(--text2)">Sin datos cargados</span>
+    </div>
+  </div>
+
+  <!-- Gráficas -->
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Tendencia mensual -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Tendencia mensual de quejas</div>
+          <div class="card-sub">Supersalud vs Canales propios · mes a mes</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding:16px 20px">
+        <canvas id="pqr-chart-tendencia" height="200"></canvas>
+        <div id="pqr-ley-tendencia" style="display:flex;gap:16px;margin-top:10px;font-size:10.5px;justify-content:center"></div>
+      </div>
+    </div>
+    <!-- Top 10 prestadores -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 prestadores</div>
+          <div class="card-sub">Mayor volumen total de quejas en el período</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding:16px 20px">
+        <canvas id="pqr-chart-top" height="260"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla detalle -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Detalle por prestador</div>
+        <div class="card-sub" id="pqr-tabla-sub">NIT · Nombre · Regional · Supersalud · Canales Propios · Total</div>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto;max-height:440px;overflow-y:auto">
+      <table class="hab-table" id="pqr-tabla">
+        <thead>
+          <tr>
+            <th>NIT</th>
+            <th>Nombre prestador</th>
+            <th>Regional</th>
+            <th style="text-align:right">Supersalud</th>
+            <th style="text-align:right">Canales propios</th>
+            <th style="text-align:right">Total quejas</th>
+            <th style="text-align:right">% Supersalud</th>
+          </tr>
+        </thead>
+        <tbody id="pqr-tabla-body">
+          <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text2)">⏳ Cargando datos...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ── Estado global ────────────────────────────────────────────────
+  let PQRS_RED_DATA = [];
+  window._pqrsRedCargado = false;
+
+  const MESES_LABEL = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const TABS_RED = ['NACIONAL','Bogotá','Barranquilla','Cali','Bucaramanga','Medellín','Centro Oriente'];
+  const AÑOS_COLS = [2024,2025,2026];
+  const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  // ── Cargar datos desde Apps Script ──────────────────────────────
+  window.cargarPqrsRed = async function() {
+    const el = document.getElementById('pqr-estado');
+    if(el){ el.textContent = '⏳ Cargando...'; el.style.color = 'var(--blue)'; }
+
+    if(PQRS_RED_SCRIPT === 'PENDIENTE_DEPLOY'){
+      // Modo demo: datos de muestra para desarrollo
+      PQRS_RED_DATA = generarDatosDemo();
+      window._pqrsRedCargado = true;
+      if(el){ el.textContent = `⚠ Apps Script pendiente · ${PQRS_RED_DATA.length.toLocaleString('es-CO')} registros demo`; el.style.color='var(--amber)';}
+      renderPqrsRed();
+      return;
+    }
+
+    try {
+      const resp = await fetch(PQRS_RED_SCRIPT);
+      if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      if(data.error) throw new Error(data.error);
+      if(!Array.isArray(data)) throw new Error('Respuesta inesperada');
+      PQRS_RED_DATA = data;
+      window._pqrsRedCargado = true;
+      if(el){ el.textContent = `✓ ${PQRS_RED_DATA.length.toLocaleString('es-CO')} registros cargados`; el.style.color='var(--green)';}
+      renderPqrsRed();
+    } catch(e) {
+      if(el){ el.textContent = `⚠ Error: ${e.message}`; el.style.color='var(--red)';}
+      console.error('[PQRS Red]', e);
+    }
+  };
+
+  // ── Datos demo (mientras se despliega Apps Script) ───────────────
+  function generarDatosDemo(){
+    const out = [];
+    const prestadores = [
+      {nit:'901041691',nombre:'CENTROS MEDICOS COLSANITAS S.A.S'},
+      {nit:'800149384',nombre:'CLINICA COLSANITAS SA'},
+      {nit:'860013570',nombre:'CAJA DE COMPENSACION FAMILIAR CAFAM'},
+      {nit:'800065396',nombre:'INSTITUTO DE DIAGNOSTICO MEDICO S.A.'},
+      {nit:'900578105',nombre:'CORPORACIÓN SALUD UN'},
+      {nit:'900215983',nombre:'CLINICA BELO HORIZONTE SAS'},
+      {nit:'900699359',nombre:'NEUROMEDICA SAS'},
+      {nit:'813001952',nombre:'CLINICA MEDILASER S.A.S.'},
+      {nit:'813011577',nombre:'CLINICA UROS LTDA'},
+      {nit:'890212568',nombre:'FUNDACION CARDIOVASCULAR DE COLOMBIA'}
+    ];
+    TABS_RED.forEach(reg => {
+      AÑOS_COLS.forEach(año => {
+        const maxMes = año === 2026 ? 2 : 12;
+        for(let m = 1; m <= maxMes; m++){
+          prestadores.forEach(p => {
+            const base = Math.floor(Math.random()*200)+20;
+            const sup = Math.floor(base*0.75);
+            const can = Math.floor(base*0.25);
+            out.push({regional:reg,nit:p.nit,nombre:p.nombre,año,mes:MESES_ES[m-1],mesNum:m,supersalud:sup,canales:can,total:sup+can});
+          });
+        }
+      });
+    });
+    return out;
+  }
+
+  // ── Filtrar datos ─────────────────────────────────────────────────
+  function filtrarDatos(){
+    const reg    = document.getElementById('pqr-f-regional')?.value || '';
+    const año    = document.getElementById('pqr-f-año')?.value     || '';
+    const mes    = document.getElementById('pqr-f-mes')?.value     || '';
+    const buscar = (document.getElementById('pqr-f-buscar')?.value || '').toLowerCase();
+
+    return PQRS_RED_DATA.filter(r => {
+      if(reg && r.regional !== reg) return false;
+      if(año && String(r.año) !== año) return false;
+      if(mes && String(r.mesNum) !== mes) return false;
+      if(buscar && !`${r.nit} ${r.nombre}`.toLowerCase().includes(buscar)) return false;
+      return true;
+    });
+  }
+
+  window.limpiarFiltrosPqrRed = function(){
+    ['pqr-f-regional','pqr-f-año','pqr-f-mes'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.value='';
+    });
+    const b=document.getElementById('pqr-f-buscar');if(b)b.value='';
+    renderPqrsRed();
+  };
+
+  // ── Render principal ─────────────────────────────────────────────
+  window.renderPqrsRed = function(){
+    if(!PQRS_RED_DATA.length) return;
+    const datos = filtrarDatos();
+
+    // ── KPIs ──
+    const totSup  = datos.reduce((a,r)=>a+r.supersalud,0);
+    const totCan  = datos.reduce((a,r)=>a+r.canales,0);
+    const totTot  = datos.reduce((a,r)=>a+r.total,0);
+    const nits    = new Set(datos.map(r=>r.nit)).size;
+    const pct     = v => totTot>0 ? ((v/totTot)*100).toFixed(1)+'%' : '0%';
+    const fmtN    = v => v.toLocaleString('es-CO');
+
+    el('pqr-kpi-total').textContent   = fmtN(totTot);
+    el('pqr-kpi-total-d').textContent = `${datos.length.toLocaleString('es-CO')} registros`;
+    el('pqr-kpi-sup').textContent     = fmtN(totSup);
+    el('pqr-kpi-sup-d').textContent   = pct(totSup) + ' del total';
+    el('pqr-kpi-can').textContent     = fmtN(totCan);
+    el('pqr-kpi-can-d').textContent   = pct(totCan) + ' del total';
+    el('pqr-kpi-prest').textContent   = fmtN(nits);
+
+    // ── Tendencia mensual ──
+    dibujarTendencia(datos);
+
+    // ── Top 10 prestadores ──
+    dibujarTopPrestadores(datos);
+
+    // ── Tabla ──
+    renderTablaPqrRed(datos);
+  };
+
+  function el(id){ return document.getElementById(id) || {textContent:''}; }
+
+  // ── Gráfica tendencia mensual ────────────────────────────────────
+  function dibujarTendencia(datos){
+    const canvas = document.getElementById('pqr-chart-tendencia');
+    if(!canvas) return;
+
+    // Agrupar por año-mes
+    const byPeriod = {};
+    datos.forEach(r => {
+      const k = `${r.año}-${String(r.mesNum).padStart(2,'0')}`;
+      if(!byPeriod[k]) byPeriod[k]={label:`${MESES_LABEL[r.mesNum]} ${r.año}`,sup:0,can:0,tot:0};
+      byPeriod[k].sup += r.supersalud;
+      byPeriod[k].can += r.canales;
+      byPeriod[k].tot += r.total;
+    });
+    const periods = Object.entries(byPeriod).sort((a,b)=>a[0].localeCompare(b[0])).slice(-18);
+
+    const dpr = window.devicePixelRatio||1;
+    const W = canvas.parentElement?.offsetWidth-40||500;
+    const H = 200;
+    canvas.width=W*dpr; canvas.height=H*dpr;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,W,H);
+
+    if(!periods.length){
+      ctx.fillStyle='#4A7A95'; ctx.font='12px Figtree,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('Sin datos para el período seleccionado', W/2, H/2);
+      return;
+    }
+
+    const maxV = Math.max(...periods.map(([,v])=>v.tot)) || 1;
+    const padL=8, padR=8, padT=10, padB=32;
+    const chartW=W-padL-padR;
+    const chartH=H-padT-padB;
+    const barW=Math.max(4, Math.floor(chartW/periods.length)-3);
+    const gap=Math.floor((chartW - barW*periods.length)/(periods.length+1));
+
+    periods.forEach(([,v],i) => {
+      const x = padL + gap + i*(barW+gap);
+      const hSup = Math.max(2,(v.sup/maxV)*chartH);
+      const hCan = Math.max(2,(v.can/maxV)*chartH);
+
+      // Barra Supersalud
+      ctx.fillStyle='#B50303';
+      ctx.beginPath(); ctx.roundRect(x, padT+chartH-hSup, barW*0.48, hSup, 2); ctx.fill();
+      // Barra Canales
+      ctx.fillStyle='#B86C00';
+      ctx.beginPath(); ctx.roundRect(x+barW*0.52, padT+chartH-hCan, barW*0.48, hCan, 2); ctx.fill();
+
+      // Label eje X
+      if(i%Math.ceil(periods.length/8)===0 || periods.length<=8){
+        ctx.fillStyle='#4A7A95'; ctx.font='9px Figtree,sans-serif'; ctx.textAlign='center';
+        ctx.fillText(v.label, x+barW/2, H-8);
+      }
+    });
+
+    // Leyenda
+    const ley=document.getElementById('pqr-ley-tendencia');
+    if(ley) ley.innerHTML=`
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:10px;border-radius:2px;background:#B50303;display:inline-block"></span><span style="color:var(--text2)">Supersalud</span></span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:10px;border-radius:2px;background:#B86C00;display:inline-block"></span><span style="color:var(--text2)">Canales propios</span></span>`;
+  }
+
+  // ── Gráfica top 10 prestadores ───────────────────────────────────
+  function dibujarTopPrestadores(datos){
+    const canvas = document.getElementById('pqr-chart-top');
+    if(!canvas) return;
+
+    // Agrupar por NIT (sumar todas las regionales y períodos filtrados)
+    const byNit = {};
+    datos.forEach(r => {
+      if(!byNit[r.nit]) byNit[r.nit]={nombre:r.nombre,sup:0,can:0,tot:0};
+      byNit[r.nit].sup += r.supersalud;
+      byNit[r.nit].can += r.canales;
+      byNit[r.nit].tot += r.total;
+    });
+    const top = Object.values(byNit).sort((a,b)=>b.tot-a.tot).slice(0,10);
+
+    const dpr = window.devicePixelRatio||1;
+    const W = canvas.parentElement?.offsetWidth-32||340;
+    const barH=22, gap=6;
+    const H = top.length*(barH+gap)+16;
+    canvas.width=W*dpr; canvas.height=H*dpr;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,W,H);
+
+    if(!top.length){
+      ctx.fillStyle='#4A7A95'; ctx.font='12px Figtree,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('Sin datos', W/2, H/2); return;
+    }
+
+    const maxV = top[0]?.tot || 1;
+    const labelW = Math.min(170, W*0.44);
+    const valW = 72;
+    const bZone = W - labelW - valW - 8;
+
+    top.forEach((p,i) => {
+      const y = i*(barH+gap)+4;
+      // Segmento Supersalud
+      const wSup = Math.max(2,(p.sup/maxV)*bZone);
+      const wCan = Math.max(2,(p.can/maxV)*bZone);
+
+      // Label
+      const label=(p.nombre||'—').replace(/\s+/g,' ');
+      const lbl=label.length>24?label.substring(0,22)+'…':label;
+      ctx.fillStyle='#212121'; ctx.font='10px Figtree,sans-serif'; ctx.textAlign='left';
+      ctx.fillText(lbl, 0, y+15);
+
+      // Track
+      ctx.fillStyle='#0069A718';
+      ctx.beginPath(); ctx.roundRect(labelW,y+3,bZone,barH-6,3); ctx.fill();
+      // Barra sup
+      ctx.fillStyle='#B50303';
+      ctx.beginPath(); ctx.roundRect(labelW,y+3,wSup,(barH-6)/2,2); ctx.fill();
+      // Barra can
+      ctx.fillStyle='#B86C00';
+      ctx.beginPath(); ctx.roundRect(labelW,y+3+(barH-6)/2,wCan,(barH-6)/2,2); ctx.fill();
+
+      // Valor total
+      const vx=labelW+bZone+6;
+      ctx.fillStyle='#003D53'; ctx.font='bold 10.5px Figtree,sans-serif';
+      ctx.fillText(p.tot.toLocaleString('es-CO'), vx, y+14);
+    });
+  }
+
+  // ── Tabla detalle ─────────────────────────────────────────────────
+  function renderTablaPqrRed(datos){
+    // Agrupar por NIT + Regional (consolidado)
+    const byKey = {};
+    datos.forEach(r => {
+      const k = `${r.nit}::${r.regional}`;
+      if(!byKey[k]) byKey[k]={nit:r.nit,nombre:r.nombre,regional:r.regional,sup:0,can:0,tot:0};
+      byKey[k].sup += r.supersalud;
+      byKey[k].can += r.canales;
+      byKey[k].tot += r.total;
+    });
+    const rows = Object.values(byKey).sort((a,b)=>b.tot-a.tot);
+
+    const sub=document.getElementById('pqr-tabla-sub');
+    if(sub) sub.textContent=`${rows.length.toLocaleString('es-CO')} prestadores · valores acumulados del período`;
+
+    const tbody=document.getElementById('pqr-tabla-body');
+    if(!tbody) return;
+    const MAX=300;
+    const fmtN=v=>v.toLocaleString('es-CO');
+    const pct=(v,t)=>t>0?((v/t)*100).toFixed(1)+'%':'0%';
+
+    tbody.innerHTML = rows.slice(0,MAX).map(r=>{
+      const pctSup = parseFloat(pct(r.sup,r.tot));
+      const semColor = pctSup>=80?'var(--red)':pctSup>=60?'var(--amber)':'var(--green)';
+      return `<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit}</td>
+        <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre}</td>
+        <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:var(--blue)">${r.regional}</span></td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">${fmtN(r.sup)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">${fmtN(r.can)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--blue)">${fmtN(r.tot)}</td>
+        <td style="text-align:right"><span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:4px;background:${semColor}18;color:${semColor}">${pct(r.sup,r.tot)}</span></td>
+      </tr>`;
+    }).join('') + (rows.length>MAX?`<tr><td colspan="7" style="text-align:center;padding:8px;font-size:11px;color:var(--text2)">Mostrando ${MAX} de ${rows.length.toLocaleString('es-CO')} · use filtros para acotar</td></tr>`:'');
+  }
+
+  // ── Trigger on navigate ───────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function(){
+    const origNav=window.navigate;
+    if(typeof origNav==='function'){
+      window.navigate=function(scr){
+        origNav(scr);
+        if(scr==='red-pqrs'){
+          setTimeout(()=>{
+            if(!window._pqrsRedCargado) cargarPqrsRed();
+            else renderPqrsRed();
+          }, 80);
+        }
+      };
+    }
   });
 })();
 </script>
