@@ -694,362 +694,106 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- ══ RANKING ══ -->
 <div class="screen" id="screen-ranking">
-  <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Óptimos (≥85)</div><div class="kpi-value" style="color:var(--green)">842</div><div class="kpi-delta up">67.5% de la red</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">En riesgo (70-84)</div><div class="kpi-value" style="color:var(--amber)">312</div><div class="kpi-delta warn">25.0% · monitoreo</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Críticos (&lt;70)</div><div class="kpi-value" style="color:var(--red)">94</div><div class="kpi-delta dn">7.5% · intervención</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Promedio red</div><div class="kpi-value" style="color:var(--purple)">83.2</div><div class="kpi-delta up">↑ 1.8pts este mes</div></div>
-  </div>
 
-  <!-- PODIO GESTORES -->
-  <div class="grid-2">
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Ranking gestores farmacéuticos</div><div class="card-sub">Podio + tabla completa · % cumplimiento</div></div><div class="card-act" onclick="exportarPrestadoresExcel()" style="cursor:pointer;color:var(--green)">⬇ Exportar Excel</div></div>
-      <div class="card-body">
-        <div class="podio">
-          <div class="pod-item">
-            <div class="pod-pos" style="color:var(--amber)">🥉 En riesgo</div>
-          </div>
-        </div>
-        <div style="border-top:1px solid var(--border);padding-top:12px">
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Ranking prestadores</div><div class="card-sub">Top mejores · Top críticos · Semáforo automático</div></div><div class="card-act">Ver todos →</div></div>
-      <div class="tabs"><div class="tab active">Top 5 mejores</div><div class="tab">Top 5 críticos</div><div class="tab">Todos</div></div>
-      <div class="card-body" style="padding:10px 20px">
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Mejores · Score ≥ 90</div>
-        <div class="rank-row"><div class="rank-num" style="color:var(--amber)">🥇</div><div class="rank-semaforo" style="background:var(--green)"></div><div style="flex:1"><div class="rank-name">Lab. Clínico Norte</div><div class="rank-type" style="font-size:10.5px;color:var(--text2)">Diagnóstico · Atlántico</div></div><div class="rank-pct" style="color:var(--green)">95</div><div style="width:70px"><div class="bar-track"><div class="bar-fill" style="width:95%;background:var(--green)"></div></div></div><div class="rank-trend up" style="font-size:10.5px;margin-left:8px">↑+4</div></div>
-        <div class="rank-row"><div class="rank-num" style="color:var(--text2)">🥈</div><div class="rank-semaforo" style="background:var(--green)"></div><div style="flex:1"><div class="rank-name">Clínica Shaio</div><div class="rank-type" style="font-size:10.5px;color:var(--text2)">Hospitalario · Bogotá</div></div><div class="rank-pct" style="color:var(--green)">97</div><div style="width:70px"><div class="bar-track"><div class="bar-fill" style="width:97%;background:var(--green)"></div></div></div><div class="rank-trend up" style="font-size:10.5px;margin-left:8px">↑+1</div></div>
-        <div class="rank-row"><div class="rank-num" style="color:var(--text2)">🥉</div><div class="rank-semaforo" style="background:var(--green)"></div><div style="flex:1"><div class="rank-name">Clínica El Bosque</div><div class="rank-type" style="font-size:10.5px;color:var(--text2)">Hospitalario · Bogotá</div></div><div class="rank-pct" style="color:var(--green)">92</div><div style="width:70px"><div class="bar-track"><div class="bar-fill" style="width:92%;background:var(--green)"></div></div></div><div class="rank-trend up" style="font-size:10.5px;margin-left:8px">↑+2</div></div>
-        <div style="border-top:1px solid var(--border);margin:10px 0;padding-top:10px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Críticos · Score &lt; 70 · Requieren trazabilidad exhaustiva</div>
-        <div class="rank-row"><div class="rank-num" style="font-size:11px;color:var(--red)">⚠</div><div class="rank-semaforo" style="background:var(--red)"></div><div style="flex:1"><div class="rank-name">Clínica Palermo</div><div class="rank-type" style="font-size:10.5px;color:var(--red)">Hospitalario · Bogotá · SUSPENDIDA</div></div><div class="rank-pct" style="color:var(--red)">44</div><div style="width:70px"><div class="bar-track"><div class="bar-fill" style="width:44%;background:var(--red)"></div></div></div><div class="rank-trend dn" style="font-size:10.5px;margin-left:8px">↓-12</div></div>
-        <div class="rank-row" style="border-bottom:none"><div class="rank-num" style="font-size:11px;color:var(--amber)">⚠</div><div class="rank-semaforo" style="background:var(--amber)"></div><div style="flex:1"><div class="rank-name">IPS San Rafael</div><div class="rank-type" style="font-size:10.5px;color:var(--amber)">Hospitalario · Antioquia · Observación</div></div><div class="rank-pct" style="color:var(--amber)">67</div><div style="width:70px"><div class="bar-track"><div class="bar-fill" style="width:67%;background:var(--amber)"></div></div></div><div class="rank-trend dn" style="font-size:10.5px;margin-left:8px">↓-5</div></div>
-      </div>
+  <!-- Selector de módulo -->
+  <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--border2)">
+    <div id="rank-tab-prestadores" onclick="rankSetModulo('prestadores')"
+      style="padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none">
+      🏥 Red de Prestadores
+    </div>
+    <div id="rank-tab-gestores" onclick="rankSetModulo('gestores')"
+      style="padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px;user-select:none">
+      💊 Gestores Farmacéuticos
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:4px">
+      <button class="btn" onclick="calcularRanking()" style="font-size:11.5px">↺ Recalcular</button>
+      <span id="rank-estado" style="font-size:11px;color:var(--text2)"></span>
     </div>
   </div>
 
-  <!-- COMPARATIVO MES A MES -->
-  <div class="card" style="margin-bottom:0">
-    <div class="card-head"><div><div class="card-title">Comparativo mes a mes — Evolución del ranking</div><div class="card-sub">Últimos 4 meses · Gestores y prestadores clave</div></div></div>
-    <div class="card-body">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
-        <div style="background:var(--bg3);border-radius:10px;padding:14px">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Dic 2025</div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Facturación total 2025</div><div class="kpi-value" style="color:var(--blue)" id="kpi-fin-fact2025">$41,240 M</div><div class="kpi-delta neu">Mar 2026</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Pagos al día</div><div class="kpi-value" style="color:var(--green)">$34,820 M</div><div class="kpi-delta up">84.4% del total</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Pagos pendientes</div><div class="kpi-value" style="color:var(--amber)">$2,202 M</div><div class="kpi-delta warn">14 prestadores · 8 gestores</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)">$4,218 M</div><div class="kpi-delta dn">↑ 8.4% vs mes ant.</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Proyección gasto T1</div><div class="kpi-value" style="color:var(--purple)">$38,940 M</div><div class="kpi-delta warn">94.4% del presupuesto</div></div>
-  </div>
-
-  <div class="grid-2">
-    <!-- PAGOS PRESTADORES -->
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Estado financiero — Red de prestadores</div><div class="card-sub">Pagos, cartera y mora por IPS/prestador</div></div><div class="card-act">Exportar</div></div>
-      <div class="tabs"><div class="tab active">Todos</div><div class="tab">Con mora</div><div class="tab">Al día</div></div>
-      <div class="card-body" style="padding:0 20px"><div class="scroll">
-        <table class="table"><thead><tr><th>Prestador</th><th>Contrato</th><th>Pagado mes</th><th>Pendiente</th><th>Estado</th><th>Días mora</th></tr></thead>
-        <tbody>
-          <tr><td class="nm">Clínica El Bosque</td><td style="font-family:'DM Mono',monospace;font-size:11px">$2,840 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">$2,840 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$0</td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">Clínica Shaio</td><td style="font-family:'DM Mono',monospace;font-size:11px">$3,120 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">$3,120 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$0</td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">Centro Médico Compensar</td><td style="font-family:'DM Mono',monospace;font-size:11px">$1,980 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">$1,980 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$0</td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">IPS San Rafael</td><td style="font-family:'DM Mono',monospace;font-size:11px">$1,420 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">$980 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">$440 M</td><td><span class="badge bg-a">Pendiente</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">32d</td></tr>
-          <tr><td class="nm">Clínica Palermo</td><td style="font-family:'DM Mono',monospace;font-size:11px">$1,240 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">$398 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">$842 M</td><td><span class="badge bg-r">Vencido</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">67d</td></tr>
-          <tr><td class="nm">Lab. Clínico Norte</td><td style="font-family:'DM Mono',monospace;font-size:11px">$920 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">$920 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$0</td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-        </tbody></table>
-      </div></div>
-    </div>
-
-    <!-- PAGOS GESTORES -->
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Estado financiero — Gestores farmacéuticos</div><div class="card-sub">Capita, pagos y mora</div></div><div class="card-act">Exportar</div></div>
-      <div class="card-body" style="padding:0 20px"><div class="scroll">
-        <table class="table"><thead><tr><th>Gestor</th><th>Capita mes</th><th>Pagado</th><th>Pendiente</th><th>Estado</th><th>Mora</th></tr></thead>
-        <tbody>
-          <tr><td class="nm">Audifarma S.A.</td><td style="font-family:'DM Mono',monospace;font-size:11px">$6,840 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">$6,840 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$0</td><td><span class="badge bg-g">Al día</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">—</td></tr>
-          <tr><td class="nm">Pharmos Domicilios</td><td style="font-family:'DM Mono',monospace;font-size:11px">$4,040 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">$2,800 M</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">$1,240 M</td><td><span class="badge bg-r">Vencido</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">45d</td></tr>
-        </tbody></table>
-      </div></div>
-    </div>
-  </div>
-        <div class="mora-item"><div class="mora-dias" style="background:var(--adim);color:var(--amber)">1-30d</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Mora temprana</div><div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:35%;background:var(--amber)"></div></div></div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber);flex-shrink:0">$440 M</div></div>
-        <div class="mora-item"><div class="mora-dias" style="background:var(--rdim);color:var(--red)">31-60d</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Mora media</div><div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:55%;background:var(--red)"></div></div></div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red);flex-shrink:0">$1,680 M</div></div>
-        <div class="mora-item"><div class="mora-dias" style="background:var(--rdim);color:var(--red)">+60d</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Mora crítica</div><div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:68%;background:var(--red)"></div></div></div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red);flex-shrink:0">$2,098 M</div></div>
-        <div class="mora-item" style="border-bottom:none"><div style="flex:1;text-align:right"><div style="font-size:11px;color:var(--text2)">Total cartera vencida</div></div><div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)">$4,218 M</div></div>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Proyección gasto vs. presupuesto</div><div class="card-sub">T1 2026 · Todos los modelos</div></div></div>
-      <div class="card-body">
-        <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;color:var(--text)">Capita</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">97.0% ejecutado</span></div><div class="progress-track" style="height:8px"><div class="progress-fill" style="width:97%;background:var(--amber)"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px"><span>$18,240 M</span><span>techo $18,800 M</span></div></div>
-        <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;color:var(--text)">Evento</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green)">76.5% ejecutado</span></div><div class="progress-track" style="height:8px"><div class="progress-fill" style="width:76%;background:var(--green)"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px"><span>$8,420 M</span><span>techo $11,000 M</span></div></div>
-        <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;color:var(--text)">MRC</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">Siniestralidad 94.8% ⚠</span></div><div class="progress-track" style="height:8px"><div class="progress-fill" style="width:88%;background:var(--blue)"></div></div><div class="progress-track" style="height:8px;margin-top:3px"><div class="progress-fill" style="width:94.8%;background:var(--amber)"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px"><span>Esperada 88%</span><span style="color:var(--amber)">Real 94.8% · +6.8% desviación</span></div></div>
-        <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;color:var(--text)">PGP</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--blue)">60.0% ejecutado</span></div><div class="progress-track" style="height:8px"><div class="progress-fill" style="width:60%;background:var(--blue)"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px"><span>$2,100 M</span><span>techo $3,500 M</span></div></div>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Costos de servicios</div><div class="card-sub">Top servicios por valor · Mar 2026</div></div></div>
-      <div class="card-body" style="padding:10px 16px">
-        <div class="stat-row"><span style="font-size:12px;color:var(--text)">Hospitalización</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)">$12,840 M</span></div>
-        <div class="stat-row"><span style="font-size:12px;color:var(--text)">Dispensación medicamentos</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">$8,240 M</span></div>
-        <div class="stat-row"><span style="font-size:12px;color:var(--text)">Consulta especializada</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--purple)">$6,120 M</span></div>
-        <div class="stat-row"><span style="font-size:12px;color:var(--text)">Procedimientos quirúrgicos</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">$4,980 M</span></div>
-        <div class="stat-row"><span style="font-size:12px;color:var(--text)">Diagnóstico / imágenes</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)">$3,840 M</span></div>
-        <div class="stat-row" style="border-bottom:none"><span style="font-size:12px;color:var(--text)">Urgencias</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">$3,220 M</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ CONTRATACION ══ -->
-<div class="screen" id="screen-contratacion">
-  <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Modelos activos</div><div class="kpi-value" style="color:var(--teal)" id="kpi-modelos-count">4</div><div class="kpi-delta neu">Capita · Evento · MRC · PGP</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--blue)" id="kpi-modelos-prest">1,248</div><div class="kpi-delta neu">Red completa</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">MRC en alerta</div><div class="kpi-value" style="color:var(--amber)">1</div><div class="kpi-delta warn">Siniestralidad +6.8% sobre esperada</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Eficiencia global</div><div class="kpi-value" style="color:var(--green)">84.2%</div><div class="kpi-delta up">↑ 1.2% vs T4 2025</div></div>
-  </div>
-
-  <!-- CAPITA -->
-  <div class="modelo-card">
-    <div class="modelo-head">
-      <div><div class="card-title">Capita</div><div class="card-sub" style="margin-top:3px">Pago fijo por afiliado asignado · Gestores farmacéuticos y algunos prestadores</div></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="modelo-tag" style="background:var(--tdim);color:var(--teal);border:1px solid var(--teal)">CAPITA</div>
-        <span class="badge bg-a">Techo al 97%</span>
-      </div>
-    </div>
-    <div class="modelo-body">
-      <div class="modelo-kpis m4">
-        <div class="mkpi"><div class="mkpi-l">Afiliados asignados</div><div class="mkpi-v" style="color:var(--text)">284,710</div><div class="mkpi-s">Población objetivo</div></div>
-        <div class="mkpi"><div class="mkpi-l">Afiliados atendidos</div><div class="mkpi-v" style="color:var(--green)">259,368</div><div class="mkpi-s">Suficiencia 97.3%</div></div>
-        <div class="mkpi"><div class="mkpi-l">Capita contratada</div><div class="mkpi-v" style="color:var(--blue)">$18,800 M</div><div class="mkpi-s">Techo mensual</div></div>
-        <div class="mkpi"><div class="mkpi-l">Ejecutado mes</div><div class="mkpi-v" style="color:var(--amber)">$18,240 M</div><div class="mkpi-s">97.0% del techo ⚠</div></div>
-      </div>
-      <div class="techo-bar">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px"><span>Ejecución vs. techo presupuestal</span><span style="color:var(--amber)">97.0% — riesgo de sobreejecutar</span></div>
-        <div class="techo-track"><div class="techo-fill" style="width:97%;background:var(--amber)"></div></div>
-        <div class="techo-labels"><span>$0</span><span style="color:var(--amber)">$18,240 M actual</span><span>$18,800 M techo</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EVENTO -->
-  <div class="modelo-card">
-    <div class="modelo-head">
-      <div><div class="card-title">Evento</div><div class="card-sub" style="margin-top:3px">Pago por prestación realizada · Red hospitalaria y ambulatoria</div></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="modelo-tag" style="background:var(--bdim);color:var(--blue);border:1px solid var(--blue)">EVENTO</div>
-        <span class="badge bg-g">Margen disponible</span>
-      </div>
-    </div>
-    <div class="modelo-body">
-      <div class="modelo-kpis m4">
-        <div class="mkpi"><div class="mkpi-l">Eventos mes</div><div class="mkpi-v" style="color:var(--blue)">48,291</div><div class="mkpi-s">Consultas + proc.</div></div>
-        <div class="mkpi"><div class="mkpi-l">Costo prom. evento</div><div class="mkpi-v" style="color:var(--text)">$174,400</div><div class="mkpi-s">Por prestación</div></div>
-        <div class="mkpi"><div class="mkpi-l">Techo presupuestal</div><div class="mkpi-v" style="color:var(--blue)">$11,000 M</div><div class="mkpi-s">T1 2026</div></div>
-        <div class="mkpi"><div class="mkpi-l">Ejecutado</div><div class="mkpi-v" style="color:var(--green)">$8,420 M</div><div class="mkpi-s">76.5% · margen OK</div></div>
-      </div>
-      <div class="techo-bar">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px"><span>Ejecución vs. techo presupuestal</span><span style="color:var(--green)">76.5% — margen disponible $2,580 M</span></div>
-        <div class="techo-track"><div class="techo-fill" style="width:76%;background:var(--green)"></div></div>
-        <div class="techo-labels"><span>$0</span><span style="color:var(--green)">$8,420 M actual</span><span>$11,000 M techo</span></div>
-      </div>
-      <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Hospitalización</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)">12,840</div></div>
-        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Consulta esp.</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal)">18,420</div></div>
-        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Urgencias</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">9,241</div></div>
-        <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">Diagnóstico</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--purple)">7,790</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MRC + PGP -->
-  <div class="grid-2" style="margin-bottom:0">
-    <div class="modelo-card" style="margin-bottom:0">
-      <div class="modelo-head">
-        <div><div class="card-title">MRC — Modelo de Riesgo Compartido</div><div class="card-sub" style="margin-top:3px">EPS y prestador comparten riesgo financiero según comportamiento real del gasto</div></div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="modelo-tag" style="background:var(--cdim);color:var(--coral);border:1px solid var(--coral)">MRC</div>
-          <span class="badge bg-a">Siniestralidad en alerta</span>
-        </div>
-      </div>
-      <div class="modelo-body">
-        <div class="modelo-kpis m4" style="margin-bottom:12px">
-          <div class="mkpi"><div class="mkpi-l">Contratos MRC</div><div class="mkpi-v" style="color:var(--text)">84</div><div class="mkpi-s">Prestadores bajo modelo</div></div>
-          <div class="mkpi"><div class="mkpi-l">Siniestralidad real</div><div class="mkpi-v" style="color:var(--amber)">94.8%</div><div class="mkpi-s">vs. prima pactada</div></div>
-          <div class="mkpi"><div class="mkpi-l">Siniestralidad esperada</div><div class="mkpi-v" style="color:var(--blue)">88.0%</div><div class="mkpi-s">Línea base contrato</div></div>
-          <div class="mkpi"><div class="mkpi-l">Desviación riesgo</div><div class="mkpi-v" style="color:var(--amber)">+6.8%</div><div class="mkpi-s">Exceso sobre esperado</div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div class="mkpi"><div class="mkpi-l">Riesgo asumido EPS</div><div class="mkpi-v" style="color:var(--red)">60%</div><div class="mkpi-s">$2,988 M del exceso</div></div>
-          <div class="mkpi"><div class="mkpi-l">Riesgo asumido prestador</div><div class="mkpi-v" style="color:var(--teal)">40%</div><div class="mkpi-s">$1,992 M del exceso</div></div>
-        </div>
-        <div class="techo-bar">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px"><span>Siniestralidad real vs. esperada</span><span style="color:var(--amber)">+6.8% sobre línea base · Ajuste de riesgo requerido</span></div>
-          <div class="techo-track">
-            <div class="techo-fill" style="width:88%;background:var(--blue)"></div>
-          </div>
-          <div style="position:relative;height:8px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-top:4px">
-            <div style="position:absolute;left:0;top:0;height:100%;width:94.8%;background:var(--amber);border-radius:3px"></div>
-          </div>
-          <div class="techo-labels" style="margin-top:3px"><span>0%</span><span style="color:var(--blue)">88% esperada</span><span style="color:var(--amber)">94.8% real</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="modelo-card" style="margin-bottom:0">
-      <div class="modelo-head">
-        <div><div class="card-title">PGP — Pago Global Prospectivo</div><div class="card-sub" style="margin-top:3px">Pago anticipado por grupo poblacional · Margen holgado</div></div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="modelo-tag" style="background:var(--pdim);color:var(--purple);border:1px solid var(--purple)">PGP</div>
-          <span class="badge bg-g">Margen disponible</span>
-        </div>
-      </div>
-      <div class="modelo-body">
-        <div class="modelo-kpis m3">
-          <div class="mkpi"><div class="mkpi-l">Contratos PGP</div><div class="mkpi-v" style="color:var(--text)">23</div><div class="mkpi-s">Prestadores</div></div>
-          <div class="mkpi"><div class="mkpi-l">Techo mensual</div><div class="mkpi-v" style="color:var(--blue)">$3,500 M</div><div class="mkpi-s">Presupuesto</div></div>
-          <div class="mkpi"><div class="mkpi-l">Ejecutado</div><div class="mkpi-v" style="color:var(--green)">$2,100 M</div><div class="mkpi-s">60.0% · holgado</div></div>
-        </div>
-        <div class="techo-bar">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px"><span>Ejecución</span><span style="color:var(--green)">$1,400 M disponibles</span></div>
-          <div class="techo-track"><div class="techo-fill" style="width:60%;background:var(--green)"></div></div>
-          <div class="techo-labels"><span>$0</span><span style="color:var(--green)">$2,100 M</span><span>$3,500 M</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ GESTORES ══ -->
-<div class="screen" id="screen-gestores">
-  <div class="kpi-strip cols-6">
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Gestores contratados</div><div class="kpi-value" style="color:var(--teal)">6</div><div class="kpi-delta neu">4 físicos · 2 domicil.</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Cobertura afiliados</div><div class="kpi-value" style="color:var(--green)">91.2%</div><div class="kpi-delta up">↑ 2.1% meta 95%</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cumplimiento ANS</div><div class="kpi-value" style="color:var(--blue)">83.7%</div><div class="kpi-delta dn">↓ 1.4%</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">PQRS abiertas</div><div class="kpi-value" style="color:var(--amber)">38</div><div class="kpi-delta warn">12 vencidas</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)">$2,120 M</div><div class="kpi-delta dn">Cruz Verde + Pharmos</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Suficiencia capita</div><div class="kpi-value" style="color:var(--purple)">97.3%</div><div class="kpi-delta up">↑ 0.8%</div></div>
-  </div>
-  <div class="g-grid">
-    <div class="g-card sel">
-      <div class="g-body">
-        <div class="ans-mini">
-          <div class="ans-cell"><div class="ans-lbl">Oportunidad</div><div class="ans-v" style="color:var(--green)">98.2%</div><div class="ans-bar"><div class="ans-bf" style="width:98%;background:var(--green)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">Cobertura</div><div class="ans-v" style="color:var(--green)">94.1%</div><div class="ans-bar"><div class="ans-bf" style="width:94%;background:var(--teal)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">Trazabilidad</div><div class="ans-v" style="color:var(--blue)">89.7%</div><div class="ans-bar"><div class="ans-bf" style="width:90%;background:var(--blue)"></div></div></div>
-        </div>
-        <div class="g-fin">
-          <div class="fin-cell"><div class="fin-lbl">Capita mes</div><div class="fin-v" style="color:var(--blue)">$6,840 M</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Estado pago</div><div class="fin-v" style="color:var(--green)">Al día</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Mora</div><div class="fin-v" style="color:var(--text2)">—</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="g-card">
-      <div class="g-head"><div><div class="g-name">Cruz Verde Droguería</div><div class="g-meta">Físico · 12 puntos · Valle, Cauca, Nariño</div><div class="g-tags"><span class="tag tw">ANS en riesgo</span><span class="tag tw">Pago pendiente 18d</span></div></div><div class="g-score"><div class="g-sv" style="color:var(--amber)">74</div><div class="g-sl">score</div></div></div>
-      <div class="g-body">
-        <div class="ans-mini">
-          <div class="ans-cell"><div class="ans-lbl">Oportunidad</div><div class="ans-v" style="color:var(--amber)">81.3%</div><div class="ans-bar"><div class="ans-bf" style="width:81%;background:var(--amber)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">Cobertura</div><div class="ans-v" style="color:var(--green)">90.2%</div><div class="ans-bar"><div class="ans-bf" style="width:90%;background:var(--teal)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">PQRS resp.</div><div class="ans-v" style="color:var(--red)">64.0%</div><div class="ans-bar"><div class="ans-bf" style="width:64%;background:var(--red)"></div></div></div>
-        </div>
-        <div class="g-fin">
-          <div class="fin-cell"><div class="fin-lbl">Capita mes</div><div class="fin-v" style="color:var(--blue)">$4,120 M</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Estado pago</div><div class="fin-v" style="color:var(--amber)">Pendiente</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Mora</div><div class="fin-v" style="color:var(--amber)">18 días</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="g-card">
-      <div class="g-head"><div><div class="g-name">Pharmos Domicilios</div><div class="g-meta">Domiciliario · Nacional · 48h entrega</div><div class="g-tags"><span class="tag tr">3 tutelas activas</span><span class="tag tr">Mora 45 días</span></div></div><div class="g-score"><div class="g-sv" style="color:var(--red)">61</div><div class="g-sl">score</div></div></div>
-      <div class="g-body">
-        <div class="ans-mini">
-          <div class="ans-cell"><div class="ans-lbl">Oportunidad</div><div class="ans-v" style="color:var(--red)">63.4%</div><div class="ans-bar"><div class="ans-bf" style="width:63%;background:var(--red)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">Cobertura</div><div class="ans-v" style="color:var(--amber)">82.7%</div><div class="ans-bar"><div class="ans-bf" style="width:83%;background:var(--amber)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">PQRS resp.</div><div class="ans-v" style="color:var(--red)">48.2%</div><div class="ans-bar"><div class="ans-bf" style="width:48%;background:var(--red)"></div></div></div>
-        </div>
-        <div class="g-fin">
-          <div class="fin-cell"><div class="fin-lbl">Capita mes</div><div class="fin-v" style="color:var(--blue)">$4,040 M</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Estado pago</div><div class="fin-v" style="color:var(--red)">Vencido</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Mora</div><div class="fin-v" style="color:var(--red)">45 días</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="g-card">
-      <div class="g-head"><div><div class="g-name">Medipharma Eje Cafetero</div><div class="g-meta">Físico · 8 puntos · Caldas, Risaralda, Quindío</div><div class="g-tags"><span class="tag tg">ANS cumplido</span><span class="tag tg">Sin tutelas</span><span class="tag tg">Pago al día</span></div></div><div class="g-score"><div class="g-sv" style="color:var(--teal)">86</div><div class="g-sl">score</div></div></div>
-      <div class="g-body">
-        <div class="ans-mini">
-          <div class="ans-cell"><div class="ans-lbl">Oportunidad</div><div class="ans-v" style="color:var(--green)">93.1%</div><div class="ans-bar"><div class="ans-bf" style="width:93%;background:var(--green)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">Cobertura</div><div class="ans-v" style="color:var(--green)">91.8%</div><div class="ans-bar"><div class="ans-bf" style="width:92%;background:var(--teal)"></div></div></div>
-          <div class="ans-cell"><div class="ans-lbl">PQRS resp.</div><div class="ans-v" style="color:var(--green)">91.2%</div><div class="ans-bar"><div class="ans-bf" style="width:91%;background:var(--green)"></div></div></div>
-        </div>
-        <div class="g-fin">
-          <div class="fin-cell"><div class="fin-lbl">Capita mes</div><div class="fin-v" style="color:var(--blue)">$3,240 M</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Estado pago</div><div class="fin-v" style="color:var(--green)">Al día</div></div>
-          <div class="fin-cell"><div class="fin-lbl">Mora</div><div class="fin-v" style="color:var(--text2)">—</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ PRESTADORES ══ -->
-<div class="screen" id="screen-prestadores">
-  <div id="banner-provisional" style="display:none;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,rgba(245,158,11,0.12),transparent);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12px">
-  <span style="font-size:16px">⚠️</span>
-  <div>
-    <span style="color:var(--amber);font-weight:600">Datos provisionales</span>
-    <span style="color:var(--text2)"> — La base de contratos vigentes está siendo actualizada. Los conteos y valores mostrados corresponden a la base anterior y serán reemplazados al recibir la nueva base oficial.</span>
-  </div>
-  <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
-</div>
+  <!-- KPIs -->
   <div class="kpi-strip cols-5">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--green)" id="kpi-prest-hab">—</div><div class="kpi-delta up" id="kpi-prest-hab-delta">% de la red</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Modelos activos</div><div class="kpi-value" style="color:var(--amber)" id="kpi-prest-sincontrato">—</div><div class="kpi-delta warn" id="kpi-prest-sincontrato-delta">Requieren seguimiento</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total prestadores</div><div class="kpi-value" style="color:var(--blue)" id="kpi-prest-total">—</div><div class="kpi-delta neu">Red nacional</div></div>
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Regionales cubiertas</div><div class="kpi-value" style="color:var(--teal)" id="kpi-prest-contrato">—</div><div class="kpi-delta up" id="kpi-prest-contrato-delta">Legalizados</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Regionales</div><div class="kpi-value" style="color:var(--purple)" id="kpi-prest-regionales">—</div><div class="kpi-delta neu">Cobertura nacional</div></div>
+    <div class="kpi" style="--kc:var(--green)">
+      <div class="kpi-label">🟢 Sobresalientes</div>
+      <div class="kpi-value" style="color:var(--green)" id="rank-kpi-v">—</div>
+      <div class="kpi-delta up" id="rank-kpi-v-d">≥ 80 puntos</div>
+    </div>
+    <div class="kpi" style="--kc:var(--amber)">
+      <div class="kpi-label">🟡 Aceptables</div>
+      <div class="kpi-value" style="color:var(--amber)" id="rank-kpi-a">—</div>
+      <div class="kpi-delta warn" id="rank-kpi-a-d">60 – 79 puntos</div>
+    </div>
+    <div class="kpi" style="--kc:var(--red)">
+      <div class="kpi-label">🔴 Críticos</div>
+      <div class="kpi-value" style="color:var(--red)" id="rank-kpi-r">—</div>
+      <div class="kpi-delta dn" id="rank-kpi-r-d">&lt; 60 puntos</div>
+    </div>
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Promedio red</div>
+      <div class="kpi-value" style="color:var(--blue)" id="rank-kpi-prom">—</div>
+      <div class="kpi-delta neu">Score compuesto /100</div>
+    </div>
+    <div class="kpi" style="--kc:var(--purple)">
+      <div class="kpi-label">Total evaluados</div>
+      <div class="kpi-value" style="color:var(--purple)" id="rank-kpi-tot">—</div>
+      <div class="kpi-delta neu" id="rank-kpi-tot-d">Con datos en sistema</div>
+    </div>
   </div>
-  <div class="grid-21">
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head">
-        <div><div class="card-title">Directorio de prestadores</div><div class="card-sub" id="cnt-prestadores">Habilitación + estado financiero integrado</div></div>
-        <div class="card-act" onclick="exportarPrestadoresExcel()" style="cursor:pointer;color:var(--green)">⬇ Exportar Excel</div>
-      </div>
-      <div class="tabs">
-        <div class="tab active" onclick="filtrarTablaPrestadores('todos',this)">Todos</div>
-        <div class="tab" onclick="filtrarTablaPrestadores('hospitalario',this)">Hospitalarios</div>
-        <div class="tab" onclick="filtrarTablaPrestadores('ambulatorio',this)">Ambulatorios</div>
-        <div class="tab" onclick="filtrarTablaPrestadores('mora',this)">Con mora</div>
-      </div>
-      <div class="card-body" style="padding:0 20px"><div class="scroll" style="max-height:400px">
-        <table class="table">
-          <thead><tr><th>Prestador</th><th>NIT</th><th>Ciudad</th><th>Regional</th><th>Modelo</th><th>Fact. 2025</th><th>Fact. Mar 2026</th><th>Habilitación</th><th>Estado tarifas</th></tr></thead>
-          <tbody id="tabla-prestadores-body"><tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text2);font-size:12px">⏳ Conectando a Drive...</td></tr></tbody>
-        </table>
+
+  <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px;margin-bottom:16px">
+    <!-- Distribución de scores -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Distribución del score</div>
+        <div class="card-sub">Cantidad de entidades por rango de puntuación</div>
       </div></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Facturación por modelo</div><div class="card-sub">2025 · COP real</div></div></div>
-        <div class="card-body" style="padding:10px 16px">
-          <div id="grafico-por-modelo">
-            <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">⏳ Cargando...</div>
-          </div>
-        </div>
+      <div class="card-body" style="padding:16px 20px">
+        <canvas id="rank-chart-dist" height="160"></canvas>
       </div>
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Estado contractual</div><div class="card-sub">Tarifas 2026 · Red completa</div></div></div>
-        <div class="card-body" style="padding:10px 16px" id="card-estado-financiero">
-          <div class="stat-row"><span style="font-size:12px;color:var(--text)">Tarifas finalizadas</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)" id="fin-finalizados">—</span></div>
-          <div class="stat-row"><span style="font-size:12px;color:var(--text)">En negociación</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)" id="fin-negociacion">—</span></div>
-          <div class="stat-row"><span style="font-size:12px;color:var(--text)">Sin iniciar</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)" id="fin-sin-iniciar">—</span></div>
-          <div class="stat-row" style="border-bottom:none"><span style="font-size:12px;color:var(--text)">Facturación total 2025</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)" id="fin-fact-total">—</span></div>
-        </div>
+    </div>
+    <!-- Desglose por dimensión -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Score promedio por dimensión</div>
+        <div class="card-sub" id="rank-dim-sub">Contribución de cada componente</div>
+      </div></div>
+      <div class="card-body" style="padding:16px 20px" id="rank-dim-body">
+        <div style="color:var(--text2);font-size:12px;text-align:center;padding:30px 0">Calculando...</div>
       </div>
     </div>
   </div>
+
+  <!-- Tabla ranking -->
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+      <div>
+        <div class="card-title" id="rank-tabla-titulo">Ranking completo</div>
+        <div class="card-sub" id="rank-tabla-sub">Score compuesto ordenado de mayor a menor</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="rank-buscar" placeholder="🔍 NIT o nombre..." oninput="rankFiltrar()"
+          style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;width:200px;background:var(--bg3);color:var(--text);outline:none">
+        <select id="rank-filtro-sem" onchange="rankFiltrar()"
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <option value="">Todos</option>
+          <option value="verde">🟢 Sobresalientes</option>
+          <option value="ambar">🟡 Aceptables</option>
+          <option value="rojo">🔴 Críticos</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:500px;overflow-y:auto">
+      <table class="hab-table" id="rank-tabla">
+        <thead id="rank-thead"></thead>
+        <tbody id="rank-tbody">
+          <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">Navega a esta pantalla para calcular el ranking</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
+
 
 <!-- ══ SCREENS RESTANTES (Indicadores, Alertas, Cobertura, PQRS, Trazabilidad, Reportes) ══ -->
 <div class="screen" id="screen-indicadores">
@@ -2270,38 +2014,87 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
       </div>
 
-      <!-- Scores -->
+      <!-- Scores Ranking -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-head">
-          <div><div class="card-title">Pesos del score de prestadores</div><div class="card-sub">RN-09-05 · Los pesos deben sumar 100%</div></div>
+          <div><div class="card-title">Pesos del ranking de cumplimiento</div><div class="card-sub">Configuración independiente · Red de Prestadores y Gestores Farmacéuticos</div></div>
           <button class="btn pri" onclick="guardarSeccion('scores')" style="font-size:11.5px">Guardar</button>
         </div>
         <div class="card-body">
-          <div class="admin-param-grid">
-            <div class="admin-param-card">
-              <div class="admin-param-label">Habilitación (%)</div>
-              <div class="admin-param-desc">Peso de la dimensión habilitación en el score</div>
-              <div class="admin-param-row"><span class="admin-param-default">Default: 30</span><input class="admin-input" id="p-w-hab" value="30" type="number" min="0" max="100" oninput="marcarCambio(this,30);actualizarSumaPesos()"></div>
+
+          <!-- Tabs -->
+          <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border2)">
+            <div id="rank-tab-prest" onclick="rankAdminTab('prest')"
+              style="padding:8px 18px;font-size:12.5px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px">
+              Red de Prestadores
             </div>
-            <div class="admin-param-card">
-              <div class="admin-param-label">Calidad en la atención (%)</div>
-              <div class="admin-param-desc">Peso de la dimensión calidad en el score</div>
-              <div class="admin-param-row"><span class="admin-param-default">Default: 25</span><input class="admin-input" id="p-w-cal" value="25" type="number" min="0" max="100" oninput="marcarCambio(this,25);actualizarSumaPesos()"></div>
-            </div>
-            <div class="admin-param-card">
-              <div class="admin-param-label">Gestión (%)</div>
-              <div class="admin-param-desc">Peso de la dimensión gestión en el score</div>
-              <div class="admin-param-row"><span class="admin-param-default">Default: 25</span><input class="admin-input" id="p-w-ges" value="25" type="number" min="0" max="100" oninput="marcarCambio(this,25);actualizarSumaPesos()"></div>
-            </div>
-            <div class="admin-param-card">
-              <div class="admin-param-label">Estado financiero (%)</div>
-              <div class="admin-param-desc">Peso de la dimensión financiera en el score</div>
-              <div class="admin-param-row"><span class="admin-param-default">Default: 20</span><input class="admin-input" id="p-w-fin" value="20" type="number" min="0" max="100" oninput="marcarCambio(this,20);actualizarSumaPesos()"></div>
+            <div id="rank-tab-gest" onclick="rankAdminTab('gest')"
+              style="padding:8px 18px;font-size:12.5px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px">
+              Gestores Farmacéuticos
             </div>
           </div>
-          <div id="pesos-suma-aviso" style="margin-top:10px;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:500;background:var(--gdim);color:var(--green)">
-            ✓ Los pesos suman 100% correctamente
+
+          <!-- Panel Prestadores -->
+          <div id="rank-panel-prest">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Los pesos deben sumar <b>100%</b>. Impactan el score compuesto de cada prestador en el ranking.</div>
+            <div class="admin-param-grid">
+              <div class="admin-param-card">
+                <div class="admin-param-label">Habilitación de servicios (%)</div>
+                <div class="admin-param-desc">% servicios SI HABILITADO sobre total evaluados en homologación</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 40</span><input class="admin-input" id="p-rp-w-hab" value="40" type="number" min="0" max="100" oninput="marcarCambio(this,40);rankSumaRed()"></div>
+              </div>
+              <div class="admin-param-card">
+                <div class="admin-param-label">Disminución PQR trimestral (%)</div>
+                <div class="admin-param-desc">Cumplimiento de meta ≥10% disminución de quejas vs trimestre anterior</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 35</span><input class="admin-input" id="p-rp-w-pqr" value="35" type="number" min="0" max="100" oninput="marcarCambio(this,35);rankSumaRed()"></div>
+              </div>
+              <div class="admin-param-card">
+                <div class="admin-param-label">Gestión de glosa (%)</div>
+                <div class="admin-param-desc">Glosa real sobre total radicado en cuentas médicas. Meta &lt;15%</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 25</span><input class="admin-input" id="p-rp-w-glos" value="25" type="number" min="0" max="100" oninput="marcarCambio(this,25);rankSumaRed()"></div>
+              </div>
+            </div>
+            <div id="rp-suma-aviso" style="margin-top:10px;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:500;background:var(--gdim);color:var(--green)">✓ Los pesos suman 100%</div>
           </div>
+
+          <!-- Panel Gestores -->
+          <div id="rank-panel-gest" style="display:none">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Los pesos deben sumar <b>100%</b>. Impactan el score compuesto de cada gestor farmacéutico en el ranking.</div>
+            <div class="admin-param-grid">
+              <div class="admin-param-card">
+                <div class="admin-param-label">Cumplimiento ANS (%)</div>
+                <div class="admin-param-desc">% de entregas que cumplen el ANS de tiempo definido en el contrato</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 45</span><input class="admin-input" id="p-gf-w-ans" value="45" type="number" min="0" max="100" oninput="marcarCambio(this,45);rankSumaGest()"></div>
+              </div>
+              <div class="admin-param-card">
+                <div class="admin-param-label">Resolución de PQRS (%)</div>
+                <div class="admin-param-desc">% PQR cerradas sobre total asignadas al gestor en el período</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 35</span><input class="admin-input" id="p-gf-w-pqr" value="35" type="number" min="0" max="100" oninput="marcarCambio(this,35);rankSumaGest()"></div>
+              </div>
+              <div class="admin-param-card">
+                <div class="admin-param-label">Satisfacción usuarios (%)</div>
+                <div class="admin-param-desc">Score promedio de satisfacción reportado para el gestor</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 20</span><input class="admin-input" id="p-gf-w-sat" value="20" type="number" min="0" max="100" oninput="marcarCambio(this,20);rankSumaGest()"></div>
+              </div>
+            </div>
+            <div id="gf-suma-aviso" style="margin-top:10px;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:500;background:var(--gdim);color:var(--green)">✓ Los pesos suman 100%</div>
+          </div>
+
+          <!-- Umbrales semáforo ranking -->
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Umbrales semáforo — aplica a ambos módulos</div>
+            <div style="display:flex;gap:20px;flex-wrap:wrap">
+              <div>
+                <div class="admin-param-label">🟢 Sobresaliente (score ≥)</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 80</span><input class="admin-input" id="p-rank-verde" value="80" type="number" min="1" max="99" oninput="marcarCambio(this,80)"></div>
+              </div>
+              <div>
+                <div class="admin-param-label">🟡 Aceptable (score ≥)</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 60</span><input class="admin-input" id="p-rank-ambar" value="60" type="number" min="1" max="98" oninput="marcarCambio(this,60)"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -7958,13 +7751,19 @@ function guardarSeccion(seccion) {
   const secciones = {
     'semaforos':       ['p-sem-verde','p-sem-ambar'],
     'alertas':         ['p-mora-ambar','p-mora-critica','p-ejec-ambar','p-mrc-desv','p-hab-vence','p-pqrs-min','p-notif-dias','p-tutela-horas'],
-    'scores':          ['p-w-hab','p-w-cal','p-w-ges','p-w-fin'],
+    'scores':          ['p-rp-w-hab','p-rp-w-pqr','p-rp-w-glos','p-gf-w-ans','p-gf-w-pqr','p-gf-w-sat','p-rank-verde','p-rank-ambar'],
     'sanciones-admin': ['pa-capita-op','pa-capita-rs','pa-mrc','pa-pgp','pa-techo','pa-val-min'],
   };
   const ids = secciones[seccion] || [];
   if(seccion==='scores') {
-    const suma = ['p-w-hab','p-w-cal','p-w-ges','p-w-fin'].reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
-    if(Math.round(suma)!==100){ alert('Los pesos deben sumar exactamente 100% antes de guardar.'); return; }
+    const sumaRed  = ['p-rp-w-hab','p-rp-w-pqr','p-rp-w-glos'].reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
+    const sumaGest = ['p-gf-w-ans','p-gf-w-pqr','p-gf-w-sat'].reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
+    if(Math.round(sumaRed)!==100){ alert('Los pesos de Red de Prestadores deben sumar 100% (actual: '+Math.round(sumaRed)+'%)'); return; }
+    if(Math.round(sumaGest)!==100){ alert('Los pesos de Gestores Farmacéuticos deben sumar 100% (actual: '+Math.round(sumaGest)+'%)'); return; }
+    // Guardar en localStorage para persistencia
+    const cfg = {};
+    ids.forEach(id=>{ const el=document.getElementById(id); if(el) cfg[id]=parseFloat(el.value); });
+    try { localStorage.setItem('redsalud_ranking_cfg', JSON.stringify(cfg)); } catch(e) {}
   }
   ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('changed'); });
   const now = new Date().toLocaleDateString('es-CO')+' '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
@@ -7999,7 +7798,9 @@ function restaurarDefaults() {
     'p-sem-verde':85,'p-sem-ambar':70,
     'p-mora-ambar':31,'p-mora-critica':60,'p-ejec-ambar':95,'p-mrc-desv':5,
     'p-hab-vence':30,'p-pqrs-min':80,'p-notif-dias':5,'p-tutela-horas':24,
-    'p-w-hab':30,'p-w-cal':25,'p-w-ges':25,'p-w-fin':20,
+    'p-rp-w-hab':40,'p-rp-w-pqr':35,'p-rp-w-glos':25,
+    'p-gf-w-ans':45,'p-gf-w-pqr':35,'p-gf-w-sat':20,
+    'p-rank-verde':80,'p-rank-ambar':60,
     'pa-capita-op':0.40,'pa-capita-rs':0.41,'pa-mrc':1.00,'pa-pgp':0.10,'pa-techo':0.20,'pa-val-min':90,
   };
   Object.entries(defaults).forEach(([id,val])=>{
@@ -10262,5 +10063,413 @@ function parsearCuentasMedicas(data) {
       };
     }
   });
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     RANKING DE CUMPLIMIENTO — ENGINE COMPLETO
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+'use strict';
+
+// ── Estado ────────────────────────────────────────────────────────
+let RANK_MODULO = 'prestadores'; // 'prestadores' | 'gestores'
+let RANK_DATA   = [];            // resultado del último cálculo
+let RANK_FILTRADO = [];
+
+// ── Helpers de parámetros (lee del admin; fallback a default) ─────
+function gP(id, def){ return parseFloat(document.getElementById(id)?.value ?? def) || def; }
+
+function getRankCfg(){
+  // Intentar cargar desde localStorage si hay config guardada
+  try {
+    const saved = JSON.parse(localStorage.getItem('redsalud_ranking_cfg') || '{}');
+    return saved;
+  } catch(e){ return {}; }
+}
+
+function wRed(){
+  return { hab: gP('p-rp-w-hab',40)/100, pqr: gP('p-rp-w-pqr',35)/100, glos: gP('p-rp-w-glos',25)/100 };
+}
+function wGest(){
+  return { ans: gP('p-gf-w-ans',45)/100, pqr: gP('p-gf-w-pqr',35)/100, sat: gP('p-gf-w-sat',20)/100 };
+}
+function thresholds(){
+  return { verde: gP('p-rank-verde',80), ambar: gP('p-rank-ambar',60) };
+}
+
+function semScore(s){
+  const t = thresholds();
+  if(s === null) return {ico:'⚫',color:'var(--text2)',bg:'var(--bg3)',label:'Sin dato'};
+  if(s >= t.verde) return {ico:'🟢',color:'var(--green)',bg:'var(--gdim)',label:'Sobresaliente'};
+  if(s >= t.ambar) return {ico:'🟡',color:'var(--amber)',bg:'var(--adim)',label:'Aceptable'};
+  return              {ico:'🔴',color:'var(--red)',  bg:'var(--rdim)',label:'Crítico'};
+}
+
+// ── Conversores dimensión → score 0-100 ───────────────────────────
+
+// Habilitación: % SI HABILITADO → score directo
+function scoreHabilitacion(nit){
+  const rows = (DATOS_CARGADOS.homologacion_rows || []).filter(r => String(r.nit||'').trim() === nit);
+  if(!rows.length) return null;
+  const norm = s => String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const si = rows.filter(r => norm(r.resultado).includes('SI HABILITADO')).length;
+  return Math.round((si/rows.length)*100);
+}
+
+// PQR Red: variación trimestral → score
+// ≥+10% = 100, 0-10% = 60-100 proporcional, negativa = 0-59 proporcional
+function scorePqrRed(nit){
+  if(!(window.PQRS_RED_DATA?.length)) return null;
+  // Calcula variación del último trimestre para este NIT (suma todas las regionales)
+  const ult = typeof detectarUltimoTrimestre === 'function' ? detectarUltimoTrimestre() : {año:2025,trim:4};
+  const getTrim = m => Math.ceil(m/3);
+  let trimActAño=ult.año, trimActNum=ult.trim;
+  let trimAntAño=trimActAño, trimAntNum=trimActNum-1;
+  if(trimAntNum===0){trimAntNum=4;trimAntAño--;}
+
+  const byNitPer = {};
+  PQRS_RED_DATA.forEach(r=>{
+    if(String(r.nit).trim()!==nit) return;
+    const trim=getTrim(r.mesNum);
+    const key=`${r.año}-${trim}`;
+    byNitPer[key]=(byNitPer[key]||0)+r.total;
+  });
+
+  const kAct = `${trimActAño}-${trimActNum}`;
+  const kAnt = `${trimAntAño}-${trimAntNum}`;
+  const act = byNitPer[kAct];
+  const ant = byNitPer[kAnt];
+  if(!ant || !act) return null;
+
+  const variacion = ((ant-act)/ant)*100;
+  if(variacion >= 10) return 100;
+  if(variacion >= 0)  return Math.round(60 + (variacion/10)*40);
+  // Negativa: hasta -50% = 0
+  return Math.max(0, Math.round(59 + (variacion/50)*59));
+}
+
+// Glosa: % glosa real → score (inverso: menos glosa = más score)
+function scoreGlosa(nit){
+  const rows = (DATOS_CARGADOS.cuentas_medicas || []).filter(r => String(r.nit||'').trim() === nit);
+  if(!rows.length) return null;
+  const tot  = rows.reduce((a,r)=>a+r.subtotal,0);
+  const glos = rows.reduce((a,r)=>a+r.glosa_real,0);
+  if(!tot) return null;
+  const pct = (glos/tot)*100;
+  if(pct < 10) return 100;
+  if(pct < 15) return Math.round(70 + ((15-pct)/5)*30);
+  if(pct < 25) return Math.round(30 + ((25-pct)/10)*40);
+  return Math.max(0, Math.round(30-(pct-25)*2));
+}
+
+// ANS Gestores: % cumple ANS de tutelas
+function scoreANS(gestor){
+  if(!(window.DATOS_TUTELAS?.length)) return null;
+  const rows = DATOS_TUTELAS.filter(r=>String(r[COL_T?.gestor??3]||'').trim()===gestor);
+  if(!rows.length) return null;
+  const cumple=rows.filter(r=>typeof esCumple==='function'?esCumple(r[COL_T?.cumpleAns??37]):false).length;
+  return Math.round((cumple/rows.length)*100);
+}
+
+// PQR Gestores: % PQR cerradas
+function scorePqrGest(gestor){
+  if(!(window.DATOS_PQRS?.length)) return null;
+  const rows=DATOS_PQRS.filter(r=>String(r[COL_P?.gestor??25]||'').trim()===gestor);
+  if(!rows.length) return null;
+  const cerradas=rows.filter(r=>typeof clasificarEstadoPqrs==='function'?clasificarEstadoPqrs(r[COL_P?.estado??3])==='cerrado':false).length;
+  return Math.round((cerradas/rows.length)*100);
+}
+
+// Satisfacción Gestores
+function scoreSatisfaccion(gestor){
+  const rows=(DATOS_CARGADOS.satisfaccion||[]).filter(r=>String(r.gestor||r.nombre||'').trim()===gestor);
+  if(!rows.length) return null;
+  const avg=rows.reduce((a,r)=>a+(r.resultado||0),0)/rows.length;
+  return Math.min(100,Math.max(0,Math.round(avg)));
+}
+
+// ── Compute score compuesto ────────────────────────────────────────
+function computeScorePrestador(nit, nombre){
+  const w = wRed();
+  const sH = scoreHabilitacion(nit);
+  const sP = scorePqrRed(nit);
+  const sG = scoreGlosa(nit);
+  const dims = [{id:'hab',lbl:'Habilitación',score:sH,peso:w.hab},
+                {id:'pqr',lbl:'PQR trimestral',score:sP,peso:w.pqr},
+                {id:'glos',lbl:'Gestión glosa',score:sG,peso:w.glos}];
+  const disponibles = dims.filter(d=>d.score!==null);
+  if(!disponibles.length) return null;
+  const pesoTotal = disponibles.reduce((a,d)=>a+d.peso,0);
+  const scoreComp = pesoTotal>0 ? disponibles.reduce((a,d)=>a+(d.score*d.peso),0)/pesoTotal : null;
+  return {nit,nombre,tipo:'prestador',score:scoreComp!==null?Math.round(scoreComp):null,dims};
+}
+
+function computeScoreGestor(gestor){
+  const w = wGest();
+  const sA = scoreANS(gestor);
+  const sP = scorePqrGest(gestor);
+  const sS = scoreSatisfaccion(gestor);
+  const dims = [{id:'ans',lbl:'ANS',score:sA,peso:w.ans},
+                {id:'pqr',lbl:'PQR cerradas',score:sP,peso:w.pqr},
+                {id:'sat',lbl:'Satisfacción',score:sS,peso:w.sat}];
+  const disponibles = dims.filter(d=>d.score!==null);
+  if(!disponibles.length) return null;
+  const pesoTotal = disponibles.reduce((a,d)=>a+d.peso,0);
+  const scoreComp = pesoTotal>0 ? disponibles.reduce((a,d)=>a+(d.score*d.peso),0)/pesoTotal : null;
+  return {nit:null,nombre:gestor,tipo:'gestor',score:scoreComp!==null?Math.round(scoreComp):null,dims};
+}
+
+// ── Calcular ranking completo ──────────────────────────────────────
+window.calcularRanking = function(){
+  const el = id => document.getElementById(id);
+  const elEstado = el('rank-estado');
+  if(elEstado) elEstado.textContent = '⏳ Calculando...';
+
+  setTimeout(()=>{
+    try {
+      if(RANK_MODULO === 'prestadores'){
+        // Obtener todos los NITs únicos de las fuentes disponibles
+        const nitsHab  = new Set((DATOS_CARGADOS.homologacion_rows||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
+        const nitsPqr  = new Set((window.PQRS_RED_DATA||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
+        const nitsGlos = new Set((DATOS_CARGADOS.cuentas_medicas||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
+        const todosNits = new Set([...nitsHab,...nitsPqr,...nitsGlos]);
+
+        // Obtener nombres desde cualquier fuente disponible
+        const nombreMap = {};
+        const fuentes = [...(DATOS_CARGADOS.homologacion_rows||[]),...(window.PQRS_RED_DATA||[]),...(DATOS_CARGADOS.cuentas_medicas||[]),...(DATOS_CARGADOS.prestadores||[])];
+        fuentes.forEach(r=>{
+          const n=String(r.nit||'').trim().replace(/\.0$/,'');
+          if(n && !nombreMap[n]) nombreMap[n]=String(r.nombre||r.razon_social||r.nombre_prestador||'').trim();
+        });
+
+        RANK_DATA = [...todosNits].map(nit=>computeScorePrestador(nit, nombreMap[nit]||nit)).filter(Boolean).sort((a,b)=>(b.score??-1)-(a.score??-1));
+
+      } else {
+        // Gestores: obtener nombres únicos
+        const gestoresSet = new Set();
+        (window.DATOS_TUTELAS||[]).forEach(r=>{ const g=String(r[COL_T?.gestor??3]||'').trim(); if(g&&g!=='N/A')gestoresSet.add(g); });
+        (window.DATOS_PQRS||[]).forEach(r=>{ const g=String(r[COL_P?.gestor??25]||'').trim(); if(g&&g!=='N/A')gestoresSet.add(g); });
+        RANK_DATA = [...gestoresSet].map(g=>computeScoreGestor(g)).filter(Boolean).sort((a,b)=>(b.score??-1)-(a.score??-1));
+      }
+
+      RANK_FILTRADO = [...RANK_DATA];
+      renderRanking();
+      if(elEstado) elEstado.textContent = `✓ ${RANK_DATA.length} entidades evaluadas`;
+    } catch(e){
+      if(elEstado) elEstado.textContent = `⚠ Error: ${e.message}`;
+      console.error('[Ranking]',e);
+    }
+  }, 50);
+};
+
+// ── Render ────────────────────────────────────────────────────────
+function renderRanking(){
+  const t = thresholds();
+  const total = RANK_FILTRADO.length;
+  const conScore = RANK_FILTRADO.filter(r=>r.score!==null);
+  const verdes  = conScore.filter(r=>r.score>=t.verde).length;
+  const amarils = conScore.filter(r=>r.score>=t.ambar&&r.score<t.verde).length;
+  const rojos   = conScore.filter(r=>r.score<t.ambar).length;
+  const prom    = conScore.length ? Math.round(conScore.reduce((a,r)=>a+r.score,0)/conScore.length) : null;
+
+  // KPIs
+  const se = id => { const el=document.getElementById(id); return el || {textContent:'',style:{}}; };
+  se('rank-kpi-v').textContent  = verdes;
+  se('rank-kpi-v-d').textContent= `${t.verde}+ puntos`;
+  se('rank-kpi-a').textContent  = amarils;
+  se('rank-kpi-a-d').textContent= `${t.ambar}–${t.verde-1} puntos`;
+  se('rank-kpi-r').textContent  = rojos;
+  se('rank-kpi-r-d').textContent= `< ${t.ambar} puntos`;
+  se('rank-kpi-prom').textContent= prom!==null?prom:'—';
+  se('rank-kpi-tot').textContent = total;
+  const elProm=document.getElementById('rank-kpi-prom');
+  if(elProm&&prom!==null) elProm.style.color=semScore(prom).color;
+
+  // Gráfica distribución
+  dibujarDistribucion(RANK_FILTRADO,t);
+
+  // Desglose dimensiones
+  renderDimensions(RANK_FILTRADO);
+
+  // Tabla
+  renderTablaRanking(RANK_FILTRADO);
+}
+
+function dibujarDistribucion(data, t){
+  const canvas=document.getElementById('rank-chart-dist');
+  if(!canvas) return;
+  // Agrupar en rangos de 10
+  const buckets=Array.from({length:11},(_,i)=>({label:`${i*10}-${i*10+9}`,count:0}));
+  data.filter(r=>r.score!==null).forEach(r=>{
+    const b=Math.min(10,Math.floor(r.score/10));
+    buckets[b].count++;
+  });
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.parentElement?.offsetWidth-40||460,H=160;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  const maxV=Math.max(...buckets.map(b=>b.count),1);
+  const bW=Math.floor((W-40)/11)-4;
+  const padB=26,chartH=H-padB-10;
+  buckets.forEach((b,i)=>{
+    const x=20+i*(bW+4);
+    const h=Math.max(2,(b.count/maxV)*chartH);
+    const score=i*10+5;
+    const color=score>=t.verde?'#0099D1':score>=t.ambar?'#B86C00':'#B50303';
+    ctx.fillStyle=color+'22';
+    ctx.beginPath();ctx.roundRect(x,10,bW,chartH,3);ctx.fill();
+    if(b.count>0){
+      ctx.fillStyle=color;
+      ctx.beginPath();ctx.roundRect(x,10+chartH-h,bW,h,3);ctx.fill();
+      ctx.fillStyle='#212121';ctx.font='9px Figtree,sans-serif';ctx.textAlign='center';
+      ctx.fillText(b.count,x+bW/2,10+chartH-h-3);
+    }
+    ctx.fillStyle='#4A7A95';ctx.font='8px Figtree,sans-serif';ctx.textAlign='center';
+    ctx.fillText(b.label,x+bW/2,H-8);
+  });
+}
+
+function renderDimensions(data){
+  const body=document.getElementById('rank-dim-body');
+  if(!body) return;
+  const withScore=data.filter(r=>r.score!==null&&r.dims);
+  if(!withScore.length){body.innerHTML='<div style="color:var(--text2);font-size:12px;text-align:center;padding:20px">Sin datos</div>';return;}
+  // Promedio por dimensión
+  const dimTotals={};
+  withScore.forEach(r=>r.dims.forEach(d=>{
+    if(d.score!==null){
+      if(!dimTotals[d.lbl]) dimTotals[d.lbl]={sum:0,n:0,peso:d.peso};
+      dimTotals[d.lbl].sum+=d.score; dimTotals[d.lbl].n++;
+    }
+  }));
+  const colors=['var(--blue)','var(--red)','var(--amber)','var(--teal)'];
+  body.innerHTML=Object.entries(dimTotals).map(([lbl,v],i)=>{
+    const avg=Math.round(v.sum/v.n);
+    const c=colors[i%colors.length];
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;color:var(--text)">${lbl}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:${c}">${avg}</span>
+      </div>
+      <div style="height:8px;background:var(--bg4);border-radius:4px">
+        <div style="height:100%;width:${avg}%;background:${c};border-radius:4px;transition:width .4s"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px">Peso: ${Math.round(v.peso*100)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTablaRanking(data){
+  const isPrest = RANK_MODULO==='prestadores';
+  // Cabecera
+  const thead=document.getElementById('rank-thead');
+  if(thead) thead.innerHTML=`<tr>
+    <th style="width:36px">#</th>
+    ${isPrest?'<th>NIT</th>':''}
+    <th>${isPrest?'Nombre prestador':'Gestor farmacéutico'}</th>
+    ${isPrest?'<th style="text-align:center">Habilitación</th><th style="text-align:center">PQR trim.</th><th style="text-align:center">Glosa</th>':'<th style="text-align:center">ANS</th><th style="text-align:center">PQR</th><th style="text-align:center">Satisfacción</th>'}
+    <th style="text-align:center">Score</th>
+    <th style="text-align:center">Semáforo</th>
+  </tr>`;
+
+  const fmtScore=v=>v!==null?v:'—';
+  const badge=(v,t)=>{
+    if(v===null) return `<span style="color:var(--text2);font-size:11px">—</span>`;
+    const c=v>=t.verde?'var(--green)':v>=t.ambar?'var(--amber)':'var(--red)';
+    return `<span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;background:${c}18;color:${c}">${v}</span>`;
+  };
+  const t=thresholds();
+  const MAX=200;
+  const tbody=document.getElementById('rank-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=data.slice(0,MAX).map((r,i)=>{
+    const sem=semScore(r.score);
+    const d=r.dims||[];
+    const getD=(id)=>d.find(x=>x.id===id)?.score;
+    return `<tr>
+      <td style="color:var(--text2);font-size:12px;font-weight:600">${i+1}</td>
+      ${isPrest?`<td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit||'—'}</td>`:''}
+      <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre}</td>
+      ${isPrest?`<td style="text-align:center">${badge(getD('hab'),t)}</td><td style="text-align:center">${badge(getD('pqr'),t)}</td><td style="text-align:center">${badge(getD('glos'),t)}</td>`
+               :`<td style="text-align:center">${badge(getD('ans'),t)}</td><td style="text-align:center">${badge(getD('pqr'),t)}</td><td style="text-align:center">${badge(getD('sat'),t)}</td>`}
+      <td style="text-align:center"><span style="font-size:15px;font-weight:700;color:${sem.color}">${fmtScore(r.score)}</span></td>
+      <td style="text-align:center">${sem.ico} <span style="font-size:10px;color:${sem.color}">${sem.label}</span></td>
+    </tr>`;
+  }).join('')+(data.length>MAX?`<tr><td colspan="8" style="text-align:center;padding:8px;font-size:11px;color:var(--text2)">Mostrando ${MAX} de ${data.length}</td></tr>`:'');
+
+  const sub=document.getElementById('rank-tabla-sub');
+  if(sub) sub.textContent=`${data.length} entidades · score promedio ${data.filter(r=>r.score!==null).length?Math.round(data.filter(r=>r.score!==null).reduce((a,r)=>a+r.score,0)/data.filter(r=>r.score!==null).length):'—'}`;
+}
+
+// ── Filtrar ───────────────────────────────────────────────────────
+window.rankFiltrar = function(){
+  const buscar=(document.getElementById('rank-buscar')?.value||'').toLowerCase();
+  const sem=document.getElementById('rank-filtro-sem')?.value||'';
+  const t=thresholds();
+  RANK_FILTRADO=RANK_DATA.filter(r=>{
+    if(buscar && !`${r.nit||''} ${r.nombre}`.toLowerCase().includes(buscar)) return false;
+    if(sem==='verde'  && (r.score===null||r.score<t.verde)) return false;
+    if(sem==='ambar'  && (r.score===null||r.score<t.ambar||r.score>=t.verde)) return false;
+    if(sem==='rojo'   && (r.score===null||r.score>=t.ambar)) return false;
+    return true;
+  });
+  renderRanking();
+};
+
+// ── Cambio de módulo ──────────────────────────────────────────────
+window.rankSetModulo = function(mod){
+  RANK_MODULO=mod;
+  document.getElementById('rank-tab-prestadores')?.style && (document.getElementById('rank-tab-prestadores').style.cssText=mod==='prestadores'?'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none':'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px;user-select:none');
+  document.getElementById('rank-tab-gestores')?.style && (document.getElementById('rank-tab-gestores').style.cssText=mod==='gestores'?'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none':'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px;user-select:none');
+  const titulo=document.getElementById('rank-tabla-titulo');
+  if(titulo) titulo.textContent=mod==='prestadores'?'Ranking · Red de Prestadores':'Ranking · Gestores Farmacéuticos';
+  RANK_DATA=[]; RANK_FILTRADO=[];
+  calcularRanking();
+};
+
+// ── Admin tabs ────────────────────────────────────────────────────
+window.rankAdminTab = function(tab){
+  document.getElementById('rank-panel-prest').style.display=tab==='prest'?'':'none';
+  document.getElementById('rank-panel-gest').style.display=tab==='gest'?'':'none';
+  const tabP=document.getElementById('rank-tab-prest');
+  const tabG=document.getElementById('rank-tab-gest');
+  if(tabP) tabP.style.cssText=tab==='prest'?'padding:8px 18px;font-size:12.5px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px':'padding:8px 18px;font-size:12.5px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px';
+  if(tabG) tabG.style.cssText=tab==='gest'?'padding:8px 18px;font-size:12.5px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px':'padding:8px 18px;font-size:12.5px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px';
+};
+
+// ── Admin suma visual ─────────────────────────────────────────────
+window.rankSumaRed = function(){
+  const s=['p-rp-w-hab','p-rp-w-pqr','p-rp-w-glos'].reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
+  const aviso=document.getElementById('rp-suma-aviso');
+  if(aviso){ aviso.style.background=Math.round(s)===100?'var(--gdim)':'var(--adim)'; aviso.style.color=Math.round(s)===100?'var(--green)':'var(--amber)'; aviso.textContent=(Math.round(s)===100?'✓ Los pesos suman 100%':'⚠ Suma actual: '+Math.round(s)+'% — debe ser 100%'); }
+};
+window.rankSumaGest = function(){
+  const s=['p-gf-w-ans','p-gf-w-pqr','p-gf-w-sat'].reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
+  const aviso=document.getElementById('gf-suma-aviso');
+  if(aviso){ aviso.style.background=Math.round(s)===100?'var(--gdim)':'var(--adim)'; aviso.style.color=Math.round(s)===100?'var(--green)':'var(--amber)'; aviso.textContent=(Math.round(s)===100?'✓ Los pesos suman 100%':'⚠ Suma actual: '+Math.round(s)+'% — debe ser 100%'); }
+};
+
+// ── Cargar config guardada al iniciar ─────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  try {
+    const saved=JSON.parse(localStorage.getItem('redsalud_ranking_cfg')||'{}');
+    Object.entries(saved).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.value=val; });
+  } catch(e){}
+  rankSumaRed(); rankSumaGest();
+
+  // Hook navigate
+  const origNav=window.navigate;
+  if(typeof origNav==='function'){
+    window.navigate=function(scr){
+      origNav(scr);
+      if(scr==='ranking'&&!RANK_DATA.length) setTimeout(calcularRanking,80);
+    };
+  }
+});
+
 })();
 </script>
