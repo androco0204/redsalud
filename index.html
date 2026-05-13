@@ -6740,7 +6740,7 @@ const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoIL
 const PQRS_SCRIPT    = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEYRoKvTNKFsuXk_CUsIRb5UHDmgycJeiGLgA4LoT9G0fcRIphBvEfdA/exec';
 const TUTELAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzVt-Q5bggChVwxeM_Wew_QsLkweNZZiYh5aQxP16lxVeCAR0BiLMouZbJbzarSwJ0Kfg/exec';
 // ── PQRS Red de Prestadores ── desplegar Apps Script y reemplazar esta URL
-const PQRS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycbzu8xaxZo11EenmMfjvSaEL_Hny7UIccwoh0GrhSvmQyLBw-G3hL5J9dOEht7GZcPTu/exec';
+const PQRS_RED_SCRIPT = 'PENDIENTE_DEPLOY';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -9629,7 +9629,7 @@ function parsearCuentasMedicas(data) {
 <div class="screen" id="screen-red-pqrs">
 
   <!-- KPIs -->
-  <div class="kpi-strip cols-4">
+  <div class="kpi-strip cols-5">
     <div class="kpi" style="--kc:var(--blue)">
       <div class="kpi-label">Total quejas</div>
       <div class="kpi-value" style="color:var(--blue)" id="pqr-kpi-total">—</div>
@@ -9649,6 +9649,11 @@ function parsearCuentasMedicas(data) {
       <div class="kpi-label">Prestadores</div>
       <div class="kpi-value" style="color:var(--teal)" id="pqr-kpi-prest">—</div>
       <div class="kpi-delta neu">Con quejas en período</div>
+    </div>
+    <div class="kpi" style="--kc:var(--green)">
+      <div class="kpi-label">✅ Cumplen meta</div>
+      <div class="kpi-value" id="pqr-kpi-cumple" style="color:var(--green)">—</div>
+      <div class="kpi-delta up" id="pqr-kpi-cumple-d">≥10% disminución trim.</div>
     </div>
   </div>
 
@@ -9721,6 +9726,67 @@ function parsearCuentasMedicas(data) {
     </div>
   </div>
 
+  <!-- Semáforo trimestral -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Semáforo trimestral · % disminución PQR</div>
+        <div class="card-sub">Fórmula: (Quejas trim. ant. − Quejas trim. actual) / Quejas trim. ant. · Meta ≥ 10%</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <select id="pqr-sem-trim" onchange="renderSemaforoTrimestral()"
+          style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);outline:none">
+          <option value="">Último trimestre disponible</option>
+          <option value="2026-1">2026 · T1</option>
+          <option value="2025-4">2025 · T4</option>
+          <option value="2025-3">2025 · T3</option>
+          <option value="2025-2">2025 · T2</option>
+          <option value="2025-1">2025 · T1</option>
+          <option value="2024-4">2024 · T4</option>
+          <option value="2024-3">2024 · T3</option>
+          <option value="2024-2">2024 · T2</option>
+        </select>
+      </div>
+    </div>
+    <!-- Resumen semáforo -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px 20px 0">
+      <div id="pqr-sem-verde" style="background:rgba(0,153,209,0.07);border:1px solid rgba(0,153,209,0.2);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;margin-bottom:4px">🟢</div>
+        <div style="font-size:22px;font-weight:700;color:var(--green)" id="pqr-sem-v-n">—</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">Cumple · ≥10% disminución</div>
+      </div>
+      <div id="pqr-sem-amarillo" style="background:rgba(184,108,0,0.07);border:1px solid rgba(184,108,0,0.2);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;margin-bottom:4px">🟡</div>
+        <div style="font-size:22px;font-weight:700;color:var(--amber)" id="pqr-sem-a-n">—</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">En riesgo · 0%–9.9% disminución</div>
+      </div>
+      <div id="pqr-sem-rojo" style="background:rgba(181,3,3,0.07);border:1px solid rgba(181,3,3,0.2);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;margin-bottom:4px">🔴</div>
+        <div style="font-size:22px;font-weight:700;color:var(--red)" id="pqr-sem-r-n">—</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">No cumple · Quejas aumentaron</div>
+      </div>
+    </div>
+    <!-- Tabla semáforo -->
+    <div style="padding:0 0 0 0;overflow-x:auto;max-height:340px;overflow-y:auto;margin-top:14px">
+      <table class="hab-table" id="pqr-sem-tabla">
+        <thead>
+          <tr>
+            <th>NIT</th>
+            <th>Nombre prestador</th>
+            <th>Regional</th>
+            <th style="text-align:right">Trim. anterior</th>
+            <th style="text-align:right">Trim. actual</th>
+            <th style="text-align:right">Variación</th>
+            <th style="text-align:center">Semáforo</th>
+          </tr>
+        </thead>
+        <tbody id="pqr-sem-body">
+          <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text2)">Selecciona un trimestre para ver el semáforo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- Tabla detalle -->
   <div class="card">
     <div class="card-head">
@@ -9740,6 +9806,7 @@ function parsearCuentasMedicas(data) {
             <th style="text-align:right">Canales propios</th>
             <th style="text-align:right">Total quejas</th>
             <th style="text-align:right">% Supersalud</th>
+            <th style="text-align:center">Var. trim.</th>
           </tr>
         </thead>
         <tbody id="pqr-tabla-body">
@@ -9872,6 +9939,9 @@ function parsearCuentasMedicas(data) {
 
     // ── Top 10 prestadores ──
     dibujarTopPrestadores(datos);
+
+    // ── Semáforo trimestral (auto-refresh) ──
+    renderSemaforoTrimestral();
 
     // ── Tabla ──
     renderTablaPqrRed(datos);
@@ -10009,7 +10079,6 @@ function parsearCuentasMedicas(data) {
 
   // ── Tabla detalle ─────────────────────────────────────────────────
   function renderTablaPqrRed(datos){
-    // Agrupar por NIT + Regional (consolidado)
     const byKey = {};
     datos.forEach(r => {
       const k = `${r.nit}::${r.regional}`;
@@ -10018,8 +10087,15 @@ function parsearCuentasMedicas(data) {
       byKey[k].can += r.canales;
       byKey[k].tot += r.total;
     });
-    const rows = Object.values(byKey).sort((a,b)=>b.tot-a.tot);
 
+    // Enriquecer con variación del último trimestre
+    const ult = detectarUltimoTrimestre();
+    const varMap = {};
+    calcularVariacionTrimestral(PQRS_RED_DATA, ult.año, ult.trim).forEach(v=>{
+      varMap[`${v.nit}::${v.regional}`] = v.variacion;
+    });
+
+    const rows = Object.values(byKey).sort((a,b)=>b.tot-a.tot);
     const sub=document.getElementById('pqr-tabla-sub');
     if(sub) sub.textContent=`${rows.length.toLocaleString('es-CO')} prestadores · valores acumulados del período`;
 
@@ -10030,21 +10106,148 @@ function parsearCuentasMedicas(data) {
     const pct=(v,t)=>t>0?((v/t)*100).toFixed(1)+'%':'0%';
 
     tbody.innerHTML = rows.slice(0,MAX).map(r=>{
-      const pctSup = parseFloat(pct(r.sup,r.tot));
+      const pctSup   = parseFloat(pct(r.sup,r.tot));
       const semColor = pctSup>=80?'var(--red)':pctSup>=60?'var(--amber)':'var(--green)';
+      const varVal   = varMap[`${r.nit}::${r.regional}`];
+      const sem      = semTrim(varVal !== undefined ? varVal : null);
+      const varTxt   = varVal !== undefined ? (varVal>=0?'+':'')+varVal.toFixed(1)+'%' : '—';
       return `<tr>
         <td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit}</td>
-        <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre}</td>
+        <td style="font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre}</td>
         <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:var(--blue)">${r.regional}</span></td>
         <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">${fmtN(r.sup)}</td>
         <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--amber)">${fmtN(r.can)}</td>
         <td style="text-align:right;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--blue)">${fmtN(r.tot)}</td>
         <td style="text-align:right"><span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:4px;background:${semColor}18;color:${semColor}">${pct(r.sup,r.tot)}</span></td>
+        <td style="text-align:center"><span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;background:${sem.bg};color:${sem.color}">${sem.ico} ${varTxt}</span></td>
       </tr>`;
-    }).join('') + (rows.length>MAX?`<tr><td colspan="7" style="text-align:center;padding:8px;font-size:11px;color:var(--text2)">Mostrando ${MAX} de ${rows.length.toLocaleString('es-CO')} · use filtros para acotar</td></tr>`:'');
+    }).join('') + (rows.length>MAX?`<tr><td colspan="8" style="text-align:center;padding:8px;font-size:11px;color:var(--text2)">Mostrando ${MAX} de ${rows.length.toLocaleString('es-CO')} · use filtros para acotar</td></tr>`:'');
   }
 
-  // ── Trigger on navigate ───────────────────────────────────────────
+  // ── Lógica trimestral ─────────────────────────────────────────────
+  const META_DISMINUCION = 10; // ≥10% para cumplir
+
+  function getTrimestre(mesNum){ return Math.ceil(mesNum/3); }
+
+  function calcularVariacionTrimestral(datos, añoSel, trimSel){
+    // Agrupa todos los datos por NIT+Regional+Año+Trimestre
+    const porPeriodo = {};
+    datos.forEach(r => {
+      const trim = getTrimestre(r.mesNum);
+      const k = `${r.nit}::${r.regional}::${r.año}::${trim}`;
+      if(!porPeriodo[k]) porPeriodo[k]={nit:r.nit,nombre:r.nombre,regional:r.regional,año:r.año,trim,total:0};
+      porPeriodo[k].total += r.total;
+    });
+
+    // Determinar trimestre actual y anterior
+    let trimActAño = añoSel, trimActNum = trimSel;
+    let trimAntAño = trimActAño, trimAntNum = trimActNum - 1;
+    if(trimAntNum === 0){ trimAntNum = 4; trimAntAño--; }
+
+    // Construir lookup por NIT+Regional para cada periodo
+    const actual   = {};
+    const anterior = {};
+    Object.values(porPeriodo).forEach(p => {
+      const kNit = `${p.nit}::${p.regional}`;
+      if(p.año === trimActAño && p.trim === trimActNum) actual[kNit]   = p;
+      if(p.año === trimAntAño && p.trim === trimAntNum) anterior[kNit] = p;
+    });
+
+    // Combinar: solo prestadores con datos en ambos períodos
+    const result = [];
+    Object.keys(actual).forEach(k => {
+      if(!anterior[k]) return;
+      const ant = anterior[k].total;
+      const act = actual[k].total;
+      const variacion = ant > 0 ? ((ant - act) / ant) * 100 : null;
+      result.push({
+        nit:      actual[k].nit,
+        nombre:   actual[k].nombre,
+        regional: actual[k].regional,
+        totAnt:   ant,
+        totAct:   act,
+        variacion // positivo = disminuyó, negativo = aumentó
+      });
+    });
+
+    return result.sort((a,b) => (b.variacion||0) - (a.variacion||0));
+  }
+
+  function semTrim(v){
+    if(v === null) return {color:'var(--text2)',bg:'var(--bg3)',ico:'—',  label:'Sin dato'};
+    if(v >= META_DISMINUCION) return {color:'var(--green)',bg:'var(--gdim)',ico:'🟢',label:'Cumple'};
+    if(v >= 0)                return {color:'var(--amber)',bg:'var(--adim)',ico:'🟡',label:'En riesgo'};
+    return                          {color:'var(--red)',  bg:'var(--rdim)',ico:'🔴',label:'No cumple'};
+  }
+
+  // Detectar último trimestre disponible en los datos
+  function detectarUltimoTrimestre(){
+    if(!PQRS_RED_DATA.length) return {año:2025,trim:4};
+    let maxAño=0,maxMes=0;
+    PQRS_RED_DATA.forEach(r=>{ if(r.año>maxAño||(r.año===maxAño&&r.mesNum>maxMes)){maxAño=r.año;maxMes=r.mesNum;}});
+    return {año:maxAño, trim:getTrimestre(maxMes)};
+  }
+
+  window.renderSemaforoTrimestral = function(){
+    const sel = document.getElementById('pqr-sem-trim')?.value || '';
+    let año, trim;
+    if(sel){
+      const parts = sel.split('-');
+      año  = parseInt(parts[0]);
+      trim = parseInt(parts[1]);
+    } else {
+      const ult = detectarUltimoTrimestre();
+      año  = ult.año;
+      trim = ult.trim;
+    }
+
+    // Usar todos los datos sin filtro de período (el semáforo trabaja con todos)
+    const reg    = document.getElementById('pqr-f-regional')?.value || '';
+    const buscar = (document.getElementById('pqr-f-buscar')?.value || '').toLowerCase();
+    const base   = PQRS_RED_DATA.filter(r => {
+      if(reg && r.regional !== reg) return false;
+      if(buscar && !`${r.nit} ${r.nombre}`.toLowerCase().includes(buscar)) return false;
+      return true;
+    });
+
+    const rows = calcularVariacionTrimestral(base, año, trim);
+
+    const verdes   = rows.filter(r=>r.variacion!==null && r.variacion>=META_DISMINUCION).length;
+    const amarillos= rows.filter(r=>r.variacion!==null && r.variacion>=0 && r.variacion<META_DISMINUCION).length;
+    const rojos    = rows.filter(r=>r.variacion!==null && r.variacion<0).length;
+    const total    = rows.filter(r=>r.variacion!==null).length;
+
+    document.getElementById('pqr-sem-v-n').textContent = verdes + (total>0?` (${((verdes/total)*100).toFixed(0)}%)`:'');
+    document.getElementById('pqr-sem-a-n').textContent = amarillos + (total>0?` (${((amarillos/total)*100).toFixed(0)}%)`:'');
+    document.getElementById('pqr-sem-r-n').textContent = rojos + (total>0?` (${((rojos/total)*100).toFixed(0)}%)`:'');
+
+    // Actualizar KPI cumplimiento
+    const elCumple = document.getElementById('pqr-kpi-cumple');
+    const elCumpleD = document.getElementById('pqr-kpi-cumple-d');
+    if(elCumple && total>0){
+      elCumple.textContent = verdes + ' / ' + total;
+      elCumple.style.color = verdes/total >= 0.7 ? 'var(--green)' : verdes/total >= 0.4 ? 'var(--amber)' : 'var(--red)';
+      if(elCumpleD) elCumpleD.textContent = `${((verdes/total)*100).toFixed(0)}% red · T${trim} ${año}`;
+    }
+
+    const tbody = document.getElementById('pqr-sem-body');
+    if(!tbody) return;
+    const fmtN = v => v.toLocaleString('es-CO');
+    const fmtV = v => v===null ? '—' : (v>=0?'+':'')+v.toFixed(1)+'%';
+
+    tbody.innerHTML = rows.slice(0,200).map(r => {
+      const sem = semTrim(r.variacion);
+      return `<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit}</td>
+        <td style="font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre}</td>
+        <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--bdim);color:var(--blue)">${r.regional}</span></td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px">${fmtN(r.totAnt)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px">${fmtN(r.totAct)}</td>
+        <td style="text-align:right"><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:${sem.bg};color:${sem.color}">${fmtV(r.variacion)}</span></td>
+        <td style="text-align:center">${sem.ico} <span style="font-size:10px;color:${sem.color}">${sem.label}</span></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--text2)">Sin prestadores con datos en ambos trimestres</td></tr>';
+  };
   document.addEventListener('DOMContentLoaded', function(){
     const origNav=window.navigate;
     if(typeof origNav==='function'){
