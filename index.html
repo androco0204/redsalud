@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RedSalud — Monitor de Red v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#F4F8FB;--bg2:#FFFFFF;--bg3:#EEF5FA;--bg4:#E4EFF7;
@@ -2945,6 +2946,9 @@ function navigate(screen){
   }
   if(screen === 'red-pqrs' && !window._pqrsRedCargado) {
     cargarPqrsRed();
+  }
+  if(screen === 'red-riesgos' && !window._riesgosCargado) {
+    cargarRiesgos();
   }
 }
 
@@ -6534,6 +6538,9 @@ const PQRS_SCRIPT    = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEY
 const TUTELAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzVt-Q5bggChVwxeM_Wew_QsLkweNZZiYh5aQxP16lxVeCAR0BiLMouZbJbzarSwJ0Kfg/exec';
 // ── PQRS Red de Prestadores ── desplegar Apps Script y reemplazar esta URL
 const PQRS_RED_SCRIPT = 'PENDIENTE_DEPLOY';
+// ── Riesgos en Salud · Hemofilia ── desplegar Apps Script y reemplazar
+// FUTURO SIGIRES: reemplazar esta URL por el endpoint del webservice
+const RIESGOS_RED_SCRIPT = 'PENDIENTE_DEPLOY';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -10467,6 +10474,308 @@ document.addEventListener('DOMContentLoaded', function(){
     window.navigate=function(scr){
       origNav(scr);
       if(scr==='ranking'&&!RANK_DATA.length) setTimeout(calcularRanking,80);
+    };
+  }
+});
+
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     RIESGOS EN SALUD · COHORTES
+══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-red-riesgos">
+
+  <!-- Tabs cohorte -->
+  <div style="display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border2);margin-bottom:16px">
+    <div id="rtab-hemofilia" onclick="riesgosSetCohorte('hemofilia')"
+      style="padding:9px 20px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none">
+      🧬 Hemofilia
+    </div>
+    <div style="padding:9px 18px;font-size:13px;color:var(--text3);cursor:default;border-bottom:2px solid transparent;margin-bottom:-1px;opacity:.5">
+      + Diabetes
+    </div>
+    <div style="padding:9px 18px;font-size:13px;color:var(--text3);cursor:default;border-bottom:2px solid transparent;margin-bottom:-1px;opacity:.5">
+      + Oncología
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:4px">
+      <span id="riesgos-corte" style="font-size:11px;color:var(--text2)"></span>
+      <button class="btn" onclick="cargarRiesgos()" style="font-size:11.5px">↺ Actualizar</button>
+      <span id="riesgos-estado" style="font-size:11px;color:var(--text2)">Sin datos</span>
+    </div>
+  </div>
+
+  <!-- KPIs resumen -->
+  <div class="kpi-strip cols-4" id="riesgos-kpis">
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Cobertura hematología</div>
+      <div class="kpi-value" id="r-kpi-hab" style="color:var(--blue)">—</div>
+      <div class="kpi-delta neu">Meta ≥ 90% cohorte evaluada</div>
+    </div>
+    <div class="kpi" style="--kc:var(--teal)">
+      <div class="kpi-label">Atención multidisciplinaria</div>
+      <div class="kpi-value" id="r-kpi-multi" style="color:var(--teal)">—</div>
+      <div class="kpi-delta neu">Meta ≥ 90% con hemofilia</div>
+    </div>
+    <div class="kpi" style="--kc:var(--amber)">
+      <div class="kpi-label">Control de inhibidores</div>
+      <div class="kpi-value" id="r-kpi-inhibi" style="color:var(--amber)">—</div>
+      <div class="kpi-delta neu">Meta ≥ 90% pacientes con factor</div>
+    </div>
+    <div class="kpi" style="--kc:var(--red)">
+      <div class="kpi-label">Pérdida en seguimiento</div>
+      <div class="kpi-value" id="r-kpi-abando" style="color:var(--red)">—</div>
+      <div class="kpi-delta dn">Meta &lt; 10% abandono</div>
+    </div>
+  </div>
+
+  <!-- Tabs regional -->
+  <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto" id="riesgos-tabs-regional"></div>
+
+  <!-- Tabla heat-map -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title" id="riesgos-tabla-titulo">Indicadores por prestador</div>
+        <div class="card-sub" id="riesgos-tabla-sub">Semáforo por celda · 🟢 Bueno · 🟡 Regular · 🔴 Bajo</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer">
+          <input type="checkbox" id="riesgos-solo-medibles" onchange="renderTablaRiesgos()" checked style="cursor:pointer">
+          Solo indicadores medibles
+        </label>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+      <table id="riesgos-tabla" style="width:100%;border-collapse:collapse;font-size:11.5px">
+        <thead id="riesgos-thead" style="position:sticky;top:0;z-index:10;background:var(--bg4)"></thead>
+        <tbody id="riesgos-tbody">
+          <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text2)">⏳ Cargando datos de la cohorte...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ── Estado ────────────────────────────────────────────────────────
+let RIESGOS_DATA   = null;  // respuesta completa del Apps Script
+let RIESGOS_TAB    = 0;     // índice de la tab regional activa
+window._riesgosCargado = false;
+
+// ── Colores semáforo ──────────────────────────────────────────────
+const SEM_STYLE = {
+  bueno:   { bg:'rgba(0,153,209,0.12)',   border:'rgba(0,153,209,0.3)',  text:'#005A7A', ico:'🟢' },
+  regular: { bg:'rgba(184,108,0,0.10)',   border:'rgba(184,108,0,0.3)', text:'#7A4500', ico:'🟡' },
+  bajo:    { bg:'rgba(181,3,3,0.10)',     border:'rgba(181,3,3,0.25)',  text:'#8C0000', ico:'🔴' },
+  null:    { bg:'transparent',            border:'transparent',          text:'var(--text2)', ico:'' },
+};
+
+function semStyle(s){ return SEM_STYLE[s] || SEM_STYLE['null']; }
+
+// ── Cargar desde Apps Script ──────────────────────────────────────
+window.cargarRiesgos = async function(){
+  const elEst = document.getElementById('riesgos-estado');
+  if(elEst){ elEst.textContent='⏳ Cargando...'; elEst.style.color='var(--blue)'; }
+
+  // ── FUTURO SIGIRES: reemplazar este bloque con fetch al webservice ──
+  if(RIESGOS_RED_SCRIPT === 'PENDIENTE_DEPLOY'){
+    if(elEst){ elEst.textContent='⚠ Apps Script pendiente de despliegue'; elEst.style.color='var(--amber)'; }
+    console.info('[Riesgos] URL del Apps Script pendiente. Configura RIESGOS_RED_SCRIPT en index.html.');
+    return;
+  }
+
+  try {
+    const resp = await fetch(RIESGOS_RED_SCRIPT);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if(data.error) throw new Error(data.error);
+
+    RIESGOS_DATA = data;
+    window._riesgosCargado = true;
+
+    const corteEl = document.getElementById('riesgos-corte');
+    if(corteEl) corteEl.textContent = data.fuente || '';
+    if(elEst){ elEst.textContent=`✓ ${data.tabs?.length||0} vistas · ${new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})}`; elEst.style.color='var(--green)'; }
+
+    renderRiesgos();
+  } catch(e){
+    if(elEst){ elEst.textContent=`⚠ ${e.message}`; elEst.style.color='var(--red)'; }
+    console.error('[Riesgos]', e);
+  }
+};
+// ── /FUTURO SIGIRES ───────────────────────────────────────────────
+
+// ── Render principal ──────────────────────────────────────────────
+function renderRiesgos(){
+  if(!RIESGOS_DATA) return;
+
+  // KPIs
+  const k = RIESGOS_DATA.kpis || {};
+  actualizarKpiRiesgo('r-kpi-hab',    k.cobertura_hematologia);
+  actualizarKpiRiesgo('r-kpi-multi',  k.multidisciplinario);
+  actualizarKpiRiesgo('r-kpi-inhibi', k.inhibidores);
+  actualizarKpiRiesgo('r-kpi-abando', k.abandono);
+
+  // Tabs regionales
+  const tabs = RIESGOS_DATA.tabs || [];
+  const tabsEl = document.getElementById('riesgos-tabs-regional');
+  if(tabsEl){
+    tabsEl.innerHTML = tabs.map((t,i) => `
+      <div onclick="riesgosSetTab(${i})" id="rtab-reg-${i}" style="
+        padding:8px 16px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;
+        border-bottom:2px solid ${i===RIESGOS_TAB?'var(--blue)':'transparent'};
+        color:${i===RIESGOS_TAB?'var(--blue)':'var(--text2)'};
+        margin-bottom:-1px;user-select:none">${t.label}</div>`
+    ).join('');
+  }
+
+  renderTablaRiesgos();
+}
+
+function actualizarKpiRiesgo(id, kpi){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(!kpi){ el.textContent='—'; return; }
+  el.textContent = kpi.valor || '—';
+  const s = semStyle(kpi.semaforo);
+  el.style.color = s.text;
+}
+
+// ── Render tabla ──────────────────────────────────────────────────
+window.renderTablaRiesgos = function(){
+  if(!RIESGOS_DATA) return;
+  const tabs = RIESGOS_DATA.tabs || [];
+  const tab  = tabs[RIESGOS_TAB];
+  if(!tab) return;
+
+  const soloMedibles = document.getElementById('riesgos-solo-medibles')?.checked !== false;
+
+  // Título
+  const titulo = document.getElementById('riesgos-tabla-titulo');
+  if(titulo) titulo.textContent = `${RIESGOS_DATA.cohorte} · ${tab.label}`;
+
+  const indicadores = soloMedibles
+    ? tab.indicadores.filter(i => i.esMedible)
+    : tab.indicadores;
+
+  const esNacional = tab.tipo === 'nacional';
+  const prestadores = tab.prestadores || [];
+
+  // Cabecera
+  const thead = document.getElementById('riesgos-thead');
+  if(thead){
+    if(esNacional){
+      thead.innerHTML = `<tr>
+        <th style="text-align:left;padding:8px 14px;font-size:11px;font-weight:600;color:var(--text2);width:55%">Indicador</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text2)">Valor nacional</th>
+        <th style="text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text2)">Meta</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text2)">Semáforo</th>
+      </tr>`;
+    } else {
+      const haTotal = indicadores.some(i => i.total);
+      thead.innerHTML = `<tr>
+        <th style="text-align:left;padding:8px 14px;font-size:11px;font-weight:600;color:var(--text2);min-width:220px;position:sticky;left:0;background:var(--bg4);z-index:5">Indicador</th>
+        ${prestadores.map(p=>`<th style="text-align:center;padding:8px 10px;font-size:10.5px;font-weight:600;color:var(--text2);white-space:nowrap;min-width:80px">${p}</th>`).join('')}
+        ${haTotal?'<th style="text-align:center;padding:8px 10px;font-size:10.5px;font-weight:600;color:var(--blue);border-left:2px solid var(--border2);min-width:70px">Total</th>':''}
+      </tr>`;
+    }
+  }
+
+  // Filas
+  const tbody = document.getElementById('riesgos-tbody');
+  if(!tbody) return;
+
+  const haTotal = !esNacional && indicadores.some(i => i.total);
+
+  tbody.innerHTML = indicadores.map(ind => {
+    const s = semStyle(ind.semaforo || null);
+
+    if(esNacional){
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 14px;font-size:12px;color:var(--text)">${ind.nombre}</td>
+        <td style="text-align:center;padding:8px 12px">
+          ${ind.semaforo
+            ? `<span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:5px;background:${s.bg};color:${s.text};border:1px solid ${s.border}">${ind.valor}</span>`
+            : `<span style="font-size:12px;color:var(--text)">${ind.valor}</span>`}
+        </td>
+        <td style="padding:8px 12px;font-size:10.5px;color:var(--text2);max-width:220px">${ind.meta||'—'}</td>
+        <td style="text-align:center;padding:8px 10px">${ind.semaforo?`${s.ico} <span style="font-size:10px;color:${s.text}">${semLabel(ind.semaforo)}</span>`:''}</td>
+      </tr>`;
+    } else {
+      const celdas = ind.valores ? ind.valores.map(v=>{
+        const sv = semStyle(v.semaforo);
+        return `<td style="text-align:center;padding:6px 8px">
+          <span style="display:inline-block;padding:3px 8px;border-radius:5px;font-size:11.5px;font-weight:${v.semaforo?'600':'400'};
+            background:${sv.bg};color:${v.semaforo?sv.text:'var(--text2)'};border:1px solid ${sv.border};white-space:nowrap">
+            ${v.valor}
+          </span>
+        </td>`;
+      }).join('') : prestadores.map(()=>'<td style="text-align:center;color:var(--text3)">—</td>').join('');
+
+      const totalCelda = haTotal ? (ind.total
+        ? `<td style="text-align:center;padding:6px 8px;border-left:2px solid var(--border2)">
+            ${ind.total.semaforo
+              ? `<span style="padding:3px 8px;border-radius:5px;font-size:11.5px;font-weight:700;background:${semStyle(ind.total.semaforo).bg};color:${semStyle(ind.total.semaforo).text};border:1px solid ${semStyle(ind.total.semaforo).border}">${ind.total.valor}</span>`
+              : `<span style="font-size:11.5px;color:var(--blue);font-weight:600">${ind.total.valor}</span>`}
+          </td>`
+        : '<td style="text-align:center;color:var(--text3);border-left:2px solid var(--border2)">—</td>')
+        : '';
+
+      const rowBg = ind.esMedible ? '' : 'background:var(--bg3);';
+      return `<tr style="border-bottom:1px solid var(--border);${rowBg}">
+        <td style="padding:8px 14px;font-size:12px;color:var(--text);position:sticky;left:0;background:${ind.esMedible?'var(--bg2)':'var(--bg3)'};z-index:3;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${ind.nombre}">
+          ${ind.esMedible?'<span style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--blue);margin-right:6px;vertical-align:middle"></span>':''}${ind.nombre}
+        </td>
+        ${celdas}
+        ${totalCelda}
+      </tr>`;
+    }
+  }).join('') || `<tr><td colspan="20" style="text-align:center;padding:24px;color:var(--text2)">Sin indicadores para mostrar</td></tr>`;
+
+  const sub = document.getElementById('riesgos-tabla-sub');
+  if(sub) sub.textContent = `${indicadores.length} indicadores · ${soloMedibles?'solo medibles':'todos los indicadores'} · 🟢 Bueno · 🟡 Regular · 🔴 Bajo`;
+};
+
+function semLabel(s){
+  return s==='bueno'?'Bueno':s==='regular'?'Regular':s==='bajo'?'Bajo':'';
+}
+
+// ── Cambio de tab regional ────────────────────────────────────────
+window.riesgosSetTab = function(idx){
+  RIESGOS_TAB = idx;
+  const tabs = RIESGOS_DATA?.tabs || [];
+  tabs.forEach((_,i)=>{
+    const el=document.getElementById(`rtab-reg-${i}`);
+    if(el){
+      el.style.borderBottom = i===idx?'2px solid var(--blue)':'2px solid transparent';
+      el.style.color        = i===idx?'var(--blue)':'var(--text2)';
+    }
+  });
+  renderTablaRiesgos();
+};
+
+// ── Cambio de cohorte (para futuras cohortes) ─────────────────────
+window.riesgosSetCohorte = function(cohorte){
+  // Por ahora solo hemofilia; en el futuro: cargar el Sheet correspondiente
+  console.info('[Riesgos] Cohorte:', cohorte);
+};
+
+window.initRiesgos = function(){
+  if(!window._riesgosCargado) cargarRiesgos();
+};
+
+// ── Trigger en navigate ───────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  const orig = window.navigate;
+  if(typeof orig==='function'){
+    window.navigate = function(scr){
+      orig(scr);
+      if(scr==='red-riesgos' && !window._riesgosCargado) setTimeout(cargarRiesgos,80);
     };
   }
 });
