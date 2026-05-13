@@ -8991,23 +8991,29 @@ function parsearCuentasMedicas(data) {
   const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(norm(kw))); if(i>=0)return i; } return -1; };
   const get = (row,i) => i>=0&&i<row.length ? String(row[i]||'').trim() : '';
   const getNum = (row,i) => {
-    const v = get(row,i).replace(/[$. ]/g,'').replace(',','.');
+    if(i < 0) return 0;
+    const raw = get(row,i);
+    if(!raw || raw === '-' || raw === '') return 0;
+    // Quitar $, espacios; punto es separador de miles en COP → eliminar
+    // Coma puede ser decimal → reemplazar por punto
+    const v = raw.replace(/[$\s]/g,'').replace(/\./g,'').replace(',','.');
     const n = parseFloat(v);
     return isNaN(n) ? 0 : n;
   };
 
   const cols = {
     fecha_radicacion: fi('FECHA RADICACION','FECHA DE RADICACION','FECHA RAD','FECHA'),
-    nit:              fi('NIT PRESTADOR','NIT'),
-    nombre:           fi('NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR','RAZON SOCIAL','NOMBRE'),
+    nit:              fi('NIT PRESTADOR','NUMERO DE NIT','NIT','NUMERO'),
+    nombre:           fi('NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR','NOMBRES DE PRESTADOR','RAZON SOCIAL','NOMBRE'),
     tipo_contrato:    fi('TIPO CONTRATO','TIPO DE CONTRATO','TIPO'),
-    validacion:       fi('VALIDACION','ESTADO VALIDACION','ESTADO'),
-    subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL'),
-    glosado:          fi('VALOR GLOSADO','GLOSADO GLOSA','GLOSA GLOSADO'),
-    glosa_real:       fi('GLOSA REAL'),
-    devoluciones:     fi('DEVOLUCIONES','DEVOLUCION'),
+    validacion:       fi('VALIDACION','VALIDACON','ESTADO VALIDACION','ESTADO VAL','ESTADO'),
+    subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL','TOTAL RADICADO','TOTAL'),
+    glosado:          fi('VALOR GLOSADO','GLOSADO GLOSA','GLOSA GLOSADO','V GLOSADO'),
+    glosa_real:       fi('GLOSA REAL','GLOSA REAL VALOR','VALOR GLOSA REAL'),
+    devoluciones:     fi('DEVOLUCIONES','DEVOLUCION','DEV'),
   };
-  console.log('[CuentasMédicas] cols:', cols, '| hdr sample:', hdr.slice(0,12));
+  console.log('[CuentasMédicas] cols detectados:', JSON.stringify(cols));
+  console.log('[CuentasMédicas] headers completos:', JSON.stringify(hdr));
 
   return data.slice(1).map(row => {
     const nit = get(row, cols.nit).replace(/\.0$/,'');
@@ -9043,12 +9049,11 @@ function parsearCuentasMedicas(data) {
       <div class="card-head"><div><div class="card-title">Top prestadores por valor radicado</div><div class="card-sub">Mayor subtotal acumulado en el período</div></div></div>
       <div class="card-body" style="padding:16px 20px" id="cm-top-prest"></div>
     </div>
-    <!-- Distribución por validación -->
+    <!-- Top 10 prestadores por valor glosado -->
     <div class="card">
-      <div class="card-head"><div><div class="card-title">Distribución por estado de validación</div><div class="card-sub">N° registros y valor total por estado</div></div></div>
+      <div class="card-head"><div><div class="card-title">Top 10 prestadores · Glosa real</div><div class="card-sub">Prestadores con mayor glosa real acumulada en el período</div></div></div>
       <div class="card-body" style="padding:16px 20px">
-        <canvas id="cm-chart-val" height="160"></canvas>
-        <div id="cm-ley-val" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:10.5px"></div>
+        <canvas id="cm-chart-glosa" height="260"></canvas>
       </div>
     </div>
   </div>
@@ -9156,10 +9161,12 @@ function parsearCuentasMedicas(data) {
         </div>
       </div>`).join('');
 
-    // Chart validación
-    const byVal = {};
-    CM_DATA.forEach(r=>{ const k=r.validacion||'Sin dato'; byVal[k]=(byVal[k]||0)+1; });
-    dibujarChartValidacion(byVal, CM_DATA.length);
+    // Top 10 prestadores por glosa real
+    const topGlosa = Object.values(byPrest)
+      .filter(p => p.gr > 0)
+      .sort((a,b) => b.gr - a.gr)
+      .slice(0, 10);
+    dibujarTopGlosa(topGlosa);
 
     // Poblar filtros
     const tipos = [...new Set(CM_DATA.map(r=>r.tipo_contrato).filter(Boolean))].sort();
@@ -9170,40 +9177,66 @@ function parsearCuentasMedicas(data) {
     cmFiltrar();
   };
 
-  function dibujarChartValidacion(byVal, total){
-    const canvas = document.getElementById('cm-chart-val');
+  function dibujarTopGlosa(topGlosa){
+    const canvas = document.getElementById('cm-chart-glosa');
     if(!canvas) return;
+    if(!topGlosa.length){
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth || 380;
+      canvas.height = 260;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#4A7A95';
+      ctx.font = '12px Figtree,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sin datos de glosa real disponibles', canvas.width/2, 130);
+      return;
+    }
     const dpr = window.devicePixelRatio||1;
-    const W = canvas.parentElement?.offsetWidth-40||380, H = 160;
-    canvas.width=W*dpr; canvas.height=H*dpr;
-    canvas.style.width=W+'px'; canvas.style.height=H+'px';
-    const ctx=canvas.getContext('2d');
-    ctx.scale(dpr,dpr);
+    const W = canvas.parentElement?.offsetWidth-40||360;
+    const barH = 22, gap = 4;
+    const H = topGlosa.length * (barH + gap) + 16;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
     ctx.clearRect(0,0,W,H);
 
-    const entries=Object.entries(byVal).sort((a,b)=>b[1]-a[1]);
-    const maxV=entries[0]?.[1]||1;
-    const barH=22, gap=8, labelW=160, valW=90, bZone=W-labelW-valW-8;
+    const maxV = topGlosa[0]?.gr || 1;
+    const labelW = Math.min(180, W * 0.45);
+    const valW   = 80;
+    const bZone  = W - labelW - valW - 8;
 
-    entries.forEach(([k,v],i)=>{
-      const y=i*(barH+gap)+4, color=CM_COLS_VAL[i%CM_COLS_VAL.length];
-      const bw=Math.max(4,(v/maxV)*bZone);
-      ctx.fillStyle='#212121'; ctx.font='10.5px Figtree,sans-serif';
-      ctx.fillText(k.length>22?k.substring(0,20)+'…':k, 0, y+16);
-      ctx.fillStyle=color+'18';
-      ctx.beginPath(); ctx.roundRect(labelW,y+2,bZone,barH-4,4); ctx.fill();
-      ctx.fillStyle=color;
-      ctx.beginPath(); ctx.roundRect(labelW,y+2,bw,barH-4,4); ctx.fill();
-      ctx.fillStyle='#003D53'; ctx.font='bold 10.5px Figtree,sans-serif';
-      ctx.fillText(v.toLocaleString('es-CO'), labelW+bZone+8, y+13);
-      ctx.fillStyle='#4A7A95'; ctx.font='10px Figtree,sans-serif';
-      ctx.fillText('('+((v/total)*100).toFixed(1)+'%)', labelW+bZone+8, y+26);
+    topGlosa.forEach((p, i) => {
+      const y = i * (barH + gap) + 4;
+      const bw = Math.max(4, (p.gr / maxV) * bZone);
+      const color = '#B50303';
+      const label = (p.nombre || p.nit || '—').replace(/\s+/g,' ');
+      const labelTrim = label.length > 28 ? label.substring(0,26)+'…' : label;
+
+      // Label
+      ctx.fillStyle = '#212121';
+      ctx.font = '10.5px Figtree,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(labelTrim, 0, y + 15);
+
+      // Track
+      ctx.fillStyle = color + '18';
+      ctx.beginPath(); ctx.roundRect(labelW, y+3, bZone, barH-6, 3); ctx.fill();
+      // Bar
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.roundRect(labelW, y+3, bw, barH-6, 3); ctx.fill();
+
+      // Value
+      const vx = labelW + bZone + 8;
+      ctx.fillStyle = '#003D53';
+      ctx.font = 'bold 10.5px Figtree,sans-serif';
+      ctx.textAlign = 'left';
+      const fv = p.gr >= 1e9 ? '$'+(p.gr/1e9).toFixed(1)+' mil M'
+               : p.gr >= 1e6 ? '$'+(p.gr/1e6).toFixed(1)+' M'
+               : p.gr >= 1e3 ? '$'+(p.gr/1e3).toFixed(0)+' K'
+               : '$'+p.gr.toLocaleString('es-CO');
+      ctx.fillText(fv, vx, y + 14);
     });
-
-    const ley=document.getElementById('cm-ley-val');
-    if(ley) ley.innerHTML=entries.map(([k,v],i)=>
-      `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${CM_COLS_VAL[i%CM_COLS_VAL.length]};display:inline-block;flex-shrink:0"></span><span style="color:var(--text2)">${k}: <b style="color:var(--text)">${v}</b></span></span>`
-    ).join('');
   }
 
   window.cmFiltrar = function(){
