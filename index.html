@@ -5239,7 +5239,7 @@ async function cargarDesdeDrive() {
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.homologacion.id,      DRIVE_CONFIG.homologacion.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.satisfaccion.id,      DRIVE_CONFIG.satisfaccion.hoja),
-    fetchViaAppsScript(DRIVE_CONFIG.cuentas_medicas.id,   DRIVE_CONFIG.cuentas_medicas.hoja),
+    fetch(`${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`).then(r=>r.json()),
   ]);
 
   const resultados = [];
@@ -6731,6 +6731,7 @@ function filtrarTablaPrestadores(tipo, tabEl) {
 }
 
 // ─── FALLAS Y REQUERIMIENTOS ──────────────────────────────────────────
+const CM_SCRIPT      = 'https://script.google.com/macros/s/AKfycbwpEezQlDxS3l1axEsrNkiAcZnmoCQ2d6YN1Arb7F2g6FX_5A8MpvapHIpsBG5p4BF6/exec';
 const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v1F9AfyN3Is6oNoZQvYWPNjJKJ4A28VYsAeeWKCZBTeumwVKFs/exec';
 const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
 const PQRS_SCRIPT    = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEYRoKvTNKFsuXk_CUsIRb5UHDmgycJeiGLgA4LoT9G0fcRIphBvEfdA/exec';
