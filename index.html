@@ -3029,6 +3029,22 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
   </div>
 </div><script>
+// ── fetchScript global ─────────────────
+// ── fetchScript: fetch a Google Apps Script con manejo de CORS ───────
+// Los scripts de Google redirigen a script.googleusercontent.com;
+// si el origen no tiene CORS, se captura aquí con info útil.
+// SOLUCIÓN DEFINITIVA: en cada Apps Script, despliega con
+//   "Ejecutar como: Yo"  +  "Quién puede acceder: Cualquier persona"
+async function fetchScript(url) {
+  const r = await fetch(url, { redirect: 'follow' });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const text = await r.text();
+  try { return JSON.parse(text); }
+  catch { throw new Error('Respuesta no es JSON: ' + text.slice(0, 120)); }
+}
+</script>
+
+<script>
 const titles = {
   resumen:['Resumen ejecutivo','Red de prestadores y gestores · Mar 2026'],
   prestadores:['Red de prestadores','Directorio · habilitación + financiero · 1,248 registros'],
@@ -10329,18 +10345,6 @@ window.switchOpTab = function(tab) {
 };
 
 
-// ── fetchScript: fetch a Google Apps Script con manejo de CORS ───────
-// Los scripts de Google redirigen a script.googleusercontent.com;
-// si el origen no tiene CORS, se captura aquí con info útil.
-// SOLUCIÓN DEFINITIVA: en cada Apps Script, despliega con
-//   "Ejecutar como: Yo"  +  "Quién puede acceder: Cualquier persona"
-async function fetchScript(url) {
-  const r = await fetch(url, { redirect: 'follow' });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  const text = await r.text();
-  try { return JSON.parse(text); }
-  catch { throw new Error('Respuesta no es JSON: ' + text.slice(0, 120)); }
-}
 
 // ── Carga ACOP_SCRIPT ────────────────────────────────────────────
 async function cargarACOP(){
@@ -11201,9 +11205,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     try {
-      const resp = { json: async()=> await fetchScript(PQRS_RED_SCRIPT) };
-      if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
+      const data = await fetchScript(PQRS_RED_SCRIPT);
       if(data.error) throw new Error(data.error);
       if(!Array.isArray(data)) throw new Error('Respuesta inesperada');
       PQRS_RED_DATA = data;
@@ -12140,9 +12142,7 @@ window.cargarRiesgos = async function(){
   }
 
   try {
-    const resp = { json: async()=> await fetchScript(RIESGOS_RED_SCRIPT) };
-    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
+    const data = await fetchScript(RIESGOS_RED_SCRIPT);
     if(data.error) throw new Error(data.error);
 
     RIESGOS_DATA = data;
