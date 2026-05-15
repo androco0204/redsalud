@@ -670,7 +670,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="nav-item nav-sub" data-screen="red-habilitacion">✅ Habilitación</div>
       <div class="nav-item nav-sub" data-screen="red-oportunidad">⏱ Oportunidad</div>
       <div class="nav-item nav-sub" data-screen="red-accesibilidad">📍 Accesibilidad</div>
-      <div class="nav-item nav-sub" data-screen="red-riesgos">⚠️ Riesgos en salud</div>
+      <div class="nav-item nav-sub" data-screen="red-resultados">⚠️ Resultados en salud</div>
       <div class="nav-item nav-sub" data-screen="red-pqrs">📋 PQRS</div>
       <div class="nav-item nav-sub" data-screen="red-satisfaccion">😊 Satisfacción</div>
       <div class="nav-item nav-sub" data-screen="red-nota-tecnica">📊 Nota técnica</div>
@@ -725,6 +725,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="topbar">
   <div class="tb-left"><span class="tb-title" id="tb-title">Resumen ejecutivo</span><span class="sep">/</span><span class="tb-sub" id="tb-sub">Red de prestadores y gestores · Mar 2026</span></div>
   <div class="tb-right">
+    <button id="btn-logout" onclick="cerrarSesion()" style="display:none;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer" title="Cerrar sesión">⏻ Salir</button>
     <div class="btn" onclick="abrirCargador()" style="background:var(--gdim);border-color:var(--green);color:var(--green);display:flex;align-items:center;gap:6px">
       <span id="datos-estado-icon">📂</span> <span id="datos-estado-lbl">Sincronizar</span>
     </div>
@@ -3083,7 +3084,7 @@ function navigate(screen){
   if(screen === 'red-pqrs' && !window._pqrsRedCargado) {
     cargarPqrsRed();
   }
-  if(screen === 'red-riesgos' && !window._riesgosCargado) {
+  if(screen === 'red-resultados' && !window._riesgosCargado) {
     cargarRiesgos();
   }
 }
@@ -5097,7 +5098,7 @@ const DRIVE_CONFIG = {
   },
   cuentas_medicas: {
     id: '1vCh2IfU11JxB11OFDfBopfRsuLrwjwWSqBxKVjAK2Lk',
-    hoja: 'Hoja1',
+    hoja: 'Hoja 1',
     nombre: 'Cuentas Médicas',
     icono: '💰'
   },
@@ -6691,6 +6692,10 @@ const PQRS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycbzu8xaxZo11Eenm
 const RIESGOS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycby9_VbVsvRp90xRX7WhEw1hsFJJk1VSvROyB7J6FBpvVPkmfwT3qSnG64imPWzpa6XWmw/exec';
 // ── Dispensación Gestores Farmacéuticos ── desplegar DispensacionScript.gs y reemplazar
 const DISP_SCRIPT = 'https://script.google.com/macros/s/AKfycbxOQ-8O4szM5tG2xXfr4LMuwXMtGbW1w_vDtm0xg-tXIiR8vCAQS9O10VA3EnmzFtynRw/exec';
+// ── Accesibilidad & Oportunidad (Cliente Incógnito) ── desplegar AcOp_Script.gs
+const ACOP_SCRIPT = 'PENDIENTE_DEPLOY';
+// ── Resolución 1552 ── desplegar Res1552_Script.gs
+const RES1552_SCRIPT = 'PENDIENTE_DEPLOY';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -9288,6 +9293,16 @@ function parsearCuentasMedicas(data) {
      GESTORES FARMACÉUTICOS · OPORTUNIDAD
 ════════════════════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-gest-oportunidad">
+  <!-- Filtros -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <select id="disp-op-fil-gestor" onchange="aplicarFiltrosDispOp()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:180px">
+      <option value="">Todos los gestores</option>
+    </select>
+    <select id="disp-op-fil-mes" onchange="aplicarFiltrosDispOp()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+      <option value="">Todos los períodos</option>
+    </select>
+    <button onclick="resetFiltrosDispOp()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+  </div>
   <!-- KPIs principales -->
   <div class="kpi-strip cols-4">
     <div class="kpi" style="--kc:var(--green)">
@@ -9349,6 +9364,23 @@ function parsearCuentasMedicas(data) {
      GESTORES FARMACÉUTICOS · PENDIENTES
 ════════════════════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-gest-pendientes">
+  <!-- Filtros -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <select id="disp-pend-fil-gestor" onchange="aplicarFiltrosDispPend()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:180px">
+      <option value="">Todos los gestores</option>
+    </select>
+    <select id="disp-pend-fil-mes" onchange="aplicarFiltrosDispPend()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+      <option value="">Todos los períodos</option>
+    </select>
+    <select id="disp-pend-fil-estado" onchange="aplicarFiltrosDispPend()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+      <option value="">Todos los estados</option>
+      <option value="entrega_48">Entrega 48 h</option>
+      <option value="posterior_48">Posterior 48 h</option>
+      <option value="pendiente_parcial">Pendiente parcial</option>
+      <option value="pendiente_activo">Pendiente activo</option>
+    </select>
+    <button onclick="resetFiltrosDispPend()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+  </div>
   <!-- 4 KPIs de pendientes -->
   <div class="kpi-strip cols-4">
     <div class="kpi" style="--kc:var(--blue)">
@@ -9692,6 +9724,13 @@ function ocultarLogin() {
 }
 
 // ── Login con Google Identity Services ───────────────────────────
+window.cerrarSesion = function() {
+  if(confirm('¿Cerrar sesión de RedSalud Monitor?')){
+    clearSession();
+    location.reload();
+  }
+};
+
 window.iniciarLoginGoogle = function() {
   const btn = document.getElementById('login-google-btn');
   const spinner = document.getElementById('login-spinner');
@@ -9788,10 +9827,11 @@ function mostrarUsuario(user) {
       ? `<img src="${user.foto}" style="width:24px;height:24px;border-radius:50%;margin-right:6px;vertical-align:middle"> ${user.nombre}`
       : `👤 ${user.nombre||user.email}`;
     el.style.display = 'flex';
-    el.style.cursor = 'pointer';
-    el.title = `${user.email} · Clic para cerrar sesión`;
-    el.onclick = () => { if(confirm('¿Cerrar sesión?')){ clearSession(); location.reload(); } };
+    el.style.cursor = 'default';
+    el.title = user.email;
   }
+  const btnOut = document.getElementById('btn-logout');
+  if(btnOut) btnOut.style.display = 'block';
 }
 
 // ── Inicialización ────────────────────────────────────────────────
@@ -9804,6 +9844,804 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     clearSession();
     mostrarLogin();
+  }
+});
+
+})();
+</script>
+
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  GESTORES FARMACÉUTICOS · Lógica de filtros
+// ══════════════════════════════════════════════════════════════════
+(function(){
+
+function poblarFiltros(por_gestor, por_mes) {
+  // Gestores
+  const selGOp   = document.getElementById('disp-op-fil-gestor');
+  const selGPend = document.getElementById('disp-pend-fil-gestor');
+  const selMOp   = document.getElementById('disp-op-fil-mes');
+  const selMPend = document.getElementById('disp-pend-fil-mes');
+
+  const gestoresOpts = por_gestor.map(g =>
+    `<option value="${g.nit}">${g.nombre||g.nit}</option>`).join('');
+  const mesesOpts = por_mes.map(m =>
+    `<option value="${m.key}">${m.mes} ${m.año}</option>`).join('');
+
+  [selGOp, selGPend].forEach(s => {
+    if(s){ const base=s.options[0].outerHTML; s.innerHTML=base+gestoresOpts; }
+  });
+  [selMOp, selMPend].forEach(s => {
+    if(s){ const base=s.options[0].outerHTML; s.innerHTML=base+mesesOpts; }
+  });
+}
+
+function getDispData() { return window.DISP_DATA || null; }
+
+window.aplicarFiltrosDispOp = function() {
+  const d = getDispData(); if(!d) return;
+  const nit = document.getElementById('disp-op-fil-gestor')?.value || '';
+  const mes = document.getElementById('disp-op-fil-mes')?.value || '';
+  const gestFilt = nit ? d.por_gestor.filter(g => g.nit===nit) : d.por_gestor;
+  const mesFilt  = mes ? d.por_mes.filter(m => m.key===mes)    : d.por_mes;
+  renderOpTabla(gestFilt);
+  renderOpMes(mesFilt);
+  // Recalcular KPI si hay filtro de gestor
+  if(nit && gestFilt.length===1) {
+    const g = gestFilt[0];
+    const tv = g.total_validos||1;
+    document.getElementById('disp-kpi-pct-op').textContent = (g.oportunidad/tv*100).toFixed(1)+'%';
+    document.getElementById('disp-kpi-op').textContent     = g.oportunidad.toLocaleString('es-CO');
+    document.getElementById('disp-kpi-tv').textContent     = g.total_validos.toLocaleString('es-CO');
+  }
+};
+
+window.resetFiltrosDispOp = function() {
+  ['disp-op-fil-gestor','disp-op-fil-mes'].forEach(id => {
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  window.aplicarFiltrosDispOp();
+};
+
+window.aplicarFiltrosDispPend = function() {
+  const d = getDispData(); if(!d) return;
+  const nit    = document.getElementById('disp-pend-fil-gestor')?.value || '';
+  const mes    = document.getElementById('disp-pend-fil-mes')?.value    || '';
+  const estado = document.getElementById('disp-pend-fil-estado')?.value || '';
+  let gestFilt = nit ? d.por_gestor.filter(g=>g.nit===nit) : d.por_gestor;
+  const mesFilt= mes ? d.por_mes.filter(m=>m.key===mes)    : d.por_mes;
+  if(estado) gestFilt = filtrarPorEstado(gestFilt, estado);
+  renderPendTabla(gestFilt);
+  renderPendMes(mesFilt, estado);
+};
+
+window.resetFiltrosDispPend = function() {
+  ['disp-pend-fil-gestor','disp-pend-fil-mes','disp-pend-fil-estado'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  window.aplicarFiltrosDispPend();
+};
+
+function filtrarPorEstado(gestores, estado) {
+  return gestores.map(g => {
+    const copia = {...g};
+    const campos = {
+      entrega_48:['entrega_48','pct_entrega_48'],
+      posterior_48:['posterior_48','pct_posterior_48'],
+      pendiente_parcial:['pendiente_parcial','pct_pendiente_parcial'],
+      pendiente_activo:['pendiente_activo','pct_pendiente_activo'],
+    };
+    // Mantener solo el estado seleccionado (para la tabla)
+    return copia;
+  });
+}
+
+// Exponer funciones de render para usar desde los filtros
+window.renderOpTabla = function(gestores) {
+  const tb = document.getElementById('disp-tabla-op-gestor');
+  if(!tb) return;
+  const fmtPct = v=>isNaN(v)?'—':v.toFixed(1)+' %';
+  const fmtN   = v=>isNaN(v)?'—':Number(v).toLocaleString('es-CO');
+  const sem    = p=>p>=85?'var(--green)':p>=70?'var(--amber)':'var(--red)';
+  tb.querySelector('tbody').innerHTML = gestores.length===0
+    ? '<tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Sin datos para el filtro</td></tr>'
+    : gestores.map(g=>{
+        const clr=sem(g.pct_oportunidad||0);
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 12px;font-size:12px">${g.nombre||g.nit||'—'}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.total_validos)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.oportunidad)}</td>
+          <td style="text-align:center"><span style="padding:3px 10px;border-radius:5px;font-size:11.5px;font-weight:600;background:${clr}22;color:${clr}">${fmtPct(g.pct_oportunidad)}</span></td>
+        </tr>`;
+      }).join('');
+};
+
+window.renderOpMes = function(meses) {
+  const div = document.getElementById('disp-chart-op-mes');
+  if(!div) return;
+  const MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const sem   = p=>p>=85?'var(--green)':p>=70?'var(--amber)':'var(--red)';
+  div.innerHTML = meses.map(m=>{
+    const pct=m.pct_oportunidad||0;
+    const clr=sem(pct);
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+      <span style="width:52px;text-align:right;color:var(--text2);flex-shrink:0">${MESES[m.mes]||m.mes} ${String(m.año||'').slice(2)}</span>
+      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${clr};border-radius:4px;transition:width .4s"></div>
+      </div>
+      <span style="width:48px;font-weight:600;color:${clr}">${pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+};
+
+window.renderPendTabla = function(gestores) {
+  const tb = document.getElementById('disp-tabla-pend-gestor');
+  if(!tb) return;
+  const fmtN = v=>isNaN(v)?'—':Number(v).toLocaleString('es-CO');
+  const rowsFilt = gestores.filter(g=>
+    (g.entrega_48||0)+(g.posterior_48||0)+(g.pendiente_parcial||0)+(g.pendiente_activo||0)>0
+  );
+  tb.querySelector('tbody').innerHTML = rowsFilt.length===0
+    ? '<tr><td colspan="10" style="text-align:center;color:var(--text2);padding:20px">Sin pendientes para el filtro</td></tr>'
+    : rowsFilt.map(g=>{
+        const tot=(g.entrega_48||0)+(g.posterior_48||0)+(g.pendiente_parcial||0)+(g.pendiente_activo||0);
+        const p=n=>tot?(n/tot*100).toFixed(1)+'%':'—';
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 12px;font-size:12px">${g.nombre||g.nit||'—'}</td>
+          <td style="text-align:center;font-size:12px;font-weight:600">${fmtN(tot)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.entrega_48)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--blue)">${p(g.entrega_48)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.posterior_48)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--amber)">${p(g.posterior_48)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.pendiente_parcial)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--red)">${p(g.pendiente_parcial)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.pendiente_activo)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--red)">${p(g.pendiente_activo)}</td>
+        </tr>`;
+      }).join('');
+};
+
+window.renderPendMes = function(meses) {
+  const div = document.getElementById('disp-chart-pend-mes');
+  if(!div) return;
+  const MESES=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  div.innerHTML = meses.map(m=>{
+    const tot=(m.entrega_48||0)+(m.posterior_48||0)+(m.pendiente_parcial||0)+(m.pendiente_activo||0)||1;
+    const pE=m.entrega_48/tot*100, pP=m.posterior_48/tot*100,
+          pPP=m.pendiente_parcial/tot*100, pPA=m.pendiente_activo/tot*100;
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+      <span style="width:52px;text-align:right;color:var(--text2);flex-shrink:0">${MESES[m.mes]||m.mes} ${String(m.año||'').slice(2)}</span>
+      <div style="flex:1;height:18px;border-radius:4px;overflow:hidden;display:flex">
+        <div style="width:${pE.toFixed(1)}%;background:var(--blue);height:100%"></div>
+        <div style="width:${pP.toFixed(1)}%;background:var(--amber);height:100%"></div>
+        <div style="width:${pPP.toFixed(1)}%;background:var(--red);height:100%"></div>
+        <div style="width:${pPA.toFixed(1)}%;background:#ff2244;height:100%"></div>
+      </div>
+      <span style="width:48px;font-size:11px;color:var(--text2)">${(tot).toLocaleString('es-CO')}</span>
+    </div>`;
+  }).join('');
+};
+
+// Poblar filtros cuando llegan los datos
+const _origRenderAll = window.renderAll;
+document.addEventListener('DOMContentLoaded', function(){
+  const check = setInterval(()=>{
+    if(window.DISP_DATA && window.DISP_DATA.por_gestor){
+      clearInterval(check);
+      poblarFiltros(window.DISP_DATA.por_gestor, window.DISP_DATA.por_mes||[]);
+      // Exponer DISP_DATA globalmente para que los filtros puedan accederlo
+      window.DISP_DATA = window.DISP_DATA;
+    }
+  }, 500);
+});
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     RED DE PRESTADORES · OPORTUNIDAD
+     Tabs: Cliente Incógnito | Resolución 1552
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-red-oportunidad">
+
+  <!-- Tabs internos -->
+  <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+    <button id="op-tab-ci" onclick="switchOpTab('ci')"
+      style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-2px;transition:all .2s">
+      👤 Cliente Incógnito
+    </button>
+    <button id="op-tab-1552" onclick="switchOpTab('1552')"
+      style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s">
+      📋 Resolución 1552
+    </button>
+  </div>
+
+  <!-- ── TAB: CLIENTE INCÓGNITO ──────────────────────────────── -->
+  <div id="op-panel-ci">
+    <!-- Filtros -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+      <select id="op-ci-fil-regional" onchange="aplicarFiltrosOpCI()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+        <option value="">Todas las regionales</option>
+      </select>
+      <select id="op-ci-fil-espec" onchange="aplicarFiltrosOpCI()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:180px">
+        <option value="">Todas las especialidades</option>
+      </select>
+      <select id="op-ci-fil-mes" onchange="aplicarFiltrosOpCI()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+        <option value="">Todos los meses</option>
+      </select>
+      <button onclick="resetFiltrosOpCI()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+    </div>
+
+    <!-- KPIs CI -->
+    <div class="kpi-strip cols-3" style="margin-bottom:16px">
+      <div class="kpi" style="--kc:var(--blue)">
+        <div class="kpi-label">Oportunidad promedio</div>
+        <div class="kpi-value" style="color:var(--blue)" id="op-ci-kpi-prom">—</div>
+        <div class="kpi-delta neu">Días promedio (meta: ≤ 15 días)</div>
+      </div>
+      <div class="kpi" style="--kc:var(--teal)">
+        <div class="kpi-label">Registros evaluados</div>
+        <div class="kpi-value" style="color:var(--teal)" id="op-ci-kpi-n">—</div>
+        <div class="kpi-delta neu">Total con fecha disponibilidad</div>
+      </div>
+      <div class="kpi" style="--kc:var(--text2)">
+        <div class="kpi-label">Actualizado</div>
+        <div class="kpi-value" style="color:var(--text2);font-size:13px" id="op-ci-kpi-fecha">—</div>
+        <div class="kpi-delta neu">Fuente: ACOP Script</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <!-- Por regional -->
+      <div class="card">
+        <div class="card-head"><div>
+          <div class="card-title">Oportunidad por Regional</div>
+          <div class="card-sub">Días promedio de espera</div>
+        </div></div>
+        <div id="op-ci-chart-regional" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:320px;overflow-y:auto"></div>
+      </div>
+      <!-- Tendencia mensual -->
+      <div class="card">
+        <div class="card-head"><div>
+          <div class="card-title">Tendencia mensual</div>
+          <div class="card-sub">Días promedio por mes</div>
+        </div></div>
+        <div id="op-ci-chart-mes" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:320px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- Top especialidades -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Oportunidad por Especialidad</div>
+        <div class="card-sub">Días promedio vs. meta 15 días · Top 20</div>
+      </div></div>
+      <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
+        <table class="table" id="op-ci-tabla-espec">
+          <thead><tr>
+            <th>Especialidad</th>
+            <th style="text-align:center">Días prom.</th>
+            <th style="text-align:center">Registros</th>
+            <th style="text-align:center">Semáforo</th>
+          </tr></thead>
+          <tbody><tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="op-ci-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
+  </div>
+
+  <!-- ── TAB: RESOLUCIÓN 1552 ───────────────────────────────── -->
+  <div id="op-panel-1552" style="display:none">
+    <!-- Filtros -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+      <select id="op-1552-fil-regional" onchange="aplicarFiltros1552()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+        <option value="">Todas las regionales</option>
+      </select>
+      <select id="op-1552-fil-espec" onchange="aplicarFiltros1552()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:200px">
+        <option value="">Todas las especialidades</option>
+      </select>
+      <select id="op-1552-fil-mes" onchange="aplicarFiltros1552()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+        <option value="">Todos los períodos</option>
+      </select>
+      <button onclick="resetFiltros1552()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+    </div>
+
+    <!-- KPIs 1552 -->
+    <div class="kpi-strip cols-4" style="margin-bottom:16px">
+      <div class="kpi" style="--kc:var(--blue)">
+        <div class="kpi-label">Prom. OP1 global</div>
+        <div class="kpi-value" style="color:var(--blue)" id="op-1552-kpi-op1">—</div>
+        <div class="kpi-delta neu">Días promedio Oportunidad 1</div>
+      </div>
+      <div class="kpi" style="--kc:var(--teal)">
+        <div class="kpi-label">% Cumple OP1</div>
+        <div class="kpi-value" style="color:var(--teal)" id="op-1552-kpi-pct">—</div>
+        <div class="kpi-delta neu" id="op-1552-kpi-pct-d">Tiempo prom ≤ Meta</div>
+      </div>
+      <div class="kpi" style="--kc:var(--green)">
+        <div class="kpi-label">Cumplen OP1</div>
+        <div class="kpi-value" style="color:var(--green)" id="op-1552-kpi-cumple">—</div>
+        <div class="kpi-delta up">Consultas dentro de meta</div>
+      </div>
+      <div class="kpi" style="--kc:var(--red)">
+        <div class="kpi-label">No cumplen OP1</div>
+        <div class="kpi-value" style="color:var(--red)" id="op-1552-kpi-no">—</div>
+        <div class="kpi-delta dn">Consultas fuera de meta</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <!-- Por regional -->
+      <div class="card">
+        <div class="card-head"><div>
+          <div class="card-title">OP1 por Regional</div>
+          <div class="card-sub">Días promedio y % cumplimiento</div>
+        </div></div>
+        <div style="overflow-x:auto">
+          <table class="table" id="op-1552-tabla-regional">
+            <thead><tr>
+              <th>Regional</th>
+              <th style="text-align:center">Prom OP1</th>
+              <th style="text-align:center">Consultas</th>
+              <th style="text-align:center">% Cumple</th>
+            </tr></thead>
+            <tbody><tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Tendencia mensual -->
+      <div class="card">
+        <div class="card-head"><div>
+          <div class="card-title">Tendencia OP1 mensual</div>
+          <div class="card-sub">Días promedio por mes</div>
+        </div></div>
+        <div id="op-1552-chart-mes" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:280px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- Top especialidades 1552 -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">OP1 por Especialidad (Res. 1552)</div>
+        <div class="card-sub">Tiempo promedio vs meta · % cumplimiento</div>
+      </div></div>
+      <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
+        <table class="table" id="op-1552-tabla-espec">
+          <thead><tr>
+            <th>Especialidad</th>
+            <th style="text-align:center">Prom OP1</th>
+            <th style="text-align:center">Meta</th>
+            <th style="text-align:center">Consultas</th>
+            <th style="text-align:center">% Cumple</th>
+          </tr></thead>
+          <tbody><tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="op-1552-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     RED DE PRESTADORES · ACCESIBILIDAD
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-red-accesibilidad">
+  <!-- Filtros -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <select id="acc-fil-regional" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+      <option value="">Todas las regionales</option>
+    </select>
+    <select id="acc-fil-espec" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:180px">
+      <option value="">Todas las especialidades</option>
+    </select>
+    <select id="acc-fil-mes" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+      <option value="">Todos los meses</option>
+    </select>
+    <button onclick="resetFiltrosAcc()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+  </div>
+
+  <!-- KPIs Accesibilidad -->
+  <div class="kpi-strip cols-3" style="margin-bottom:16px">
+    <div class="kpi" style="--kc:var(--green)">
+      <div class="kpi-label">Accesibilidad global</div>
+      <div class="kpi-value" style="color:var(--green)" id="acc-kpi-global">—</div>
+      <div class="kpi-delta up">Llamadas con contacto efectivo / Total</div>
+    </div>
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Contactos efectivos</div>
+      <div class="kpi-value" style="color:var(--blue)" id="acc-kpi-num">—</div>
+      <div class="kpi-delta neu">Numerador</div>
+    </div>
+    <div class="kpi" style="--kc:var(--teal)">
+      <div class="kpi-label">Total llamadas</div>
+      <div class="kpi-value" style="color:var(--teal)" id="acc-kpi-den">—</div>
+      <div class="kpi-delta neu">Denominador</div>
+    </div>
+  </div>
+
+  <!-- Definición -->
+  <div style="background:var(--bdim);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--text2)">
+    <strong style="color:var(--text)">Accesibilidad</strong> · Es la posibilidad que tiene el usuario de utilizar los servicios de salud que le garantiza el SGSSS.<br>
+    <em>Fórmula: Σ llamadas con contacto efectivo / Σ total llamadas en el período × 100</em>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Por regional -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Accesibilidad por Regional</div>
+        <div class="card-sub">% accesibilidad · meta ≥ 80%</div>
+      </div></div>
+      <div id="acc-chart-regional" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:280px;overflow-y:auto"></div>
+    </div>
+    <!-- Tendencia mensual -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Tendencia mensual</div>
+        <div class="card-sub">% Accesibilidad por mes</div>
+      </div></div>
+      <div id="acc-chart-mes" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:280px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- Top especialidades accesibilidad -->
+  <div class="card">
+    <div class="card-head"><div>
+      <div class="card-title">Accesibilidad por Especialidad</div>
+      <div class="card-sub">% contacto efectivo · Top 20 por volumen</div>
+    </div></div>
+    <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
+      <table class="table" id="acc-tabla-espec">
+        <thead><tr>
+          <th>Especialidad</th>
+          <th style="text-align:center">% Acc.</th>
+          <th style="text-align:center">Contactos</th>
+          <th style="text-align:center">Total llamadas</th>
+          <th style="text-align:center">Semáforo</th>
+        </tr></thead>
+        <tbody><tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="acc-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  OPORTUNIDAD (CI + Res.1552) & ACCESIBILIDAD — JS
+// ══════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+let ACOP_DATA = null;
+let RES1552_DATA = null;
+
+const fmtN   = v => isNaN(v)||v===null ? '—' : Number(v).toLocaleString('es-CO');
+const fmtPct = v => isNaN(v)||v===null ? '—' : v.toFixed(1)+' %';
+const fmtD   = v => isNaN(v)||v===null ? '—' : v.toFixed(1)+' días';
+const semAcc = p => p>=90?'var(--green)':p>=80?'var(--amber)':'var(--red)';
+const semOp  = d => d<=10?'var(--green)':d<=15?'var(--amber)':'var(--red)';
+const sem1552= p => p>=85?'var(--green)':p>=70?'var(--amber)':'var(--red)';
+const setText= (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+
+// ── Tabs de Oportunidad ──────────────────────────────────────────
+window.switchOpTab = function(tab) {
+  const panelCI   = document.getElementById('op-panel-ci');
+  const panel1552 = document.getElementById('op-panel-1552');
+  const tabCI     = document.getElementById('op-tab-ci');
+  const tab1552   = document.getElementById('op-tab-1552');
+  if(!panelCI) return;
+  if(tab==='ci'){
+    panelCI.style.display=''; panel1552.style.display='none';
+    tabCI.style.color='var(--blue)'; tabCI.style.borderBottomColor='var(--blue)';
+    tab1552.style.color='var(--text2)'; tab1552.style.borderBottomColor='transparent';
+    if(ACOP_DATA) renderOpCI(ACOP_DATA);
+    else cargarACOP();
+  } else {
+    panelCI.style.display='none'; panel1552.style.display='';
+    tab1552.style.color='var(--blue)'; tab1552.style.borderBottomColor='var(--blue)';
+    tabCI.style.color='var(--text2)'; tabCI.style.borderBottomColor='transparent';
+    if(RES1552_DATA) render1552(RES1552_DATA);
+    else cargarRes1552();
+  }
+};
+
+// ── Carga ACOP_SCRIPT ────────────────────────────────────────────
+async function cargarACOP(){
+  if(ACOP_SCRIPT==='PENDIENTE_DEPLOY'){ renderAcopDemo(); return; }
+  try {
+    const r = await fetch(ACOP_SCRIPT);
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    ACOP_DATA = d;
+    renderOpCI(d); renderAcc(d);
+    poblarFiltrosACOP(d);
+  } catch(e){
+    setText('op-ci-status','✗ Error ACOP: '+e.message);
+    setText('acc-status','✗ Error ACOP: '+e.message);
+  }
+}
+
+// ── Carga RES1552_SCRIPT ─────────────────────────────────────────
+async function cargarRes1552(){
+  if(RES1552_SCRIPT==='PENDIENTE_DEPLOY'){ renderRes1552Demo(); return; }
+  try {
+    const r = await fetch(RES1552_SCRIPT);
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    RES1552_DATA = d;
+    render1552(d);
+    poblarFiltros1552(d);
+  } catch(e){
+    setText('op-1552-status','✗ Error Res.1552: '+e.message);
+  }
+}
+
+// ── Render Oportunidad CI ────────────────────────────────────────
+function renderOpCI(d){
+  const r=d.resumen||{};
+  setText('op-ci-kpi-prom', fmtD(r.oport_total));
+  setText('op-ci-kpi-n',    fmtN(r.op_registros));
+  setText('op-ci-kpi-fecha', d.generado?d.generado.slice(0,10):'—');
+  renderOpCIRegional(d.por_regional||[]);
+  renderOpCIMes(d.por_mes||[]);
+  renderOpCIEspec(d.por_especialidad||[]);
+  setText('op-ci-status',`✓ ${fmtN(r.op_registros)} registros evaluados`);
+}
+
+function renderOpCIRegional(arr){
+  const div=document.getElementById('op-ci-chart-regional'); if(!div) return;
+  const max=Math.max(...arr.map(x=>x.oport||0),1);
+  div.innerHTML=arr.map(x=>{
+    const d=x.oport||0; const clr=semOp(d);
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+      <span style="width:90px;text-align:right;color:var(--text2);flex-shrink:0;font-size:10.5px">${(x.regional||'').replace('REGIONAL ','')}</span>
+      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="width:${(d/max*100).toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
+      </div>
+      <span style="width:56px;font-weight:600;color:${clr}">${fmtD(d)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderOpCIMes(arr){
+  const div=document.getElementById('op-ci-chart-mes'); if(!div) return;
+  const max=Math.max(...arr.map(x=>x.oport||0),1);
+  div.innerHTML=arr.map(m=>{
+    const d=m.oport||0; const clr=semOp(d);
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+      <span style="width:60px;text-align:right;color:var(--text2);flex-shrink:0">${(m.mes||'').slice(0,3)}</span>
+      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="width:${(d/max*100).toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
+      </div>
+      <span style="width:56px;font-weight:600;color:${clr}">${fmtD(d)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderOpCIEspec(arr){
+  const tb=document.getElementById('op-ci-tabla-espec'); if(!tb) return;
+  tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
+    const d=x.oport||0; const clr=semOp(d);
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 12px;font-size:11.5px">${x.especialidad||'—'}</td>
+      <td style="text-align:center;font-weight:600;color:${clr}">${fmtD(d)}</td>
+      <td style="text-align:center;font-size:11.5px">${fmtN(x.op_n)}</td>
+      <td style="text-align:center"><span style="padding:2px 8px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${d<=10?'✓ OK':d<=15?'⚠ Atención':'✗ Crítico'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Render Accesibilidad ─────────────────────────────────────────
+function renderAcc(d){
+  const r=d.resumen||{};
+  const clr=semAcc(r.acc_total||0);
+  setText('acc-kpi-global', fmtPct(r.acc_total));
+  document.getElementById('acc-kpi-global') && (document.getElementById('acc-kpi-global').style.color=clr);
+  setText('acc-kpi-num', fmtN(r.num_acc));
+  setText('acc-kpi-den', fmtN(r.den_acc));
+  renderAccRegional(d.por_regional||[]);
+  renderAccMes(d.por_mes||[]);
+  renderAccEspec(d.por_especialidad||[]);
+  setText('acc-status',`✓ ${fmtN(r.den_acc)} llamadas evaluadas`);
+}
+
+function renderAccRegional(arr){
+  const div=document.getElementById('acc-chart-regional'); if(!div) return;
+  div.innerHTML=arr.map(x=>{
+    const p=x.acc||0; const clr=semAcc(p);
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+      <span style="width:90px;text-align:right;color:var(--text2);flex-shrink:0;font-size:10.5px">${(x.regional||'').replace('REGIONAL ','')}</span>
+      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="width:${p.toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
+      </div>
+      <span style="width:48px;font-weight:600;color:${clr}">${fmtPct(p)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderAccMes(arr){
+  const div=document.getElementById('acc-chart-mes'); if(!div) return;
+  div.innerHTML=arr.map(m=>{
+    const p=m.acc||0; const clr=semAcc(p);
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+      <span style="width:60px;text-align:right;color:var(--text2);flex-shrink:0">${(m.mes||'').slice(0,3)}</span>
+      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="width:${p.toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
+      </div>
+      <span style="width:48px;font-weight:600;color:${clr}">${fmtPct(p)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderAccEspec(arr){
+  const tb=document.getElementById('acc-tabla-espec'); if(!tb) return;
+  tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
+    const p=x.acc||0; const clr=semAcc(p);
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 12px;font-size:11.5px">${x.especialidad||'—'}</td>
+      <td style="text-align:center;font-weight:600;color:${clr}">${fmtPct(p)}</td>
+      <td style="text-align:center;font-size:11.5px">${fmtN(x.num_acc)}</td>
+      <td style="text-align:center;font-size:11.5px">${fmtN(x.den_acc)}</td>
+      <td style="text-align:center"><span style="padding:2px 8px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${p>=90?'✓ OK':p>=80?'⚠ Atención':'✗ Crítico'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Render Resolución 1552 ───────────────────────────────────────
+function render1552(d){
+  const r=d.resumen||{};
+  const clr=sem1552(r.pct_cumple_op1||0);
+  setText('op-1552-kpi-op1',  fmtD(r.promOP1_global));
+  setText('op-1552-kpi-pct',  fmtPct(r.pct_cumple_op1));
+  document.getElementById('op-1552-kpi-pct') && (document.getElementById('op-1552-kpi-pct').style.color=clr);
+  setText('op-1552-kpi-cumple', fmtN(r.cumple_op1));
+  setText('op-1552-kpi-no',    fmtN(r.no_cumple_op1));
+  render1552Regional(d.por_regional||[]);
+  render1552Mes(d.por_mes||[]);
+  render1552Espec(d.por_especialidad||[]);
+  setText('op-1552-status',`✓ ${fmtN(r.total_consultas)} consultas evaluadas`);
+}
+
+function render1552Regional(arr){
+  const tb=document.getElementById('op-1552-tabla-regional'); if(!tb) return;
+  tb.querySelector('tbody').innerHTML=arr.map(x=>{
+    const clr=sem1552(x.pctCumple||0);
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 12px;font-size:11.5px">${(x.regional||'').replace('REGIONAL ','')}</td>
+      <td style="text-align:center;font-weight:600;color:var(--blue)">${fmtD(x.promOP1)}</td>
+      <td style="text-align:center;font-size:11.5px">${fmtN(x.cons)}</td>
+      <td style="text-align:center"><span style="padding:2px 10px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${fmtPct(x.pctCumple)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function render1552Mes(arr){
+  const div=document.getElementById('op-1552-chart-mes'); if(!div) return;
+  const max=Math.max(...arr.map(x=>x.promOP1||0),1);
+  div.innerHTML=arr.map(m=>{
+    const d=m.promOP1||0; const clr=sem1552(m.pctCumple||0);
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+      <span style="width:60px;text-align:right;color:var(--text2);flex-shrink:0">${(m.mes||'').slice(0,3)} ${String(m.año||'').slice(2)}</span>
+      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="width:${(d/max*100).toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
+      </div>
+      <span style="width:56px;font-weight:600;color:${clr}">${fmtD(d)}</span>
+    </div>`;
+  }).join('');
+}
+
+function render1552Espec(arr){
+  const tb=document.getElementById('op-1552-tabla-espec'); if(!tb) return;
+  tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
+    const clr=sem1552(x.pctCumple||0);
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 12px;font-size:11px">${x.especialidad||'—'}</td>
+      <td style="text-align:center;font-weight:600;color:var(--blue)">${fmtD(x.promOP1)}</td>
+      <td style="text-align:center;color:var(--text2)">${x.meta||'—'} d</td>
+      <td style="text-align:center;font-size:11.5px">${fmtN(x.cons)}</td>
+      <td style="text-align:center"><span style="padding:2px 10px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${fmtPct(x.pctCumple)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Filtros ──────────────────────────────────────────────────────
+function poblarFiltrosACOP(d){
+  const regs  = d.por_regional||[];
+  const esps  = d.por_especialidad||[];
+  const meses = d.por_mes||[];
+  const regOpts = regs.map(x=>`<option value="${x.regional}">${x.regional}</option>`).join('');
+  const espOpts = esps.map(x=>`<option value="${x.especialidad}">${x.especialidad}</option>`).join('');
+  const mesOpts = meses.map(x=>`<option value="${x.mes}">${x.mes}</option>`).join('');
+  ['op-ci-fil-regional','acc-fil-regional'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+regOpts;}});
+  ['op-ci-fil-espec','acc-fil-espec'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+espOpts;}});
+  ['op-ci-fil-mes','acc-fil-mes'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+mesOpts;}});
+}
+
+function poblarFiltros1552(d){
+  const regs  = d.por_regional||[];
+  const esps  = d.por_especialidad||[];
+  const meses = d.por_mes||[];
+  const regOpts = regs.map(x=>`<option value="${x.regional}">${x.regional}</option>`).join('');
+  const espOpts = esps.map(x=>`<option value="${x.especialidad}">${x.especialidad}</option>`).join('');
+  const mesOpts = meses.map(x=>`<option value="${x.key}">${x.mes} ${x.año}</option>`).join('');
+  const el1=document.getElementById('op-1552-fil-regional');if(el1){const b=el1.options[0].outerHTML;el1.innerHTML=b+regOpts;}
+  const el2=document.getElementById('op-1552-fil-espec');  if(el2){const b=el2.options[0].outerHTML;el2.innerHTML=b+espOpts;}
+  const el3=document.getElementById('op-1552-fil-mes');    if(el3){const b=el3.options[0].outerHTML;el3.innerHTML=b+mesOpts;}
+}
+
+window.aplicarFiltrosOpCI = function(){
+  if(!ACOP_DATA) return;
+  const reg=document.getElementById('op-ci-fil-regional')?.value||'';
+  const esp=document.getElementById('op-ci-fil-espec')?.value||'';
+  const mes=document.getElementById('op-ci-fil-mes')?.value||'';
+  renderOpCIRegional(ACOP_DATA.por_regional.filter(x=>!reg||x.regional===reg));
+  renderOpCIEspec(ACOP_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
+  renderOpCIMes(ACOP_DATA.por_mes.filter(x=>!mes||x.mes===mes));
+};
+window.resetFiltrosOpCI=()=>{['op-ci-fil-regional','op-ci-fil-espec','op-ci-fil-mes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosOpCI();};
+
+window.aplicarFiltrosAcc = function(){
+  if(!ACOP_DATA) return;
+  const reg=document.getElementById('acc-fil-regional')?.value||'';
+  const esp=document.getElementById('acc-fil-espec')?.value||'';
+  const mes=document.getElementById('acc-fil-mes')?.value||'';
+  renderAccRegional(ACOP_DATA.por_regional.filter(x=>!reg||x.regional===reg));
+  renderAccEspec(ACOP_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
+  renderAccMes(ACOP_DATA.por_mes.filter(x=>!mes||x.mes===mes));
+};
+window.resetFiltrosAcc=()=>{['acc-fil-regional','acc-fil-espec','acc-fil-mes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosAcc();};
+
+window.aplicarFiltros1552 = function(){
+  if(!RES1552_DATA) return;
+  const reg=document.getElementById('op-1552-fil-regional')?.value||'';
+  const esp=document.getElementById('op-1552-fil-espec')?.value||'';
+  const mes=document.getElementById('op-1552-fil-mes')?.value||'';
+  render1552Regional(RES1552_DATA.por_regional.filter(x=>!reg||x.regional===reg));
+  render1552Espec(RES1552_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
+  render1552Mes(RES1552_DATA.por_mes.filter(x=>!mes||x.key===mes));
+};
+window.resetFiltros1552=()=>{['op-1552-fil-regional','op-1552-fil-espec','op-1552-fil-mes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltros1552();};
+
+// ── Demos ────────────────────────────────────────────────────────
+function renderAcopDemo(){
+  ACOP_DATA={resumen:{acc_total:87.3,oport_total:7.7,num_acc:1823034,den_acc:2087381,op_registros:116284},
+    por_regional:[{regional:'BOGOTA',acc:92,oport:5.1,num_acc:520000,den_acc:565000},{regional:'MEDELLIN',acc:90,oport:6.2,num_acc:380000,den_acc:422000},{regional:'CALI',acc:87,oport:8.1,num_acc:310000,den_acc:356000},{regional:'BARRANQUILLA',acc:85,oport:9.0,num_acc:290000,den_acc:341000},{regional:'BUCARAMANGA',acc:83,oport:10.2,num_acc:220000,den_acc:265000},{regional:'CENTRO ORIENTE',acc:82,oport:11.4,num_acc:103034,den_acc:138381}],
+    por_mes:[{mes:'ENERO',acc:79.6,oport:8.2,num_acc:150000,den_acc:188000},{mes:'ABRIL',acc:88.1,oport:7.9,num_acc:160000,den_acc:181000},{mes:'JULIO',acc:90.8,oport:7.5,num_acc:175000,den_acc:192000},{mes:'OCTUBRE',acc:93.0,oport:6.8,num_acc:180000,den_acc:193000},{mes:'ENERO',acc:93.6,oport:6.5,num_acc:185000,den_acc:197000},{mes:'MARZO',acc:81.6,oport:8.5,num_acc:172000,den_acc:211000}],
+    por_especialidad:[{especialidad:'PEDIATRIA',acc:100,oport:4.6,num_acc:95000,den_acc:95000,op_n:12000},{especialidad:'MEDICINA GENERAL',acc:98,oport:2.1,num_acc:320000,den_acc:326000,op_n:45000},{especialidad:'GINECOLOGIA',acc:96,oport:6.8,num_acc:88000,den_acc:91000,op_n:9500},{especialidad:'MEDICINA INTERNA',acc:94,oport:8.3,num_acc:76000,den_acc:80000,op_n:8200},{especialidad:'ORTOPEDIA Y TRAUMATOLOGIA',acc:91,oport:9.1,num_acc:65000,den_acc:71000,op_n:7100},{especialidad:'NEUROLOGIA',acc:88,oport:12.4,num_acc:45000,den_acc:51000,op_n:4900},{especialidad:'PSIQUIATRIA',acc:85,oport:14.2,num_acc:38000,den_acc:44000,op_n:4100},{especialidad:'REUMATOLOGIA',acc:80,oport:18.5,num_acc:32000,den_acc:40000,op_n:3500}]
+  };
+  renderOpCI(ACOP_DATA); renderAcc(ACOP_DATA); poblarFiltrosACOP(ACOP_DATA);
+  setText('op-ci-status','⚠ Demo · Despliega AcOp_Script.gs y actualiza ACOP_SCRIPT');
+  setText('acc-status','⚠ Demo · Despliega AcOp_Script.gs y actualiza ACOP_SCRIPT');
+}
+
+function renderRes1552Demo(){
+  RES1552_DATA={resumen:{total_consultas:5059859,promOP1_global:7.6,promOP2_global:3.2,cumple_op1:38530957,no_cumple_op1:2522000,pct_cumple_op1:87.0,pct_no_cumple_op1:13.0},
+    por_regional:[{regional:'BOGOTA',cons:1200000,promOP1:6.2,pctCumple:92},{regional:'MEDELLIN',cons:980000,promOP1:7.8,pctCumple:88},{regional:'CALI',cons:820000,promOP1:8.1,pctCumple:85},{regional:'BARRANQUILLA',cons:740000,promOP1:9.2,pctCumple:82},{regional:'CENTRO ORIENTE',cons:680000,promOP1:7.0,pctCumple:89},{regional:'BUCARAMANGA',cons:640000,promOP1:10.1,pctCumple:80}],
+    por_mes:[{key:'2025-10',año:2025,mes:'OCTUBRE',cons:420000,promOP1:8.2,pctCumple:85},{key:'2025-11',año:2025,mes:'NOVIEMBRE',cons:440000,promOP1:7.9,pctCumple:86},{key:'2025-12',año:2025,mes:'DICIEMBRE',cons:380000,promOP1:7.4,pctCumple:88},{key:'2026-01',año:2026,mes:'ENERO',cons:460000,promOP1:7.1,pctCumple:89},{key:'2026-02',año:2026,mes:'FEBRERO',cons:450000,promOP1:7.6,pctCumple:87},{key:'2026-03',año:2026,mes:'MARZO',cons:470000,promOP1:7.8,pctCumple:86},{key:'2026-04',año:2026,mes:'ABRIL',cons:440000,promOP1:8.0,pctCumple:84}],
+    por_especialidad:[{especialidad:'NEUROCIRUGIA',cons:92000,promOP1:22.8,meta:30,pctCumple:78},{especialidad:'NEUROLOGIA PEDIATRICA',cons:59000,promOP1:58.4,meta:40,pctCumple:42},{especialidad:'NEUROLOGIA',cons:628000,promOP1:64.2,meta:30,pctCumple:31},{especialidad:'PSIQUIATRIA',cons:280000,promOP1:45.2,meta:10,pctCumple:65},{especialidad:'FISIOTERAPIA',cons:902000,promOP1:54.9,meta:8,pctCumple:55},{especialidad:'ORTOPEDIA Y TRAUMATOLOGIA',cons:180000,promOP1:6.4,meta:30,pctCumple:95},{especialidad:'DOLOR Y CUIDADOS PALIATIVOS',cons:66000,promOP1:45.0,meta:20,pctCumple:52}],
+    por_mes_trends:[], top_prestadores:[]
+  };
+  render1552(RES1552_DATA); poblarFiltros1552(RES1552_DATA);
+  setText('op-1552-status','⚠ Demo · Despliega Res1552_Script.gs y actualiza RES1552_SCRIPT');
+}
+
+// ── Navigate trigger ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  const orig = window.navigate;
+  if(typeof orig==='function'){
+    window.navigate = function(scr){
+      orig(scr);
+      if(scr==='red-oportunidad'){
+        setTimeout(()=>{ if(!ACOP_DATA) cargarACOP(); else renderOpCI(ACOP_DATA); }, 80);
+      }
+      if(scr==='red-accesibilidad'){
+        setTimeout(()=>{ if(!ACOP_DATA) cargarACOP(); else renderAcc(ACOP_DATA); }, 80);
+      }
+    };
   }
 });
 
@@ -11198,7 +12036,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <!-- ══════════════════════════════════════════════════════════════
      RIESGOS EN SALUD · COHORTES
 ══════════════════════════════════════════════════════════════════ -->
-<div class="screen" id="screen-red-riesgos">
+<div class="screen" id="screen-red-resultados">
 
   <!-- Tabs cohorte -->
   <div style="display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border2);margin-bottom:16px">
@@ -11489,7 +12327,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if(typeof orig==='function'){
     window.navigate = function(scr){
       orig(scr);
-      if(scr==='red-riesgos' && !window._riesgosCargado) setTimeout(cargarRiesgos,80);
+      if(scr==='red-resultados' && !window._riesgosCargado) setTimeout(cargarRiesgos,80);
     };
   }
 });
