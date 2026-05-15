@@ -511,8 +511,144 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 });
 </script>
+
+<style id="login-styles">
+/* ═══════════════════════════ LOGIN PAGE ═══════════════════════════ */
+#login-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#003D53 0%,#0069A7 50%,#0099D1 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Sans',sans-serif;
+}
+#login-overlay.hidden{display:none!important;}
+.login-card{
+  background:#fff;border-radius:20px;
+  width:420px;padding:48px 44px 40px;
+  box-shadow:0 32px 80px rgba(0,61,83,0.28);
+  position:relative;overflow:hidden;
+}
+.login-card::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:rgba(0,153,209,0.07);
+}
+.login-logo-wrap{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:6px;
+}
+.login-logo-img{height:44px;object-fit:contain;}
+.login-logo-text{
+  font-family:'Fraunces',serif;font-size:22px;font-weight:600;
+  color:#003D53;line-height:1.1;
+}
+.login-logo-sub{
+  font-size:11px;color:#4A7A95;letter-spacing:.5px;
+  text-transform:uppercase;margin-top:2px;
+}
+.login-divider{
+  height:1px;background:linear-gradient(90deg,#003D53 0%,#0099D1 50%,transparent 100%);
+  margin:18px 0 22px;opacity:.18;
+}
+.login-title{
+  font-size:17px;font-weight:600;color:#212121;margin-bottom:4px;
+}
+.login-sub{font-size:12.5px;color:#4A7A95;margin-bottom:28px;line-height:1.4;}
+.login-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#EEF5FA;border:1px solid rgba(0,105,167,.18);
+  border-radius:20px;padding:4px 12px;font-size:11px;
+  color:#0069A7;margin-bottom:24px;
+}
+.login-badge::before{content:'🔒';}
+.login-btn{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#003D53,#0069A7);
+  color:#fff;font-size:14px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:10px;transition:opacity .15s,transform .1s;
+  font-family:'DM Sans',sans-serif;
+}
+.login-btn:hover{opacity:.9;transform:translateY(-1px);}
+.login-btn:active{transform:translateY(0);}
+.login-btn svg{flex-shrink:0;}
+.login-error{
+  margin-top:12px;padding:10px 14px;border-radius:8px;
+  background:#fff0f0;border:1px solid #fecaca;
+  color:#B50303;font-size:12px;display:none;
+}
+.login-footer{
+  margin-top:24px;text-align:center;font-size:11px;color:#7FA8BF;
+  line-height:1.5;
+}
+.login-network{
+  margin-top:16px;padding:10px 14px;border-radius:8px;
+  background:#F4F8FB;border:1px solid rgba(0,105,167,.12);
+  font-size:11.5px;color:#4A7A95;text-align:center;
+}
+.login-spinner{
+  display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:lspin .7s linear infinite;
+}
+@keyframes lspin{to{transform:rotate(360deg);}}
+
+/* Red de salud deco */
+.login-deco{
+  position:absolute;bottom:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,#003D53,#0069A7,#0099D1,#0069A7,#003D53);
+}
+</style>
 </head>
 <body>
+
+<!-- ════════════════════════════════════════════════════════
+     LOGIN OVERLAY — RedSalud Monitor · EPS Sanitas
+════════════════════════════════════════════════════════════ -->
+<div id="login-overlay">
+  <div class="login-card">
+    <!-- Logo -->
+    <div class="login-logo-wrap">
+      <img src="EPS.png" alt="EPS Sanitas" class="login-logo-img" onerror="this.style.display='none'">
+      <div>
+        <div class="login-logo-text">RedSalud</div>
+        <div class="login-logo-sub">Monitor de Red · EPS Sanitas</div>
+      </div>
+    </div>
+    <div class="login-divider"></div>
+
+    <div class="login-title">Acceso al tablero</div>
+    <div class="login-sub">
+      Inicia sesión con tu cuenta corporativa para acceder<br>
+      al monitoreo integral de la red de prestadores y gestores.
+    </div>
+
+    <div class="login-badge">Solo cuentas autorizadas</div>
+
+    <button class="login-btn" id="login-google-btn" onclick="iniciarLoginGoogle()">
+      <!-- Google G icon -->
+      <svg width="18" height="18" viewBox="0 0 18 18">
+        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"/>
+        <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"/>
+        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z"/>
+      </svg>
+      Continuar con Google
+      <div class="login-spinner" id="login-spinner"></div>
+    </button>
+
+    <div class="login-error" id="login-error"></div>
+
+    <div class="login-network">
+      🔐 Acceso restringido a correos <strong>@epssanitas.com</strong> y <strong>@gmail.com</strong> autorizados
+    </div>
+
+    <div class="login-footer">
+      RedSalud Monitor v3.1 · Impulsa para EPS Sanitas / Keralty<br>
+      <span style="color:#B86C00">⚠ Información confidencial — uso interno</span>
+    </div>
+    <div class="login-deco"></div>
+  </div>
+</div>
+
 
 <!-- ══ SIDEBAR ══ -->
 <nav class="sidebar">
@@ -6930,9 +7066,9 @@ function dibujarTorta(datos, titulo) {
     const clrPaleta=PALETA_ESTADOS[lbl]||'#6b7280';
     const pct=Math.round(n/totalT*100);
     return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <div style="width:10px;height:10px;border-radius:2px;background:${clrItem};flex-shrink:0"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:${clrPaleta};flex-shrink:0"></div>
       <span style="font-size:11px;color:var(--text2);flex:1">${lbl}</span>
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrItem}">${n} · ${pct}%</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:${clrPaleta}">${n} · ${pct}%</span>
     </div>`;
   }).join('');
 }
@@ -9497,6 +9633,177 @@ document.addEventListener('DOMContentLoaded', function(){
         setTimeout(cargarDispensacion, 80);
       }
     };
+  }
+});
+
+})();
+</script>
+
+
+<script>
+// ════════════════════════════════════════════════════════
+//  LOGIN — Google OAuth · RedSalud Monitor
+// ════════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+// ── Correos autorizados ──────────────────────────────────────────
+// Agrega aquí los correos de prueba y corporativos
+const EMAILS_AUTORIZADOS = [
+  // Cuentas gmail de prueba (eliminar en producción)
+  'androco0204@gmail.com',
+  // Cuentas corporativas (dominio completo o específico)
+  '@epssanitas.com',
+  '@keralty.com',
+  '@impulsa.co',
+];
+
+function estaAutorizado(email) {
+  if (!email) return false;
+  const e = email.toLowerCase().trim();
+  return EMAILS_AUTORIZADOS.some(patron => {
+    if (patron.startsWith('@')) return e.endsWith(patron.toLowerCase());
+    return e === patron.toLowerCase();
+  });
+}
+
+// ── Estado de sesión (sessionStorage — no persiste al cerrar tab) ──
+const SESSION_KEY = 'redsalud_session';
+
+function getSession() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); }
+  catch { return null; }
+}
+function setSession(data) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+}
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+// ── Mostrar / ocultar overlay ─────────────────────────────────────
+function mostrarLogin() {
+  const ov = document.getElementById('login-overlay');
+  if (ov) ov.classList.remove('hidden');
+}
+function ocultarLogin() {
+  const ov = document.getElementById('login-overlay');
+  if (ov) ov.classList.add('hidden');
+}
+
+// ── Login con Google Identity Services ───────────────────────────
+window.iniciarLoginGoogle = function() {
+  const btn = document.getElementById('login-google-btn');
+  const spinner = document.getElementById('login-spinner');
+  const errEl  = document.getElementById('login-error');
+  if (btn)     btn.disabled = true;
+  if (spinner) spinner.style.display = 'block';
+  if (errEl)   errEl.style.display = 'none';
+
+  // Usar popup OAuth de Google
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=REEMPLAZAR_CON_CLIENT_ID_OAUTH&` +
+    `redirect_uri=${encodeURIComponent(window.location.href.split('?')[0])}&` +
+    `response_type=token&` +
+    `scope=${encodeURIComponent('openid email profile')}&` +
+    `prompt=select_account`;
+
+  // Mientras no hay Client ID configurado → usar simulación local
+  if (authUrl.includes('REEMPLAZAR_CON_CLIENT_ID_OAUTH')) {
+    simularLogin(btn, spinner, errEl);
+    return;
+  }
+
+  const popup = window.open(authUrl, 'google-auth', 'width=500,height=600,left=200,top=100');
+  const check = setInterval(() => {
+    try {
+      const url = popup.location.href;
+      if (url.includes('access_token=')) {
+        clearInterval(check);
+        popup.close();
+        const token = new URLSearchParams(url.split('#')[1]).get('access_token');
+        verificarTokenGoogle(token, btn, spinner, errEl);
+      }
+    } catch(e) {} // Cross-origin — normal
+    if (!popup || popup.closed) {
+      clearInterval(check);
+      if (btn) btn.disabled = false;
+      if (spinner) spinner.style.display = 'none';
+    }
+  }, 300);
+};
+
+// ── Verificar token con Google UserInfo ──────────────────────────
+async function verificarTokenGoogle(token, btn, spinner, errEl) {
+  try {
+    const resp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const user = await resp.json();
+    if (!user.email) throw new Error('No se pudo obtener el email');
+    if (!estaAutorizado(user.email)) {
+      mostrarError(errEl, `✗ ${user.email} no tiene acceso autorizado al tablero.`, btn, spinner);
+      return;
+    }
+    // Sesión válida
+    setSession({ email: user.email, nombre: user.name, foto: user.picture, ts: Date.now() });
+    ocultarLogin();
+    mostrarUsuario(user);
+  } catch(e) {
+    mostrarError(errEl, `Error verificando cuenta: ${e.message}`, btn, spinner);
+  }
+}
+
+// ── Simulación de login (mientras no hay OAuth Client ID) ─────────
+function simularLogin(btn, spinner, errEl) {
+  const emailIngresado = prompt('⚠ Modo demo — OAuth no configurado\n\nIngresa tu correo autorizado:',
+    'usuario@epssanitas.com');
+  if (!emailIngresado) {
+    if (btn) btn.disabled = false;
+    if (spinner) spinner.style.display = 'none';
+    return;
+  }
+  if (!estaAutorizado(emailIngresado)) {
+    mostrarError(errEl, `✗ "${emailIngresado}" no tiene acceso autorizado.`, btn, spinner);
+    return;
+  }
+  const user = { email: emailIngresado, nombre: emailIngresado.split('@')[0], foto: null };
+  setSession({ ...user, ts: Date.now() });
+  ocultarLogin();
+  mostrarUsuario(user);
+}
+
+function mostrarError(errEl, msg, btn, spinner) {
+  if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+  if (btn) btn.disabled = false;
+  if (spinner) spinner.style.display = 'none';
+}
+
+// ── Mostrar usuario en topbar ────────────────────────────────────
+function mostrarUsuario(user) {
+  // Actualizar topbar si existe el elemento
+  const el = document.getElementById('topbar-user');
+  if (el) {
+    el.innerHTML = user.foto
+      ? `<img src="${user.foto}" style="width:24px;height:24px;border-radius:50%;margin-right:6px;vertical-align:middle"> ${user.nombre}`
+      : `👤 ${user.nombre||user.email}`;
+    el.style.display = 'flex';
+    el.style.cursor = 'pointer';
+    el.title = `${user.email} · Clic para cerrar sesión`;
+    el.onclick = () => { if(confirm('¿Cerrar sesión?')){ clearSession(); location.reload(); } };
+  }
+}
+
+// ── Inicialización ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const session = getSession();
+  // Sesión válida por 8 horas
+  if (session && session.email && (Date.now() - session.ts < 8*60*60*1000)) {
+    ocultarLogin();
+    mostrarUsuario(session);
+  } else {
+    clearSession();
+    mostrarLogin();
   }
 });
 
