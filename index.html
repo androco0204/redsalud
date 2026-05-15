@@ -5039,7 +5039,19 @@ async function cargarDesdeDrive() {
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.homologacion.id,      DRIVE_CONFIG.homologacion.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.satisfaccion.id,      DRIVE_CONFIG.satisfaccion.hoja),
-    fetch(`${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`).then(r=>r.json()),
+    (async()=>{
+      // CM_SCRIPT con retry automático (hasta 2 intentos) para ERR_QUIC_PROTOCOL_ERROR
+      for(let intento=1; intento<=2; intento++){
+        try{
+          const r = await fetch(`${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`);
+          if(!r.ok) throw new Error(`HTTP ${r.status}`);
+          return await r.json();
+        } catch(e){
+          if(intento===2) throw e;
+          await new Promise(res=>setTimeout(res, 1500)); // esperar 1.5s antes de reintentar
+        }
+      }
+    })(),
   ]);
 
   const resultados = [];
@@ -8852,6 +8864,9 @@ function parsearCuentasMedicas(data) {
 
 <div class="screen" id="screen-red-cuentas-medicas">
 
+  <!-- Status bar + botón reintentar -->
+  <div id="cm-status-bar" style="font-size:11.5px;color:var(--text2);margin-bottom:10px;min-height:18px"></div>
+
   <!-- KPIs -->
   <div class="kpi-strip cols-4">
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Total radicado</div><div class="kpi-value" style="color:var(--blue)" id="cm-kpi-subtotal">—</div><div class="kpi-delta up" id="cm-kpi-subtotal-d">Subtotal acumulado</div></div>
@@ -9088,12 +9103,44 @@ function parsearCuentasMedicas(data) {
       (CM_FILTRADO.length>MAX?`<tr><td colspan="10" style="text-align:center;padding:8px;color:var(--text2);font-size:11px">Mostrando primeros ${MAX} de ${CM_FILTRADO.length.toLocaleString('es-CO')} registros.</td></tr>`:'');
   };
 
+  // ── Carga lazy de CM si el fetch inicial falló ─────────────────
+  async function cargarCMSiVacio(){
+    if(DATOS_CARGADOS.cuentas_medicas && DATOS_CARGADOS.cuentas_medicas.length>0){
+      window.renderizarCuentasMedicas();
+      return;
+    }
+    // Intentar cargar CM de forma independiente
+    setCMStatus('⏳ Cargando cuentas médicas...','var(--text2)');
+    try{
+      const r = await fetch(`${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`);
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      DATOS_CARGADOS.cuentas_medicas = parsearCuentasMedicas(data);
+      window.renderizarCuentasMedicas();
+      setCMStatus(`✓ ${(DATOS_CARGADOS.cuentas_medicas||[]).length.toLocaleString('es-CO')} registros cargados`,'var(--green)');
+    } catch(e){
+      setCMStatus(`✗ Error al cargar: ${e.message} — <span onclick="cargarCMSiVacio()" style="color:var(--blue);cursor:pointer;text-decoration:underline">Reintentar</span>`,'var(--red)');
+      // Mostrar mensaje en tabla
+      const tb=document.getElementById('cm-tbody');
+      if(tb) tb.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--red)">
+        ✗ No se pudo cargar cuentas médicas (${e.message})
+        <br><br><button onclick="cargarCMSiVacio()" style="background:var(--blue);color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px">🔄 Reintentar</button>
+      </td></tr>`;
+    }
+  }
+  window.cargarCMSiVacio = cargarCMSiVacio;
+
+  function setCMStatus(html, color){
+    const el=document.getElementById('cm-status-bar');
+    if(el){ el.innerHTML=html; el.style.color=color; }
+  }
+
   document.addEventListener('DOMContentLoaded', function(){
     const origNav=window.navigate;
     if(typeof origNav==='function'){
       window.navigate=function(scr){
         origNav(scr);
-        if(scr==='red-cuentas-medicas') setTimeout(window.renderizarCuentasMedicas,80);
+        if(scr==='red-cuentas-medicas') setTimeout(cargarCMSiVacio, 80);
       };
     }
   });
