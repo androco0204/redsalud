@@ -681,6 +681,7 @@ document.addEventListener('DOMContentLoaded',function(){
       Gestores farmacéuticos <span class="nav-arrow" id="arrow-sub-gestores">▾</span>
     </div>
     <div class="nav-submenu" id="sub-gestores">
+      <div class="nav-item nav-sub" data-screen="gest-resumen">📊 Resumen</div>
       <div class="nav-item nav-sub" data-screen="gest-oportunidad">🚚 Oportunidad</div>
       <div class="nav-item nav-sub" data-screen="gest-pendientes">📦 Pendientes</div>
       <div class="nav-item nav-sub" data-screen="pqrs">📋 PQRS y Tutelas</div>
@@ -830,10 +831,6 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 
 
-<!-- ── Gestores Farmacéuticos · Resumen ejecutivo ── -->
-<div class="card" style="margin-top:16px" id="resumen-gestores-med">
-  <div class="card-head"><div>
-    <div class="card-title">Red Nacional de Medicamentos · Gestores</div>
     <div class="card-sub">Cobertura PBS y No PBS · Actual 2026 · 737 municipios</div>
   </div>
   <span style="font-size:10.5px;background:var(--gdim);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">✓ 100% Cobertura</span>
@@ -3194,11 +3191,6 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
   </div>
 </div>
-<script>
-// ── Red Nacional de Medicamentos · Detalle DANE · Actual 2026 ─────────
-// Fuente: Red_Nacional_Medicamentos.xlsx · procesado offline
-const MED_DATA = {"total_munis":737,"total_gestores_pbs":11,"total_gestores_nopbs":12,"sin_gf":0,"pct_cobertura":100.0,"por_gestor_pbs":[{"nombre":"Cruz Verde","munis_pbs":264,"propio":32,"aliado":34,"sin_tipo":198,"pct_propio":12.1,"integral":4,"pct_integral":1.5,"regionales":["BARRANQUILLA","BOGOTA","BUCARAMANGA","CALI","CENTRO ORIENTE","MEDELLIN"],"n_regionales":6},{"nombre":"Discolmets","munis_pbs":125,"propio":62,"aliado":58,"sin_tipo":5,"pct_propio":49.6,"integral":124,"pct_integral":99.2,"regionales":["CALI","CENTRO ORIENTE","MEDELLIN"],"n_regionales":3},{"nombre":"Pharmasan","munis_pbs":86,"propio":40,"aliado":24,"sin_tipo":22,"pct_propio":46.5,"integral":86,"pct_integral":100.0,"regionales":["BUCARAMANGA","CALI"],"n_regionales":2},{"nombre":"Insumedic","munis_pbs":85,"propio":9,"aliado":7,"sin_tipo":69,"pct_propio":10.6,"integral":85,"pct_integral":100.0,"regionales":["BOGOTA","CENTRO ORIENTE"],"n_regionales":2},{"nombre":"Disfarma","munis_pbs":53,"propio":18,"aliado":2,"sin_tipo":33,"pct_propio":34.0,"integral":53,"pct_integral":100.0,"regionales":["BARRANQUILLA","MEDELLIN"],"n_regionales":2},{"nombre":"Genhospi","munis_pbs":46,"propio":12,"aliado":28,"sin_tipo":6,"pct_propio":26.1,"integral":46,"pct_integral":100.0,"regionales":["CALI"],"n_regionales":1},{"nombre":"Éticos","munis_pbs":32,"propio":12,"aliado":16,"sin_tipo":4,"pct_propio":37.5,"integral":32,"pct_integral":100.0,"regionales":["BARRANQUILLA","BUCARAMANGA"],"n_regionales":2},{"nombre":"Cohan","munis_pbs":18,"propio":4,"aliado":0,"sin_tipo":14,"pct_propio":22.2,"integral":18,"pct_integral":100.0,"regionales":["BARRANQUILLA","BUCARAMANGA","MEDELLIN"],"n_regionales":3},{"nombre":"Humsalud","munis_pbs":11,"propio":4,"aliado":6,"sin_tipo":1,"pct_propio":36.4,"integral":11,"pct_integral":100.0,"regionales":["MEDELLIN"],"n_regionales":1},{"nombre":"Colsubsidio","munis_pbs":10,"propio":10,"aliado":0,"sin_tipo":0,"pct_propio":100.0,"integral":10,"pct_integral":100.0,"regionales":["BOGOTA","CENTRO ORIENTE"],"n_regionales":2},{"nombre":"MyT Salud","munis_pbs":7,"propio":7,"aliado":0,"sin_tipo":0,"pct_propio":100.0,"integral":7,"pct_integral":100.0,"regionales":["BUCARAMANGA"],"n_regionales":1}],"por_gestor_nopbs":[{"nombre":"Discolmets","munis_nopbs":149,"regionales":["CALI","CENTRO ORIENTE","MEDELLIN"],"n_regionales":3},{"nombre":"Audifarma","munis_nopbs":133,"regionales":["BARRANQUILLA","BOGOTA","BUCARAMANGA","CALI","CENTRO ORIENTE","MEDELLIN"],"n_regionales":6},{"nombre":"Cohan","munis_nopbs":104,"regionales":["BARRANQUILLA","BUCARAMANGA","MEDELLIN"],"n_regionales":3},{"nombre":"Pharmasan","munis_nopbs":86,"regionales":["BUCARAMANGA","CALI"],"n_regionales":2},{"nombre":"Insumedic","munis_nopbs":85,"regionales":["BOGOTA","CENTRO ORIENTE"],"n_regionales":2},{"nombre":"Disfarma","munis_nopbs":53,"regionales":["BARRANQUILLA","MEDELLIN"],"n_regionales":2},{"nombre":"Genhospi","munis_nopbs":46,"regionales":["CALI"],"n_regionales":1},{"nombre":"Éticos","munis_nopbs":33,"regionales":["BARRANQUILLA","BUCARAMANGA"],"n_regionales":2},{"nombre":"Medisfarma","munis_nopbs":20,"regionales":["CALI","MEDELLIN"],"n_regionales":2},{"nombre":"Humsalud","munis_nopbs":11,"regionales":["MEDELLIN"],"n_regionales":1},{"nombre":"Colsubsidio","munis_nopbs":10,"regionales":["BOGOTA","CENTRO ORIENTE"],"n_regionales":2},{"nombre":"MyT Salud","munis_nopbs":7,"regionales":["BUCARAMANGA"],"n_regionales":1}],"por_regional":[{"regional":"BARRANQUILLA","total":95,"integral":59,"pct_integral":62.1,"sin_gf":0},{"regional":"BOGOTA","total":98,"integral":89,"pct_integral":90.8,"sin_gf":0},{"regional":"BUCARAMANGA","total":98,"integral":94,"pct_integral":95.9,"sin_gf":0},{"regional":"CALI","total":98,"integral":48,"pct_integral":49.0,"sin_gf":0},{"regional":"CENTRO ORIENTE","total":202,"integral":129,"pct_integral":63.9,"sin_gf":0},{"regional":"MEDELLIN","total":146,"integral":57,"pct_integral":39.0,"sin_gf":0}]};
-</script>
 
 <script>
 // ── fetchScript global ─────────────────
@@ -5388,6 +5380,8 @@ async function cargarDesdeDrive() {
   if(resNIT.status === 'fulfilled' && resDANE.status === 'fulfilled') {
     try {
       const {gestores, cobertura} = parsearArrayGestores(resNIT.value, resDANE.value);
+      // Calcular agregados de medicamentos (fase VII) y exponerlos globalmente
+      window.MED_DATA_LOADED = parsearMedData(resDANE.value);
       DATOS_CARGADOS.gestores = { gestores, cobertura };
       actualizarEstadoFuente('medicamentos',`✓ ${gestores.length} gestores · ${cobertura.length.toLocaleString()} municipios`,'var(--gdim)','var(--green)');
       // gestores omitidos del pill
@@ -5677,6 +5671,85 @@ function enriquecerConHab(prestadores) {
       hab_no_cumple: h ? h.noCumpleCount  : 0,
     };
   });
+}
+
+
+// ─── PARSER MED DATA · Red Nacional Medicamentos (fase actual VII) ──
+function parsearMedData(dataDANE) {
+  if(!dataDANE || dataDANE.length < 3) return null;
+  // Fila 1 = encabezados de período, fila 2 = headers de columna, fila 3+ = datos
+  // Índices fase VII (Actual 2026):
+  const GF_PBS   = 89;  // GF PBS_VII
+  const TIPO_RED = 90;  // Tipo Red PBS_VII
+  const GF_NOPBS = 93;  // GF No PBS_VII
+  const INTEGRAL = 96;  // Integral_VII
+
+  const norm = s => String(s||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  const gestoresPbs   = {};
+  const gestoresNoPbs = {};
+  const regionalStats = {};
+  let totalMunis = 0;
+
+  dataDANE.slice(2).forEach(row => {
+    if(!row || row.length < 97) return;
+    const reg     = norm(row[1]);
+    const gfPbs   = String(row[GF_PBS]   || '').trim();
+    const gfNoPbs = String(row[GF_NOPBS] || '').trim();
+    const tipo    = String(row[TIPO_RED]  || '').trim();
+    const integral= String(row[INTEGRAL]  || '').trim();
+
+    if(!reg || !/[A-Z]/.test(reg)) return;
+    totalMunis++;
+
+    if(!regionalStats[reg]) regionalStats[reg] = {total:0, integral:0};
+    regionalStats[reg].total++;
+    if(integral==='SÍ' || integral==='SI') regionalStats[reg].integral++;
+
+    if(gfPbs && gfPbs!=='-' && gfPbs!=='0') {
+      if(!gestoresPbs[gfPbs]) gestoresPbs[gfPbs]={munis:0,propio:0,aliado:0,integral:0,regionales:new Set()};
+      const g=gestoresPbs[gfPbs];
+      g.munis++; g.regionales.add(reg);
+      if(tipo==='Propio'||tipo==='PROPIO') g.propio++;
+      else if(tipo==='Aliado'||tipo==='ALIADO') g.aliado++;
+      if(integral==='SÍ'||integral==='SI') g.integral++;
+    }
+    if(gfNoPbs && gfNoPbs!=='-' && gfNoPbs!=='0') {
+      if(!gestoresNoPbs[gfNoPbs]) gestoresNoPbs[gfNoPbs]={munis:0,regionales:new Set()};
+      gestoresNoPbs[gfNoPbs].munis++;
+      gestoresNoPbs[gfNoPbs].regionales.add(reg);
+    }
+  });
+
+  const pct=(n,d)=>d>0?+(n/d*100).toFixed(1):0;
+  const setToArr = s => [...s].sort();
+
+  return {
+    ok:true, generado: new Date().toISOString(),
+    total_munis: totalMunis,
+    total_gestores_pbs: Object.keys(gestoresPbs).length,
+    total_gestores_nopbs: Object.keys(gestoresNoPbs).length,
+    pct_cobertura: pct(Object.values(gestoresPbs).reduce((a,g)=>a+g.munis,0), totalMunis),
+    por_gestor_pbs: Object.entries(gestoresPbs)
+      .map(([nombre,d])=>({
+        nombre, munis_pbs:d.munis, propio:d.propio, aliado:d.aliado,
+        sin_tipo:d.munis-d.propio-d.aliado,
+        pct_propio:pct(d.propio,d.munis), integral:d.integral,
+        pct_integral:pct(d.integral,d.munis),
+        regionales:setToArr(d.regionales), n_regionales:d.regionales.size
+      })).sort((a,b)=>b.munis_pbs-a.munis_pbs),
+    por_gestor_nopbs: Object.entries(gestoresNoPbs)
+      .map(([nombre,d])=>({
+        nombre, munis_nopbs:d.munis,
+        regionales:setToArr(d.regionales), n_regionales:d.regionales.size
+      })).sort((a,b)=>b.munis_nopbs-a.munis_nopbs),
+    por_regional: Object.entries(regionalStats)
+      .map(([regional,d])=>({
+        regional, total:d.total, integral:d.integral,
+        pct_integral:pct(d.integral,d.total)
+      })).sort((a,b)=>a.regional.localeCompare(b.regional))
+  };
 }
 
 function parsearArrayGestores(dataNIT, dataDANE) {
@@ -9432,8 +9505,8 @@ function parsearCuentasMedicas(raw) {
     try{
       // CM usa su propio script dedicado (tiene acceso a esa hoja)
       // El main APPS_SCRIPT_URL NO tiene acceso a esa hoja → usar CM_SCRIPT
-      const cmUrl = `${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`;
-      const data = await fetchScript(cmUrl);
+      // Llamar CM_SCRIPT directo — el script tiene la hoja hardcodeada internamente
+      const data = await fetchScript(CM_SCRIPT);
       DATOS_CARGADOS.cuentas_medicas = parsearCuentasMedicas(data);
       window.renderizarCuentasMedicas();
       setCMStatus(`✓ ${(DATOS_CARGADOS.cuentas_medicas||[]).length.toLocaleString('es-CO')} registros cargados`,'var(--green)');
@@ -9469,6 +9542,153 @@ function parsearCuentasMedicas(raw) {
 })();
 </script>
 
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     GESTORES FARMACÉUTICOS · RESUMEN EJECUTIVO
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-gest-resumen">
+
+  <!-- KPIs principales -->
+  <div class="kpi-strip cols-3" style="margin-bottom:18px">
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Gestores PBS activos</div>
+      <div class="kpi-value" style="color:var(--blue)">11</div>
+      <div class="kpi-delta up">Cruz Verde · 6 regionales · 264 municipios</div>
+    </div>
+    <div class="kpi" style="--kc:var(--teal)">
+      <div class="kpi-label">Gestores No PBS activos</div>
+      <div class="kpi-value" style="color:var(--teal)">12</div>
+      <div class="kpi-delta neu">Audifarma · 6 regionales · 133 municipios</div>
+    </div>
+    <div class="kpi" style="--kc:var(--green)">
+      <div class="kpi-label">Cobertura nacional PBS</div>
+      <div class="kpi-value" style="color:var(--green)">100%</div>
+      <div class="kpi-delta up">737 municipios · 6 regionales · Actual 2026</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Cobertura PBS por gestor</div>
+        <div class="card-sub">Municipios asignados · % integral · regionales</div>
+      </div><span style="font-size:10.5px;background:var(--gdim);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">Actual 2026</span></div>
+      <div id="gest-res-tabla-pbs" style="max-height:340px;overflow-y:auto"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Cobertura integral por regional</div>
+        <div class="card-sub">% municipios con cobertura integral PBS</div>
+      </div></div>
+      <div id="gest-res-chart-reg" style="padding:8px 12px;display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Cobertura No PBS por gestor</div>
+        <div class="card-sub">Municipios asignados · Actual 2026</div>
+      </div></div>
+      <div id="gest-res-tabla-nopbs" style="max-height:280px;overflow-y:auto"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Tipo de red PBS</div>
+        <div class="card-sub">Propio · Aliado · Sin definir por gestor</div>
+      </div></div>
+      <div id="gest-res-tipo-red" style="padding:8px 12px;display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+    async function renderGestResumen(){
+    const d = window.MED_DATA_LOADED;
+    if(!d) return;
+    const fmtN = n => Number(n).toLocaleString('es-CO');
+    const sem = p => p>=90?'var(--green)':p>=60?'var(--amber)':'var(--red)';
+
+    // Tabla PBS
+    const elPbs = document.getElementById('gest-res-tabla-pbs');
+    if(elPbs){
+      const hdr = '<div style="display:flex;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:7px 12px;border-bottom:1px solid var(--border)"><span style=\"flex:1\">Gestor</span><span style=\"width:58px;text-align:right\">Munis</span><span style=\"width:62px;text-align:right\">Integral</span><span style=\"width:40px;text-align:right\">Regs</span></div>';
+      const rows = d.por_gestor_pbs.map(g => {
+        const clr = sem(g.pct_integral);
+        const barW = Math.round(g.munis_pbs/264*100);
+        return '<div style="padding:7px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px">' +
+          '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500">' + g.nombre + '</div>' +
+          '<div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:3px;overflow:hidden"><div style="width:' + barW + '%;height:100%;background:var(--blue);border-radius:2px"></div></div></div>' +
+          '<span style="width:58px;text-align:right;font-size:12px;font-weight:600;color:var(--blue)">' + fmtN(g.munis_pbs) + '</span>' +
+          '<span style="width:62px;text-align:right;font-size:11.5px;font-weight:600;color:' + clr + '">' + g.pct_integral + '%</span>' +
+          '<span style="width:40px;text-align:right;font-size:11.5px;color:var(--text2)">' + g.n_regionales + '</span></div>';
+      }).join('');
+      elPbs.innerHTML = hdr + rows;
+    }
+
+    // Barras regional
+    const elReg = document.getElementById('gest-res-chart-reg');
+    if(elReg){
+      elReg.innerHTML = d.por_regional.map(r => {
+        const clr = sem(r.pct_integral);
+        return '<div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px">' +
+          '<span>' + r.regional.replace('CENTRO ORIENTE','C. ORIENTE') + '</span>' +
+          '<span style="font-weight:600;color:' + clr + '">' + r.pct_integral + '% <span style="color:var(--text2);font-weight:400;font-size:11px">· ' + r.total + ' munis</span></span></div>' +
+          '<div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">' +
+          '<div style="width:' + r.pct_integral + '%;height:100%;background:' + clr + ';border-radius:4px;transition:width .4s"></div></div></div>';
+      }).join('') + '<div style="font-size:10.5px;color:var(--text2);padding-top:6px;border-top:1px solid var(--border)">🟢 ≥90% · 🟡 ≥60% · 🔴 &lt;60%</div>';
+    }
+
+    // Tabla No PBS
+    const elNoPbs = document.getElementById('gest-res-tabla-nopbs');
+    if(elNoPbs){
+      const hdr2 = '<div style="display:flex;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:7px 12px;border-bottom:1px solid var(--border)"><span style=\"flex:1\">Gestor</span><span style=\"width:58px;text-align:right\">Munis</span><span style=\"width:44px;text-align:right\">Regs</span></div>';
+      const rows2 = d.por_gestor_nopbs.map(g => {
+        const barW = Math.round(g.munis_nopbs/149*100);
+        return '<div style="padding:7px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px">' +
+          '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500">' + g.nombre + '</div>' +
+          '<div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:3px;overflow:hidden"><div style="width:' + barW + '%;height:100%;background:var(--teal);border-radius:2px"></div></div></div>' +
+          '<span style="width:58px;text-align:right;font-size:12px;font-weight:600;color:var(--teal)">' + fmtN(g.munis_nopbs) + '</span>' +
+          '<span style="width:44px;text-align:right;font-size:11.5px;color:var(--text2)">' + g.n_regionales + '</span></div>';
+      }).join('');
+      elNoPbs.innerHTML = hdr2 + rows2;
+    }
+
+    // Tipo de red
+    const elTipo = document.getElementById('gest-res-tipo-red');
+    if(elTipo){
+      elTipo.innerHTML = d.por_gestor_pbs.map(g => {
+        const tot = g.munis_pbs||1;
+        const pP = (g.propio/tot*100).toFixed(0);
+        const pA = (g.aliado/tot*100).toFixed(0);
+        const pS = (g.sin_tipo/tot*100).toFixed(0);
+        return '<div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px">' +
+          '<span style="font-weight:500">' + g.nombre + '</span><span style="font-size:10.5px;color:var(--text2)">' + g.munis_pbs + ' munis</span></div>' +
+          '<div style="display:flex;height:10px;border-radius:4px;overflow:hidden">' +
+          '<div style="width:' + pP + '%;background:var(--blue)" title="Propio: ' + g.propio + '"></div>' +
+          '<div style="width:' + pA + '%;background:var(--teal);opacity:.7" title="Aliado: ' + g.aliado + '"></div>' +
+          '<div style="width:' + pS + '%;background:var(--bg4)" title="Sin tipo: ' + g.sin_tipo + '"></div>' +
+          '</div></div>';
+      }).join('') + '<div style="display:flex;gap:12px;font-size:10.5px;color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">' +
+        '<span><span style="display:inline-block;width:10px;height:10px;background:var(--blue);border-radius:2px;margin-right:3px;vertical-align:middle"></span>Propio</span>' +
+        '<span><span style="display:inline-block;width:10px;height:10px;background:var(--teal);opacity:.7;border-radius:2px;margin-right:3px;vertical-align:middle"></span>Aliado</span>' +
+        '<span><span style="display:inline-block;width:10px;height:10px;background:var(--bg4);border-radius:2px;margin-right:3px;vertical-align:middle"></span>Sin definir</span></div>';
+    }
+  }
+
+  // Hook navigate
+  document.addEventListener('DOMContentLoaded', function(){
+    const orig = window.navigate;
+    if(typeof orig==='function'){
+      window.navigate = function(scr){
+        orig(scr);
+        if(scr==='gest-resumen') setTimeout(()=>renderGestResumen(), 80);
+      };
+    }
+  });
+})();
+</script>
 
 <!-- ═══════════════════════════════════════════════════════════════════
      GESTORES FARMACÉUTICOS · OPORTUNIDAD
@@ -11970,9 +12190,10 @@ function computeScorePrestador(nit, nombre){
 
 // Score de cobertura municipal PBS para un gestor (0-100)
 function scoreCoberturaGestor(gestor) {
-  if(!window.MED_DATA) return null;
-  const maxMusis = 264; // Cruz Verde es el máximo (benchmark)
-  const gf = MED_DATA.por_gestor_pbs.find(g =>
+  const med = window.MED_DATA_LOADED || null;
+  if(!med) return null;
+  const maxMusis = 264;
+  const gf = med.por_gestor_pbs.find(g =>
     g.nombre.toLowerCase() === gestor.toLowerCase() ||
     gestor.toLowerCase().includes(g.nombre.toLowerCase()) ||
     g.nombre.toLowerCase().includes(gestor.toLowerCase().split(' ')[0])
@@ -11984,13 +12205,14 @@ function scoreCoberturaGestor(gestor) {
 
 // Datos de cobertura para mostrar en la tabla
 function dataCoberturaGestor(gestor) {
-  if(!window.MED_DATA) return null;
-  const gfPbs = MED_DATA.por_gestor_pbs.find(g =>
+  const med = window.MED_DATA_LOADED || null;
+  if(!med) return null;
+  const gfPbs = med.por_gestor_pbs.find(g =>
     g.nombre.toLowerCase() === gestor.toLowerCase() ||
     gestor.toLowerCase().includes(g.nombre.toLowerCase()) ||
     g.nombre.toLowerCase().includes(gestor.toLowerCase().split(' ')[0])
   );
-  const gfNoPbs = MED_DATA.por_gestor_nopbs.find(g =>
+  const gfNoPbs = med.por_gestor_nopbs.find(g =>
     g.nombre.toLowerCase() === gestor.toLowerCase() ||
     gestor.toLowerCase().includes(g.nombre.toLowerCase()) ||
     g.nombre.toLowerCase().includes(gestor.toLowerCase().split(' ')[0])
