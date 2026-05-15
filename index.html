@@ -5192,7 +5192,8 @@ async function cargarDesdeDrive() {
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.homologacion.id,      DRIVE_CONFIG.homologacion.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.satisfaccion.id,      DRIVE_CONFIG.satisfaccion.hoja),
-    fetchViaAppsScript(DRIVE_CONFIG.cuentas_medicas.id, DRIVE_CONFIG.cuentas_medicas.hoja),
+    // CM carga de forma independiente con CM_SCRIPT (script dedicado con acceso propio)
+    Promise.resolve(null),
   ]);
 
   const resultados = [];
@@ -5264,11 +5265,8 @@ async function cargarDesdeDrive() {
       const n = Object.keys(habData.idx).length;
   // ── Satisfacción ────────────────────────────────────────────
   // ── Cuentas Médicas ──────────────────────────────────────────
-  if(resCM.status === 'fulfilled') {
-    try {
-      DATOS_CARGADOS.cuentas_medicas = parsearCuentasMedicas(resCM.value);
-    } catch(e) { console.error('CM parser:', e); }
-  }
+  // CM no se carga en el bulk — se carga on-demand con CM_SCRIPT dedicado
+  // (el script principal no tiene acceso a la hoja de cuentas médicas)
   if(resSat.status === 'fulfilled') {
     try {
       DATOS_CARGADOS.satisfaccion = parsearSatisfaccion(resSat.value);
@@ -9260,8 +9258,10 @@ function parsearCuentasMedicas(raw) {
     // Intentar cargar CM de forma independiente
     setCMStatus('⏳ Cargando cuentas médicas...','var(--text2)');
     try{
-      // Usar fetchViaAppsScript (main script, sin CORS) en vez de CM_SCRIPT directo
-      const data = await fetchViaAppsScript(DRIVE_CONFIG.cuentas_medicas.id, DRIVE_CONFIG.cuentas_medicas.hoja);
+      // CM usa su propio script dedicado (tiene acceso a esa hoja)
+      // El main APPS_SCRIPT_URL NO tiene acceso a esa hoja → usar CM_SCRIPT
+      const cmUrl = `${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`;
+      const data = await fetchScript(cmUrl);
       DATOS_CARGADOS.cuentas_medicas = parsearCuentasMedicas(data);
       window.renderizarCuentasMedicas();
       setCMStatus(`✓ ${(DATOS_CARGADOS.cuentas_medicas||[]).length.toLocaleString('es-CO')} registros cargados`,'var(--green)');
