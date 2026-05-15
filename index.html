@@ -6541,6 +6541,8 @@ const PQRS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycbzu8xaxZo11Eenm
 // ── Riesgos en Salud · Hemofilia ──
 // FUTURO SIGIRES: reemplazar esta URL por el endpoint del webservice
 const RIESGOS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycby9_VbVsvRp90xRX7WhEw1hsFJJk1VSvROyB7J6FBpvVPkmfwT3qSnG64imPWzpa6XWmw/exec';
+// ── Dispensación Gestores Farmacéuticos ── desplegar DispensacionScript.gs y reemplazar
+const DISP_SCRIPT = 'https://script.google.com/macros/s/AKfycbxOQ-8O4szM5tG2xXfr4LMuwXMtGbW1w_vDtm0xg-tXIiR8vCAQS9O10VA3EnmzFtynRw/exec';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -9095,6 +9097,362 @@ function parsearCuentasMedicas(data) {
       };
     }
   });
+})();
+</script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     GESTORES FARMACÉUTICOS · OPORTUNIDAD
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-gest-oportunidad">
+  <!-- KPIs principales -->
+  <div class="kpi-strip cols-4">
+    <div class="kpi" style="--kc:var(--green)">
+      <div class="kpi-label">% Oportunidad</div>
+      <div class="kpi-value" style="color:var(--green)" id="disp-kpi-pct-op">—</div>
+      <div class="kpi-delta up" id="disp-kpi-pct-op-d">Oportunidad / Total válidos</div>
+    </div>
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Registros oportunidad</div>
+      <div class="kpi-value" style="color:var(--blue)" id="disp-kpi-op">—</div>
+      <div class="kpi-delta neu">Numerador</div>
+    </div>
+    <div class="kpi" style="--kc:var(--teal)">
+      <div class="kpi-label">Total válidos</div>
+      <div class="kpi-value" style="color:var(--teal)" id="disp-kpi-tv">—</div>
+      <div class="kpi-delta neu">Denominador · ClasificaciónGeneral=Válido</div>
+    </div>
+    <div class="kpi" style="--kc:var(--text2)">
+      <div class="kpi-label">Fuente</div>
+      <div class="kpi-value" style="color:var(--text2);font-size:13px" id="disp-kpi-src">—</div>
+      <div class="kpi-delta neu" id="disp-kpi-src-d">Dispensación consolidada</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Oportunidad por gestor -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">% Oportunidad por gestor</div>
+        <div class="card-sub">Oportunidad / Total válidos por gestor</div>
+      </div></div>
+      <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
+        <table class="table" id="disp-tabla-op-gestor">
+          <thead><tr>
+            <th>Gestor</th>
+            <th style="text-align:center">Total válidos</th>
+            <th style="text-align:center">Oportunidad</th>
+            <th style="text-align:center">% Oportunidad</th>
+          </tr></thead>
+          <tbody><tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tendencia mensual -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Tendencia mensual</div>
+        <div class="card-sub">% Oportunidad por mes</div>
+      </div></div>
+      <div id="disp-chart-op-mes" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:340px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <div id="disp-op-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     GESTORES FARMACÉUTICOS · PENDIENTES
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-gest-pendientes">
+  <!-- 4 KPIs de pendientes -->
+  <div class="kpi-strip cols-4">
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Entrega 48 h</div>
+      <div class="kpi-value" style="color:var(--blue)" id="disp-kpi-e48-pct">—</div>
+      <div class="kpi-delta neu" id="disp-kpi-e48-n">— registros</div>
+    </div>
+    <div class="kpi" style="--kc:var(--amber)">
+      <div class="kpi-label">Posterior 48 h</div>
+      <div class="kpi-value" style="color:var(--amber)" id="disp-kpi-p48-pct">—</div>
+      <div class="kpi-delta warn" id="disp-kpi-p48-n">— registros</div>
+    </div>
+    <div class="kpi" style="--kc:var(--red)">
+      <div class="kpi-label">Pendiente parcial</div>
+      <div class="kpi-value" style="color:var(--red)" id="disp-kpi-pparcial-pct">—</div>
+      <div class="kpi-delta dn" id="disp-kpi-pparcial-n">— registros</div>
+    </div>
+    <div class="kpi" style="--kc:var(--red)">
+      <div class="kpi-label">Pendiente activo</div>
+      <div class="kpi-value" style="color:var(--red)" id="disp-kpi-pactivo-pct">—</div>
+      <div class="kpi-delta dn" id="disp-kpi-pactivo-n">— registros</div>
+    </div>
+  </div>
+
+  <!-- Denominador pendientes -->
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:11.5px;color:var(--text2)">
+    <span style="color:var(--text);font-weight:600">Denominador: </span>
+    Total válidos diferentes a Oportunidad (Entrega 48h + Posterior 48h + Pendiente parcial + Pendiente activo) =
+    <span style="color:var(--blue);font-weight:600" id="disp-kpi-den-pend">—</span> registros
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Tabla por gestor -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-head"><div>
+        <div class="card-title">Pendientes por gestor</div>
+        <div class="card-sub">Entrega 48h · Posterior 48h · Pend. parcial · Pend. activo — % sobre total pendientes del gestor</div>
+      </div></div>
+      <div style="overflow-x:auto;max-height:380px;overflow-y:auto">
+        <table class="table" id="disp-tabla-pend-gestor">
+          <thead><tr>
+            <th>Gestor</th>
+            <th style="text-align:center">Total pend.</th>
+            <th style="text-align:center">Entrega 48h</th>
+            <th style="text-align:center">% E48</th>
+            <th style="text-align:center">Posterior 48h</th>
+            <th style="text-align:center">% P48</th>
+            <th style="text-align:center">Pend. parcial</th>
+            <th style="text-align:center">% PParcial</th>
+            <th style="text-align:center">Pend. activo</th>
+            <th style="text-align:center">% PActivo</th>
+          </tr></thead>
+          <tbody><tr><td colspan="10" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tendencia mensual pendientes -->
+  <div class="card">
+    <div class="card-head"><div>
+      <div class="card-title">Tendencia mensual de pendientes</div>
+      <div class="card-sub">Distribución de los 4 tipos de pendiente por mes</div>
+    </div></div>
+    <div id="disp-chart-pend-mes" style="display:flex;flex-direction:column;gap:8px;padding:8px 0;max-height:300px;overflow-y:auto"></div>
+  </div>
+
+  <div id="disp-pend-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     DISPENSACIÓN · Lógica JS
+════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+'use strict';
+
+let DISP_DATA = null; // cache del JSON del script
+
+function fmtPct(v){ return isNaN(v) ? '—' : v.toFixed(1) + ' %'; }
+function fmtN(v)  { return isNaN(v) ? '—' : Number(v).toLocaleString('es-CO'); }
+
+// ─── Semáforo oportunidad (meta ≥ 85%) ───────────────────────────
+function semOp(pct){
+  if(pct >= 85) return 'var(--green)';
+  if(pct >= 70) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+// ─── Carga desde Apps Script ──────────────────────────────────────
+async function cargarDispensacion(){
+  if(DISP_DATA) return renderAll();
+
+  if(DISP_SCRIPT === 'PENDIENTE_DEPLOY'){
+    renderDemo();
+    return;
+  }
+
+  try {
+    const resp = await fetch(DISP_SCRIPT);
+    const json = await resp.json();
+    if(json.error) throw new Error(json.error);
+    DISP_DATA = json;
+    renderAll();
+  } catch(e){
+    renderError(e.message);
+  }
+}
+
+// ─── Render principal ─────────────────────────────────────────────
+function renderAll(){
+  if(!DISP_DATA) return;
+  const { resumen, por_gestor, por_mes } = DISP_DATA;
+
+  // ── Pantalla Oportunidad ───────────────────────────────────────
+  setText('disp-kpi-pct-op',   fmtPct(resumen.pct_oportunidad));
+  setText('disp-kpi-op',       fmtN(resumen.oportunidad));
+  setText('disp-kpi-tv',       fmtN(resumen.total_validos));
+  setStyle('disp-kpi-pct-op','color', semOp(resumen.pct_oportunidad));
+  setText('disp-kpi-src',      DISP_DATA.generado ? DISP_DATA.generado.slice(0,10) : '—');
+  setText('disp-kpi-src-d',    'Dispensación consolidada · Dic 2025');
+
+  // Tabla gestor - oportunidad
+  const tbOp = document.getElementById('disp-tabla-op-gestor');
+  if(tbOp){
+    const tbody = tbOp.querySelector('tbody');
+    if(!por_gestor.length){
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Sin datos</td></tr>';
+    } else {
+      tbody.innerHTML = por_gestor.map(g => {
+        const clr = semOp(g.pct_oportunidad);
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 12px;font-size:12px">${g.nombre||g.nit||'—'}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.total_validos)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.oportunidad)}</td>
+          <td style="text-align:center">
+            <span style="padding:3px 10px;border-radius:5px;font-size:11.5px;font-weight:600;
+              background:${clr}22;color:${clr}">
+              ${fmtPct(g.pct_oportunidad)}
+            </span>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // Tendencia mensual oportunidad — barras horizontales
+  const divOp = document.getElementById('disp-chart-op-mes');
+  if(divOp && por_mes.length){
+    const maxPct = Math.max(...por_mes.map(m => m.pct_oportunidad||0), 1);
+    const MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    divOp.innerHTML = por_mes.map(m => {
+      const pct = m.pct_oportunidad||0;
+      const bar = Math.round(pct / 100 * 100);
+      const clr = semOp(pct);
+      return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+        <span style="width:52px;text-align:right;color:var(--text2);flex-shrink:0">${MESES[m.mes]||m.mes} ${String(m.año).slice(2)}</span>
+        <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
+          <div style="width:${bar}%;height:100%;background:${clr};border-radius:4px;transition:width .4s"></div>
+        </div>
+        <span style="width:48px;font-weight:600;color:${clr}">${fmtPct(pct)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  setText('disp-op-status', `✓ ${fmtN(resumen.total_validos)} registros válidos · ${fmtN(por_gestor.length)} gestores`);
+
+  // ── Pantalla Pendientes ────────────────────────────────────────
+  setText('disp-kpi-e48-pct',      fmtPct(resumen.pct_entrega_48));
+  setText('disp-kpi-p48-pct',      fmtPct(resumen.pct_posterior_48));
+  setText('disp-kpi-pparcial-pct', fmtPct(resumen.pct_pendiente_parcial));
+  setText('disp-kpi-pactivo-pct',  fmtPct(resumen.pct_pendiente_activo));
+
+  setText('disp-kpi-e48-n',      `${fmtN(resumen.entrega_48)} registros`);
+  setText('disp-kpi-p48-n',      `${fmtN(resumen.posterior_48)} registros`);
+  setText('disp-kpi-pparcial-n', `${fmtN(resumen.pendiente_parcial)} registros`);
+  setText('disp-kpi-pactivo-n',  `${fmtN(resumen.pendiente_activo)} registros`);
+  setText('disp-kpi-den-pend',   fmtN(resumen.total_pendientes));
+
+  // Tabla gestor - pendientes
+  const tbPend = document.getElementById('disp-tabla-pend-gestor');
+  if(tbPend){
+    const tbody = tbPend.querySelector('tbody');
+    const rowsPend = por_gestor.filter(g =>
+      (g.entrega_48||0)+(g.posterior_48||0)+(g.pendiente_parcial||0)+(g.pendiente_activo||0) > 0
+    );
+    if(!rowsPend.length){
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text2);padding:20px">Sin pendientes</td></tr>';
+    } else {
+      tbody.innerHTML = rowsPend.map(g => {
+        const tot = (g.entrega_48||0)+(g.posterior_48||0)+(g.pendiente_parcial||0)+(g.pendiente_activo||0);
+        const p = n => tot ? (n/tot*100).toFixed(1)+'%' : '—';
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 12px;font-size:12px">${g.nombre||g.nit||'—'}</td>
+          <td style="text-align:center;font-size:12px;font-weight:600">${fmtN(tot)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.entrega_48)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--blue)">${p(g.entrega_48)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.posterior_48)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--amber)">${p(g.posterior_48)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.pendiente_parcial)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--red)">${p(g.pendiente_parcial)}</td>
+          <td style="text-align:center;font-size:12px">${fmtN(g.pendiente_activo)}</td>
+          <td style="text-align:center;font-size:11.5px;color:var(--red)">${p(g.pendiente_activo)}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // Tendencia mensual pendientes — stacked bars
+  const divPend = document.getElementById('disp-chart-pend-mes');
+  if(divPend && por_mes.length){
+    const MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    divPend.innerHTML = por_mes.map(m => {
+      const tot = (m.entrega_48||0)+(m.posterior_48||0)+(m.pendiente_parcial||0)+(m.pendiente_activo||0)||1;
+      const pE = m.entrega_48/tot*100, pP = m.posterior_48/tot*100,
+            pPP = m.pendiente_parcial/tot*100, pPA = m.pendiente_activo/tot*100;
+      return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
+        <span style="width:52px;text-align:right;color:var(--text2);flex-shrink:0">${MESES[m.mes]||m.mes} ${String(m.año).slice(2)}</span>
+        <div style="flex:1;height:18px;border-radius:4px;overflow:hidden;display:flex">
+          <div style="width:${pE.toFixed(1)}%;background:var(--blue);height:100%" title="Entrega 48h: ${m.entrega_48}"></div>
+          <div style="width:${pP.toFixed(1)}%;background:var(--amber);height:100%" title="Posterior 48h: ${m.posterior_48}"></div>
+          <div style="width:${pPP.toFixed(1)}%;background:var(--red);height:100%" title="Pend.parcial: ${m.pendiente_parcial}"></div>
+          <div style="width:${pPA.toFixed(1)}%;background:#ff2244;height:100%" title="Pend.activo: ${m.pendiente_activo}"></div>
+        </div>
+        <span style="width:48px;font-size:11px;color:var(--text2)">${fmtN(tot)}</span>
+      </div>`;
+    }).join('') + `<div style="display:flex;gap:16px;margin-top:6px;font-size:10.5px;color:var(--text2);padding-left:60px">
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--blue);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Entrega 48h</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--amber);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Posterior 48h</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--red);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Pend. parcial</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#ff2244;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Pend. activo</span>
+    </div>`;
+  }
+
+  setText('disp-pend-status', `✓ Denominador: ${fmtN(resumen.total_pendientes)} registros pendientes`);
+}
+
+// ─── Demo mientras DISP_SCRIPT está PENDIENTE_DEPLOY ─────────────
+function renderDemo(){
+  const demoData = {
+    ok: true, generado: new Date().toISOString(),
+    resumen:{
+      total_validos:15420, oportunidad:11640,
+      entrega_48:1850, posterior_48:980,
+      pendiente_parcial:620, pendiente_activo:330,
+      pct_oportunidad:75.5, pct_entrega_48:49.2,
+      pct_posterior_48:26.1, pct_pendiente_parcial:16.5,
+      pct_pendiente_activo:8.8, total_pendientes:3780,
+    },
+    por_gestor:[
+      {nit:'892300678',nombre:'ETICOS S.A.S',total_validos:8200,oportunidad:6400,entrega_48:900,posterior_48:450,pendiente_parcial:280,pendiente_activo:170,pct_oportunidad:78.0,pct_entrega_48:50.3,pct_posterior_48:25.1,pct_pendiente_parcial:15.6,pct_pendiente_activo:9.5},
+      {nit:'800251440',nombre:'AUDIFARMA S.A.',total_validos:4800,oportunidad:3400,entrega_48:650,posterior_48:320,pendiente_parcial:190,pendiente_activo:90,pct_oportunidad:70.8,pct_entrega_48:52.0,pct_posterior_48:25.6,pct_pendiente_parcial:15.2,pct_pendiente_activo:7.2},
+      {nit:'900000001',nombre:'GESTOR 3',total_validos:2420,oportunidad:1840,entrega_48:300,posterior_48:210,pendiente_parcial:150,pendiente_activo:70,pct_oportunidad:76.0,pct_entrega_48:41.7,pct_posterior_48:29.2,pct_pendiente_parcial:20.8,pct_pendiente_activo:9.7},
+    ],
+    por_mes:[
+      {año:2025,mes:10,key:'2025-10',total_validos:3800,oportunidad:2750,entrega_48:480,posterior_48:240,pendiente_parcial:180,pendiente_activo:150,pct_oportunidad:72.4},
+      {año:2025,mes:11,key:'2025-11',total_validos:5600,oportunidad:4100,entrega_48:680,posterior_48:380,pendiente_parcial:250,pendiente_activo:90,pct_oportunidad:73.2},
+      {año:2025,mes:12,key:'2025-12',total_validos:6020,oportunidad:4790,entrega_48:690,posterior_48:360,pendiente_parcial:190,pendiente_activo:90,pct_oportunidad:79.6},
+    ],
+  };
+  DISP_DATA = demoData;
+  renderAll();
+  setText('disp-op-status', '⚠ Apps Script pendiente · Datos de demostración · Despliega DispensacionScript.gs y actualiza DISP_SCRIPT');
+  setText('disp-pend-status', '⚠ Apps Script pendiente · Datos de demostración');
+}
+
+function renderError(msg){
+  ['disp-op-status','disp-pend-status'].forEach(id =>
+    setText(id, `✗ Error cargando dispensación: ${msg}`));
+}
+
+function setText(id, val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+function setStyle(id, prop, val){ const el=document.getElementById(id); if(el) el.style[prop]=val; }
+
+// ─── Trigger en navigate ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  const orig = window.navigate;
+  if(typeof orig === 'function'){
+    window.navigate = function(scr){
+      orig(scr);
+      if(scr === 'gest-oportunidad' || scr === 'gest-pendientes'){
+        setTimeout(cargarDispensacion, 80);
+      }
+    };
+  }
+});
+
 })();
 </script>
 
