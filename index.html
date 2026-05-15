@@ -215,8 +215,8 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 
 /* TABLE */
 .table{width:100%;border-collapse:collapse;}
-.table th{font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding:0 10px 9px 0;text-align:left;border-bottom:1px solid var(--border);}
-.table td{padding:9px 10px 9px 0;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
+.table th{font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding:9px 12px;text-align:left;border-bottom:2px solid var(--border2);white-space:nowrap;}
+.table td{padding:9px 12px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
 .table tr:last-child td{border-bottom:none;}
 .table td.nm{color:var(--text);font-weight:500;}
 .table tr{cursor:pointer;transition:background .1s;}
@@ -5176,19 +5176,7 @@ async function cargarDesdeDrive() {
     fetchViaAppsScript(DRIVE_CONFIG.reclamaciones.id,     DRIVE_CONFIG.reclamaciones.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.homologacion.id,      DRIVE_CONFIG.homologacion.hoja),
     fetchViaAppsScript(DRIVE_CONFIG.satisfaccion.id,      DRIVE_CONFIG.satisfaccion.hoja),
-    (async()=>{
-      // CM_SCRIPT con retry automático (hasta 2 intentos) para ERR_QUIC_PROTOCOL_ERROR
-      for(let intento=1; intento<=2; intento++){
-        try{
-          const r = await fetch(`${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`);
-          if(!r.ok) throw new Error(`HTTP ${r.status}`);
-          return await r.json();
-        } catch(e){
-          if(intento===2) throw e;
-          await new Promise(res=>setTimeout(res, 1500)); // esperar 1.5s antes de reintentar
-        }
-      }
-    })(),
+    fetchViaAppsScript(DRIVE_CONFIG.cuentas_medicas.id, DRIVE_CONFIG.cuentas_medicas.hoja),
   ]);
 
   const resultados = [];
@@ -9256,9 +9244,8 @@ function parsearCuentasMedicas(raw) {
     // Intentar cargar CM de forma independiente
     setCMStatus('⏳ Cargando cuentas médicas...','var(--text2)');
     try{
-      const r = await fetch(`${CM_SCRIPT}?hoja=${encodeURIComponent(DRIVE_CONFIG.cuentas_medicas.hoja)}`);
-      if(!r.ok) throw new Error(`HTTP ${r.status}`);
-      const data = await r.json();
+      // Usar fetchViaAppsScript (main script, sin CORS) en vez de CM_SCRIPT directo
+      const data = await fetchViaAppsScript(DRIVE_CONFIG.cuentas_medicas.id, DRIVE_CONFIG.cuentas_medicas.hoja);
       DATOS_CARGADOS.cuentas_medicas = parsearCuentasMedicas(data);
       window.renderizarCuentasMedicas();
       setCMStatus(`✓ ${(DATOS_CARGADOS.cuentas_medicas||[]).length.toLocaleString('es-CO')} registros cargados`,'var(--green)');
@@ -9478,8 +9465,7 @@ async function cargarDispensacion(){
   }
 
   try {
-    const resp = await fetch(DISP_SCRIPT);
-    const json = await resp.json();
+    const json = await fetchScript(DISP_SCRIPT);
     if(json.error) throw new Error(json.error);
     DISP_DATA = json;
     renderAll();
@@ -10342,12 +10328,25 @@ window.switchOpTab = function(tab) {
   }
 };
 
+
+// ── fetchScript: fetch a Google Apps Script con manejo de CORS ───────
+// Los scripts de Google redirigen a script.googleusercontent.com;
+// si el origen no tiene CORS, se captura aquí con info útil.
+// SOLUCIÓN DEFINITIVA: en cada Apps Script, despliega con
+//   "Ejecutar como: Yo"  +  "Quién puede acceder: Cualquier persona"
+async function fetchScript(url) {
+  const r = await fetch(url, { redirect: 'follow' });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const text = await r.text();
+  try { return JSON.parse(text); }
+  catch { throw new Error('Respuesta no es JSON: ' + text.slice(0, 120)); }
+}
+
 // ── Carga ACOP_SCRIPT ────────────────────────────────────────────
 async function cargarACOP(){
   if(ACOP_SCRIPT==='PENDIENTE_DEPLOY'){ renderAcopDemo(); return; }
   try {
-    const r = await fetch(ACOP_SCRIPT);
-    const d = await r.json();
+    const d = await fetchScript(ACOP_SCRIPT);
     if(d.error) throw new Error(d.error);
     ACOP_DATA = d;
     renderOpCI(d); renderAcc(d);
@@ -10362,8 +10361,7 @@ async function cargarACOP(){
 async function cargarRes1552(){
   if(RES1552_SCRIPT==='PENDIENTE_DEPLOY'){ renderRes1552Demo(); return; }
   try {
-    const r = await fetch(RES1552_SCRIPT);
-    const d = await r.json();
+    const d = await fetchScript(RES1552_SCRIPT);
     if(d.error) throw new Error(d.error);
     RES1552_DATA = d;
     render1552(d);
@@ -11203,7 +11201,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     try {
-      const resp = await fetch(PQRS_RED_SCRIPT);
+      const resp = { json: async()=> await fetchScript(PQRS_RED_SCRIPT) };
       if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
       if(data.error) throw new Error(data.error);
@@ -12142,7 +12140,7 @@ window.cargarRiesgos = async function(){
   }
 
   try {
-    const resp = await fetch(RIESGOS_RED_SCRIPT);
+    const resp = { json: async()=> await fetchScript(RIESGOS_RED_SCRIPT) };
     if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     if(data.error) throw new Error(data.error);
