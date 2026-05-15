@@ -2398,7 +2398,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <span style="font-size:20px">🏥</span>
         <div style="flex:1">
           <div style="font-size:12.5px;font-weight:500;color:var(--text)">Base Prestadores Nacionales</div>
-          <div style="font-size:10.5px;color:var(--text2);margin-top:1px">Google Sheets · Pestaña "EPS Sanitas" · 7,704 registros</div>
+          
         </div>
         <div id="estado-drive-prestadores" style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--bg4);color:var(--text2)">Sin cargar</div>
       </div>
@@ -2407,7 +2407,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <span style="font-size:20px">💊</span>
         <div style="flex:1">
           <div style="font-size:12.5px;font-weight:500;color:var(--text)">Red Nacional de Medicamentos</div>
-          <div style="font-size:10.5px;color:var(--text2);margin-top:1px">Google Sheets · NIT Gestores + Detalle DANE · ~739 municipios</div>
+          
         </div>
         <div id="estado-drive-medicamentos" style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--bg4);color:var(--text2)">Sin cargar</div>
       </div>
@@ -2416,7 +2416,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <span style="font-size:20px">📋</span>
         <div style="flex:1">
           <div style="font-size:12.5px;font-weight:500;color:var(--text)">Registro Único de Reclamaciones</div>
-          <div style="font-size:10.5px;color:var(--text2);margin-top:1px">Google Sheets · Pestaña "Datos" · Cartera · Glosas · Pagos por cuotas</div>
+          
         </div>
         <div id="estado-drive-reclamaciones" style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--bg4);color:var(--text2)">Sin cargar</div>
       </div>
@@ -8952,8 +8952,11 @@ function parsearSatisfaccion(data) {
 // ═══════════════════════════════════════════════════════════
 // CUENTAS MÉDICAS — Parser
 // ═══════════════════════════════════════════════════════════
-function parsearCuentasMedicas(data) {
-  if(!data || data.length < 2) return [];
+function parsearCuentasMedicas(raw) {
+  // Soportar tanto array plano [[header],[fila],...] como {data:[[...]]}
+  let data = Array.isArray(raw) ? raw : (raw && (raw.data||raw.values||raw.rows)) ? (raw.data||raw.values||raw.rows) : null;
+  if(!data || !Array.isArray(data) || data.length < 2) return [];
+  if(!data[0] || !Array.isArray(data[0])) return [];
   const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const hdr = data[0].map(h => norm(h));
   const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(norm(kw))); if(i>=0)return i; } return -1; };
@@ -9337,7 +9340,7 @@ function parsearCuentasMedicas(data) {
       <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
         <table class="table" id="disp-tabla-op-gestor">
           <thead><tr>
-            <th>Gestor</th>
+            <th style="padding:8px 16px;min-width:180px">Gestor</th>
             <th style="text-align:center">Total válidos</th>
             <th style="text-align:center">Oportunidad</th>
             <th style="text-align:center">% Oportunidad</th>
@@ -9405,12 +9408,7 @@ function parsearCuentasMedicas(data) {
     </div>
   </div>
 
-  <!-- Denominador pendientes -->
-  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:11.5px;color:var(--text2)">
-    <span style="color:var(--text);font-weight:600">Denominador: </span>
-    Total válidos diferentes a Oportunidad (Entrega 48h + Posterior 48h + Pendiente parcial + Pendiente activo) =
-    <span style="color:var(--blue);font-weight:600" id="disp-kpi-den-pend">—</span> registros
-  </div>
+
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
     <!-- Tabla por gestor -->
@@ -10085,11 +10083,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="kpi-value" style="color:var(--teal)" id="op-ci-kpi-n">—</div>
         <div class="kpi-delta neu">Total con fecha disponibilidad</div>
       </div>
-      <div class="kpi" style="--kc:var(--text2)">
-        <div class="kpi-label">Actualizado</div>
-        <div class="kpi-value" style="color:var(--text2);font-size:13px" id="op-ci-kpi-fecha">—</div>
-        <div class="kpi-delta neu">Fuente: ACOP Script</div>
-      </div>
+
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
@@ -10155,15 +10149,15 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="kpi-value" style="color:var(--blue)" id="op-1552-kpi-op1">—</div>
         <div class="kpi-delta neu">Días promedio Oportunidad 1</div>
       </div>
-      <div class="kpi" style="--kc:var(--teal)">
-        <div class="kpi-label">% Cumple OP1</div>
-        <div class="kpi-value" style="color:var(--teal)" id="op-1552-kpi-pct">—</div>
-        <div class="kpi-delta neu" id="op-1552-kpi-pct-d">Tiempo prom ≤ Meta</div>
+      <div class="kpi" style="--kc:var(--purple)">
+        <div class="kpi-label">Prom. OP2 global</div>
+        <div class="kpi-value" style="color:var(--purple)" id="op-1552-kpi-op2">—</div>
+        <div class="kpi-delta neu">Días promedio Oportunidad 2</div>
       </div>
       <div class="kpi" style="--kc:var(--green)">
-        <div class="kpi-label">Cumplen OP1</div>
-        <div class="kpi-value" style="color:var(--green)" id="op-1552-kpi-cumple">—</div>
-        <div class="kpi-delta up">Consultas dentro de meta</div>
+        <div class="kpi-label">% Cumple OP1</div>
+        <div class="kpi-value" style="color:var(--green)" id="op-1552-kpi-pct">—</div>
+        <div class="kpi-delta up">Tiempo promedio ≤ Meta</div>
       </div>
       <div class="kpi" style="--kc:var(--red)">
         <div class="kpi-label">No cumplen OP1</div>
@@ -10236,6 +10230,9 @@ document.addEventListener('DOMContentLoaded', function(){
     <select id="acc-fil-espec" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:180px">
       <option value="">Todas las especialidades</option>
     </select>
+    <select id="acc-fil-año" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+      <option value="">Todos los años</option>
+    </select>
     <select id="acc-fil-mes" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
       <option value="">Todos los meses</option>
     </select>
@@ -10261,11 +10258,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
   </div>
 
-  <!-- Definición -->
-  <div style="background:var(--bdim);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--text2)">
-    <strong style="color:var(--text)">Accesibilidad</strong> · Es la posibilidad que tiene el usuario de utilizar los servicios de salud que le garantiza el SGSSS.<br>
-    <em>Fórmula: Σ llamadas con contacto efectivo / Σ total llamadas en el período × 100</em>
-  </div>
+
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
     <!-- Por regional -->
@@ -10427,7 +10420,7 @@ function renderOpCIEspec(arr){
   tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
     const d=x.oport||0; const clr=semOp(d);
     return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:7px 12px;font-size:11.5px">${x.especialidad||'—'}</td>
+      <td style="padding:7px 16px;font-size:11.5px;min-width:200px">${x.especialidad||'—'}</td>
       <td style="text-align:center;font-weight:600;color:${clr}">${fmtD(d)}</td>
       <td style="text-align:center;font-size:11.5px">${fmtN(x.op_n)}</td>
       <td style="text-align:center"><span style="padding:2px 8px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${d<=10?'✓ OK':d<=15?'⚠ Atención':'✗ Crítico'}</span></td>
@@ -10482,7 +10475,7 @@ function renderAccEspec(arr){
   tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
     const p=x.acc||0; const clr=semAcc(p);
     return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:7px 12px;font-size:11.5px">${x.especialidad||'—'}</td>
+      <td style="padding:7px 16px;font-size:11.5px;min-width:200px">${x.especialidad||'—'}</td>
       <td style="text-align:center;font-weight:600;color:${clr}">${fmtPct(p)}</td>
       <td style="text-align:center;font-size:11.5px">${fmtN(x.num_acc)}</td>
       <td style="text-align:center;font-size:11.5px">${fmtN(x.den_acc)}</td>
@@ -10496,6 +10489,7 @@ function render1552(d){
   const r=d.resumen||{};
   const clr=sem1552(r.pct_cumple_op1||0);
   setText('op-1552-kpi-op1',  fmtD(r.promOP1_global));
+  setText('op-1552-kpi-op2',  fmtD(r.promOP2_global));
   setText('op-1552-kpi-pct',  fmtPct(r.pct_cumple_op1));
   document.getElementById('op-1552-kpi-pct') && (document.getElementById('op-1552-kpi-pct').style.color=clr);
   setText('op-1552-kpi-cumple', fmtN(r.cumple_op1));
@@ -10539,7 +10533,7 @@ function render1552Espec(arr){
   tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
     const clr=sem1552(x.pctCumple||0);
     return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:7px 12px;font-size:11px">${x.especialidad||'—'}</td>
+      <td style="padding:7px 16px;font-size:11px;min-width:220px">${x.especialidad||'—'}</td>
       <td style="text-align:center;font-weight:600;color:var(--blue)">${fmtD(x.promOP1)}</td>
       <td style="text-align:center;color:var(--text2)">${x.meta||'—'} d</td>
       <td style="text-align:center;font-size:11.5px">${fmtN(x.cons)}</td>
@@ -10553,12 +10547,16 @@ function poblarFiltrosACOP(d){
   const regs  = d.por_regional||[];
   const esps  = d.por_especialidad||[];
   const meses = d.por_mes||[];
+  // Extraer años únicos de los meses (campo año si existe, o de FECHA MEDICION)
+  const años = [...new Set(meses.map(m=>m.año).filter(Boolean))].sort();
   const regOpts = regs.map(x=>`<option value="${x.regional}">${x.regional}</option>`).join('');
   const espOpts = esps.map(x=>`<option value="${x.especialidad}">${x.especialidad}</option>`).join('');
   const mesOpts = meses.map(x=>`<option value="${x.mes}">${x.mes}</option>`).join('');
+  const añoOpts = años.map(a=>`<option value="${a}">${a}</option>`).join('');
   ['op-ci-fil-regional','acc-fil-regional'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+regOpts;}});
   ['op-ci-fil-espec','acc-fil-espec'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+espOpts;}});
   ['op-ci-fil-mes','acc-fil-mes'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+mesOpts;}});
+  ['op-ci-fil-año','acc-fil-año'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+añoOpts;}});
 }
 
 function poblarFiltros1552(d){
@@ -10578,22 +10576,24 @@ window.aplicarFiltrosOpCI = function(){
   const reg=document.getElementById('op-ci-fil-regional')?.value||'';
   const esp=document.getElementById('op-ci-fil-espec')?.value||'';
   const mes=document.getElementById('op-ci-fil-mes')?.value||'';
+  const año=document.getElementById('op-ci-fil-año')?.value||'';
   renderOpCIRegional(ACOP_DATA.por_regional.filter(x=>!reg||x.regional===reg));
   renderOpCIEspec(ACOP_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
-  renderOpCIMes(ACOP_DATA.por_mes.filter(x=>!mes||x.mes===mes));
+  renderOpCIMes(ACOP_DATA.por_mes.filter(x=>(!mes||x.mes===mes)&&(!año||String(x.año)===año)));
 };
-window.resetFiltrosOpCI=()=>{['op-ci-fil-regional','op-ci-fil-espec','op-ci-fil-mes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosOpCI();};
+window.resetFiltrosOpCI=()=>{['op-ci-fil-regional','op-ci-fil-espec','op-ci-fil-mes','op-ci-fil-año'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosOpCI();};
 
 window.aplicarFiltrosAcc = function(){
   if(!ACOP_DATA) return;
   const reg=document.getElementById('acc-fil-regional')?.value||'';
   const esp=document.getElementById('acc-fil-espec')?.value||'';
   const mes=document.getElementById('acc-fil-mes')?.value||'';
+  const año=document.getElementById('acc-fil-año')?.value||'';
   renderAccRegional(ACOP_DATA.por_regional.filter(x=>!reg||x.regional===reg));
   renderAccEspec(ACOP_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
-  renderAccMes(ACOP_DATA.por_mes.filter(x=>!mes||x.mes===mes));
+  renderAccMes(ACOP_DATA.por_mes.filter(x=>(!mes||x.mes===mes)&&(!año||String(x.año)===año)));
 };
-window.resetFiltrosAcc=()=>{['acc-fil-regional','acc-fil-espec','acc-fil-mes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosAcc();};
+window.resetFiltrosAcc=()=>{['acc-fil-regional','acc-fil-espec','acc-fil-mes','acc-fil-año'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosAcc();};
 
 window.aplicarFiltros1552 = function(){
   if(!RES1552_DATA) return;
