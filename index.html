@@ -6536,11 +6536,11 @@ const REQS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbzWwDZU5fJtmJyF6v
 const FALLAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyiBy08PHdIMTyoILQCvf7N83puiZDuWrc0DrkhR9mIqlSzBnKpZSQXS6q-8LhsMapF/exec';
 const PQRS_SCRIPT    = 'https://script.google.com/macros/s/AKfycbyHnmWWRjieaUyEYRoKvTNKFsuXk_CUsIRb5UHDmgycJeiGLgA4LoT9G0fcRIphBvEfdA/exec';
 const TUTELAS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzVt-Q5bggChVwxeM_Wew_QsLkweNZZiYh5aQxP16lxVeCAR0BiLMouZbJbzarSwJ0Kfg/exec';
-// ── PQRS Red de Prestadores ── desplegar Apps Script y reemplazar esta URL
-const PQRS_RED_SCRIPT = 'PENDIENTE_DEPLOY';
-// ── Riesgos en Salud · Hemofilia ── desplegar Apps Script y reemplazar
+// ── PQRS Red de Prestadores ──
+const PQRS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycbzu8xaxZo11EenmMfjvSaEL_Hny7UIccwoh0GrhSvmQyLBw-G3hL5J9dOEht7GZcPTu/exec';
+// ── Riesgos en Salud · Hemofilia ──
 // FUTURO SIGIRES: reemplazar esta URL por el endpoint del webservice
-const RIESGOS_RED_SCRIPT = 'PENDIENTE_DEPLOY';
+const RIESGOS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycby9_VbVsvRp90xRX7WhEw1hsFJJk1VSvROyB7J6FBpvVPkmfwT3qSnG64imPWzpa6XWmw/exec';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -8802,6 +8802,8 @@ function parsearCuentasMedicas(data) {
   const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const hdr = data[0].map(h => norm(h));
   const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(norm(kw))); if(i>=0)return i; } return -1; };
+  // fiOrIdx: igual que fi() con fallback a posición conocida si el nombre no matchea
+  const fiOrIdx = (idx, ...kws) => { const i=fi(...kws); return i>=0 ? i : idx; };
   const get = (row,i) => i>=0&&i<row.length ? String(row[i]||'').trim() : '';
   const getNum = (row,i) => {
     if(i < 0) return 0;
@@ -8821,8 +8823,8 @@ function parsearCuentasMedicas(data) {
     tipo_contrato:    fi('TIPO CONTRATO','TIPO DE CONTRATO','TIPO'),
     validacion:       fi('VALIDACION','VALIDACON','ESTADO VALIDACION','ESTADO VAL','ESTADO'),
     subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL','TOTAL RADICADO','TOTAL'),
-    glosado:          fi('VALOR GLOSADO','GLOSADO GLOSA','GLOSA GLOSADO','V GLOSADO'),
-    glosa_real:       fi('GLOSA REAL','GLOSA REAL VALOR','VALOR GLOSA REAL'),
+    glosado:          fiOrIdx(6,'VALOR GLOSADO','V GLOSADO','VR GLOSADO','VLR GLOSADO','GLOSADO'),
+    glosa_real:       fiOrIdx(7,'GLOSA REAL','VALOR GLOSA REAL','GLOSA REAL VALOR','VR GLOSA REAL','VLR GLOSA REAL'),
     devoluciones:     fi('DEVOLUCIONES','DEVOLUCION','DEV'),
   };
   console.log('[CuentasMédicas] cols detectados:', JSON.stringify(cols));
