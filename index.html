@@ -12400,7 +12400,7 @@ document.addEventListener('DOMContentLoaded', function(){
 const fmtCOP2=v=>{if(!v)return'—';const n=Math.abs(v);if(n>=1e9)return'$'+(v/1e9).toFixed(1)+' mil mill.';if(n>=1e6)return'$'+(v/1e6).toFixed(0)+' M';if(n>=1e3)return'$'+(v/1e3).toFixed(0)+' K';return'$'+Number(v).toLocaleString('es-CO');};
 const fmtN2=v=>Number(v||0).toLocaleString('es-CO');
 const MESES_ES2=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const hoy=new Date();
+const _HOY=new Date();
 
 // ══════════════════════════════════════════════════════════════════
 // SEGUIMIENTO Y NOTIFICACIONES
@@ -12505,8 +12505,8 @@ function renderSeguimiento(){
   se('seg-kpi-notif').textContent=notifs.length;
 
   // Cronograma: actualizar mes actual
-  const mesIdx=hoy.getMonth();
-  const añoAct=hoy.getFullYear();
+  const mesIdx=_HOY.getMonth();
+  const añoAct=_HOY.getFullYear();
   const seg_sub=document.getElementById('seg-hallazgos-sub');
   if(seg_sub) seg_sub.textContent=`${MESES_ES2[mesIdx]} ${añoAct} · ${pendientes} pendientes de comunicar`;
 
@@ -14036,10 +14036,4 @@ ${totalPqr?`<p>Se registraron <strong>${totalPqr}</strong> PQR para ${gesN} en e
 };
 
 // ── Poblar selector gestores en reportes ─────────────────────────
-window.poblarSelectorGestores=function(){
-  const sel=document.getElementById('rep-gestor-selector'); if(!sel) return;
-  if(sel.options.length>1) return;
-  ['AUDIFARMA','DISFARMA','CRUZ VERDE','DISCOLMETS','PHARMASAN','INSUMEDIC','MEDISFARMA','COHAN','GENHOSPI','MACROMED','INPHAPRO','HUMSALUD','ETICOS SERRANO','GLOBAL','COLSUBSIDIO','CAFAM','MYTSALUD']
-    .forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});
-};
 </script>
