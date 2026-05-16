@@ -697,7 +697,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="nav-sec">Auditoría</div>
     <div class="nav-item" data-screen="seguimiento"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12M5 2V1M9 2V1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="9" r="1" fill="currentColor"/><circle cx="7" cy="9" r="1" fill="currentColor"/><circle cx="10" cy="9" r="1" fill="currentColor"/></svg>Seguimiento y notif.</div>
     <div class="nav-item" data-screen="sanciones"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1L2 4v4c0 3 2.5 4.5 5 5 2.5-.5 5-2 5-5V4L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7l1.5 1.5L9 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sanciones</div>
-    <div class="nav-item" data-screen="trazabilidad"><svg viewBox="0 0 14 14" fill="none"><circle cx="2.5" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11.5" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="11" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 7h2M8 7h2M7 4.5v1M7 8.5v1" stroke="currentColor" stroke-width="1.2"/></svg>Trazabilidad</div>
+
     <div class="nav-item" data-screen="reportes"><svg viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 5h4M5 8h4M5 11h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Reportes <span class="nav-badge ok">✓</span></div>
     <div class="nav-sec">Herramientas contractuales</div>
     <div class="nav-item" data-screen="validador"><svg viewBox="0 0 14 14" fill="none"><path d="M11 2H3a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.2"/><path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Validador de contratos</div>
@@ -1077,6 +1077,9 @@ document.addEventListener('DOMContentLoaded',function(){
         <option value="pqrs">📋 PQRS</option>
         <option value="tutelas">⚖ Tutelas</option>
         <option value="medicamentos">💊 Medicamentos</option>
+      </select>
+      <select id="al-f-regional" onchange="filtrarAlertas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);outline:none">
+        <option value="">Todas las regionales</option>
       </select>
       <span id="al-f-count" style="font-size:11px;color:var(--text2);align-self:center"></span>
     </div>
@@ -1468,36 +1471,6 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 
-<div class="screen" id="screen-trazabilidad">
-  <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Gestores con cobertura</div><div class="kpi-value" style="color:var(--teal)" id="traz-kpi-gestores">—</div><div class="kpi-delta up" id="traz-kpi-gestores-d">PBS y No PBS</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Municipios cubiertos</div><div class="kpi-value" style="color:var(--green)" id="traz-kpi-munis">—</div><div class="kpi-delta up" id="traz-kpi-munis-d">Red nacional</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura PBS</div><div class="kpi-value" style="color:var(--blue)" id="traz-kpi-pct">—</div><div class="kpi-delta neu">% municipios con acceso</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Brechas identificadas</div><div class="kpi-value" style="color:var(--amber)" id="traz-kpi-brechas">—</div><div class="kpi-delta warn">Gestores <60% cobertura</div></div>
-  </div>
-  <div class="grid-21">
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head"><div><div class="card-title">Cobertura por gestor PBS</div><div class="card-sub" id="traz-sub">Municipios cubiertos · Trazabilidad de red</div></div></div>
-      <div class="card-body" style="padding:0 16px;max-height:400px;overflow-y:auto" id="traz-gestor-body">
-        <div style="text-align:center;padding:32px;color:var(--text2);font-size:12px">⏳ Cargando datos de cobertura...</div>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Cobertura por regional</div><div class="card-sub">Municipios PBS · % integral</div></div></div>
-        <div class="card-body" style="padding:10px 16px" id="traz-regional-body">
-          <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">⏳ Cargando...</div>
-        </div>
-      </div>
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Gestores No PBS</div><div class="card-sub">Red complementaria · Medicamentos especializados</div></div></div>
-        <div class="card-body" style="padding:10px 16px" id="traz-nopbs-body">
-          <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">⏳ Cargando...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <div class="screen" id="screen-reportes">
   <div class="kpi-strip cols-4">
@@ -1528,11 +1501,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <!-- CRONOGRAMA -->
   <div class="card">
     <div class="card-head">
-      <div><div class="card-title">Cronograma de seguimiento 2026</div><div class="card-sub">Cortes de evaluación · periodicidad configurable · Estado por período</div></div>
-      <div style="display:flex;gap:8px">
-        <div class="btn">▼ Mensual</div>
-        <div class="card-act">Exportar cronograma</div>
-      </div>
+      <div><div class="card-title">Cronograma de seguimiento 2026</div><div class="card-sub">Cortes de evaluación · Estado por período · Los datos de prestadores/gestores se actualizan con los datos reales cargados</div></div>
     </div>
     <div class="card-body">
       <div class="crono-wrap">
@@ -1556,7 +1525,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <td><span class="badge bg-g">1,232</span></td>
               <td><span class="badge bg-g">6/6</span></td>
               <td><span class="badge bg-g">34/34</span></td>
-              <td><div class="h-btn download" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px" onclick="simulateDownload('Ene-2026')">⬇ Descargar</div></td>
+              <td><div class="h-btn download" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px" onclick="toastMsg('Informe Ene-2026 disponible al conectar el sistema de informes')">⬇ Descargar</div></td>
               <td><span class="badge bg-g">8 enviadas</span></td>
               <td><span class="crono-pill" style="background:var(--gdim);color:var(--green)">✓ Completo</span></td>
             </tr>
@@ -1566,7 +1535,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <td><span class="badge bg-g">1,238</span></td>
               <td><span class="badge bg-g">6/6</span></td>
               <td><span class="badge bg-g">34/34</span></td>
-              <td><div class="h-btn download" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px" onclick="simulateDownload('Feb-2026')">⬇ Descargar</div></td>
+              <td><div class="h-btn download" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px" onclick="toastMsg('Informe Feb-2026 disponible al conectar el sistema de informes')">⬇ Descargar</div></td>
               <td><span class="badge bg-g">11 enviadas</span></td>
               <td><span class="crono-pill" style="background:var(--gdim);color:var(--green)">✓ Completo</span></td>
             </tr>
@@ -1623,19 +1592,12 @@ document.addEventListener('DOMContentLoaded',function(){
       </div>
     </div>
 
-    <!-- INFORMES POR CONTRATO + HISTORIAL NOTIFICACIONES -->
+    <!-- HISTORIAL NOTIFICACIONES -->
     <div style="display:flex;flex-direction:column;gap:14px">
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Resumen por prestador</div><div class="card-sub">Contratos vigentes · Score y estado actual</div></div></div>
-        <div class="card-body" style="padding:10px 16px;max-height:280px;overflow-y:auto" id="seg-resumen-contratos">
-          <div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">⏳ Cargando...</div>
-        </div>
-      </div>
-
       <div class="card" style="margin-bottom:0">
         <div class="card-head"><div><div class="card-title">Historial de notificaciones</div><div class="card-sub" id="seg-notif-sub">Registradas en sistema</div></div>
         <button class="btn" onclick="limpiarNotificaciones()" style="font-size:11px">↺ Limpiar</button></div>
-        <div class="card-body" style="padding:10px 16px;max-height:240px;overflow-y:auto" id="seg-notif-historial">
+        <div class="card-body" style="padding:10px 16px;max-height:420px;overflow-y:auto" id="seg-notif-historial">
           <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">Sin notificaciones registradas</div>
         </div>
       </div>
@@ -2269,39 +2231,6 @@ document.addEventListener('DOMContentLoaded',function(){
       </div>
     </div>
 
-    <!-- Parámetros configurables -->
-    <div class="card" style="margin-bottom:0">
-      <div class="card-head">
-        <div><div class="card-title">Parámetros de sanción</div><div class="card-sub">Configuración por modelo · Requiere perfil Administrador</div></div>
-        <div class="btn pri" onclick="guardarParametros()" style="font-size:11.5px">Guardar cambios</div>
-      </div>
-      <div class="card-body">
-        <div class="param-row">
-          <div><div class="param-name">Capita — Oportunidad</div><div class="param-sub">% del valor mensual del contrato por indicador incumplido</div></div>
-          <input class="param-input" id="p-capita-op" value="0.40" type="number" step="0.01" min="0" max="5">
-        </div>
-        <div class="param-row">
-          <div><div class="param-name">Capita — Resultados en salud</div><div class="param-sub">% del valor mensual del contrato por indicador incumplido</div></div>
-          <input class="param-input" id="p-capita-rs" value="0.41" type="number" step="0.01" min="0" max="5">
-        </div>
-        <div class="param-row">
-          <div><div class="param-name">Techo Presupuestal</div><div class="param-sub">% del cierre financiero trimestral por indicador incumplido</div></div>
-          <input class="param-input" id="p-techo" value="0.20" type="number" step="0.01" min="0" max="5">
-        </div>
-        <div class="param-row">
-          <div><div class="param-name">MRC — Riesgo Compartido</div><div class="param-sub">% del valor de la liquidación por indicador incumplido</div></div>
-          <input class="param-input" id="p-mrc" value="1.00" type="number" step="0.01" min="0" max="10">
-        </div>
-        <div class="param-row">
-          <div><div class="param-name">PGP — Pago Global</div><div class="param-sub">% del valor de la liquidación por indicador incumplido</div></div>
-          <input class="param-input" id="p-pgp" value="0.10" type="number" step="0.01" min="0" max="5">
-        </div>
-        <div style="margin-top:12px;padding:10px 12px;background:var(--bdim);border-radius:8px;font-size:11.5px;color:var(--blue)">
-          ℹ Los cambios aplican prospectivamente. Los períodos ya cerrados no se recalculan. Toda modificación queda registrada en el log de auditoría.
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <!-- Listado de indicadores incumplidos -->
@@ -2749,7 +2678,7 @@ const titles = {
   fallas:['Fallas de acceso','Matriz sistematizada · RUTA + REGIONALES + G11ASDESAVID'],
   pqrs:['PQRS y Tutelas','Gestión de reclamaciones · 38 activas'],
   seguimiento:['Seguimiento y notificaciones','Cronograma · informes por contrato · notificación de hallazgos'],
-  trazabilidad:['Trazabilidad','Cadena EPS → Gestor → Paciente'],
+
   reportes:['Reportes','Generación y envío de informes regulatorios'],
   validador:['Validador de contratos','Carga PDF y validación vs. batería oficial'],
   constructor:['Constructor de baterías por regional','Selección de especialidades · generación de anexo Excel'],
@@ -7811,11 +7740,11 @@ function cambiarEstadoSancion(btn, nuevoEstado){
 
 function guardarParametros(){
   const params = {
-    capitaOp: document.getElementById('p-capita-op')?.value,
-    capitaRs: document.getElementById('p-capita-rs')?.value,
-    techo:    document.getElementById('p-techo')?.value,
-    mrc:      document.getElementById('p-mrc')?.value,
-    pgp:      document.getElementById('p-pgp')?.value,
+    capitaOp: document.getElementById('pa-capita-op')?.value,
+    capitaRs: document.getElementById('pa-capita-rs')?.value,
+    techo:    document.getElementById('pa-techo')?.value,
+    mrc:      document.getElementById('pa-mrc')?.value,
+    pgp:      document.getElementById('pa-pgp')?.value,
   };
   const toast=document.getElementById('notif-toast');
   if(toast){
@@ -8750,15 +8679,23 @@ function parsearCuentasMedicas(raw) {
 
   const cols = {
     fecha_radicacion: fi('FECHA RADICACION','FECHA DE RADICACION','FECHA RAD','FECHA'),
-    nit:              fi('NIT PRESTADOR','NUMERO DE NIT','NIT','NUMERO'),
-    nombre:           fi('NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR','NOMBRES DE PRESTADOR','RAZON SOCIAL','NOMBRE'),
+    nit:              fi('NIT PRESTADOR','NUMERO DE NIT','NIT CONTRATISTA','NIT IPS','NIT','NUMERO','IDENTIFICACION','ID PRESTADOR','CEDULA NIT'),
+    nombre:           fi('NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR','NOMBRES DE PRESTADOR','RAZON SOCIAL','NOMBRE IPS','NOMBRE CONTRATISTA','NOMBRE'),
     tipo_contrato:    fi('TIPO CONTRATO','TIPO DE CONTRATO','TIPO'),
     validacion:       fi('VALIDACION','VALIDACON','ESTADO VALIDACION','ESTADO VAL','ESTADO'),
-    subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL','TOTAL RADICADO','TOTAL FACTURADO','VR TOTAL','VLR TOTAL','VALOR TOTAL','TOTAL'),
+    subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL','TOTAL RADICADO','TOTAL FACTURADO','VR TOTAL','VLR TOTAL','VALOR TOTAL','VALOR NETO','TOTAL'),
     glosado:          fiOrIdx(6,'VALOR GLOSADO','V GLOSADO','VR GLOSADO','VLR GLOSADO','GLOSADO','VALOR GLOSA'),
     glosa_real:       fiOrIdx(7,'GLOSA REAL','VALOR GLOSA REAL','GLOSA REAL VALOR','VR GLOSA REAL','VLR GLOSA REAL','GLOSA NETA','VR GLOSA','GLOSA'),
     devoluciones:     fi('DEVOLUCIONES','DEVOLUCION','DEV'),
   };
+  // Si NIT no encontrado por nombre, buscar columna con valores que parezcan NITs (7-10 dígitos)
+  if(cols.nit<0 && data.length>1){
+    for(let c=0;c<(data[1]||[]).length;c++){
+      const sample=data.slice(1,6).map(r=>String(r[c]||'').trim().replace(/\.0$/,''));
+      const nitLike=sample.filter(v=>/^\d{7,10}$/.test(v)).length;
+      if(nitLike>=2){cols.nit=c;break;}
+    }
+  }
   console.log('[CuentasMédicas] cols detectados:', JSON.stringify(cols));
   console.log('[CuentasMédicas] headers completos:', JSON.stringify(hdr));
 
@@ -12516,7 +12453,6 @@ function renderSeguimiento(){
   if(seg_sub) seg_sub.textContent=`${MESES_ES2[mesIdx]} ${añoAct} · ${pendientes} pendientes de comunicar`;
 
   renderHallazgos();
-  renderResumenContratos();
   renderHistorialNotif();
 }
 
@@ -12647,12 +12583,13 @@ window.calcularSanciones=function(){
     return;
   }
 
-  // Parámetros configurables desde la pantalla
-  const pCapOp=parseFloat(document.getElementById('p-capita-op')?.value||0.40)/100;
-  const pCapRs=parseFloat(document.getElementById('p-capita-rs')?.value||0.41)/100;
-  const pTecho=parseFloat(document.getElementById('p-techo')?.value||0.20)/100;
-  const pMrc=parseFloat(document.getElementById('p-mrc')?.value||1.00)/100;
-  const pPgp=parseFloat(document.getElementById('p-pgp')?.value||0.10)/100;
+  // Parámetros desde Administración (pa-*); fallback a defaults
+  const gP2=(id,def)=>parseFloat(document.getElementById(id)?.value??def)||def;
+  const pCapOp=gP2('pa-capita-op',0.40)/100;
+  const pCapRs=gP2('pa-capita-rs',0.41)/100;
+  const pTecho=gP2('pa-techo',0.20)/100;
+  const pMrc=gP2('pa-mrc',1.00)/100;
+  const pPgp=gP2('pa-pgp',0.10)/100;
 
   const paramPct={CAPITA:{op:pCapOp,rs:pCapRs,hab:pCapOp},MRC:{op:pMrc,rs:pMrc,hab:pMrc},TECHO:{op:pTecho,rs:pTecho,hab:pTecho},'PGP':{op:pPgp,rs:pPgp,hab:pPgp},EVENTO:{op:0.01,rs:0.01,hab:0.01}};
   const normMod=m=>String(m||'').toUpperCase().split(/[\s+]/)[0];
@@ -12859,13 +12796,37 @@ document.addEventListener('DOMContentLoaded',function(){
       origNav(scr);
       if(scr==='seguimiento') setTimeout(renderSeguimiento,100);
       if(scr==='sanciones')   setTimeout(calcularSanciones,100);
-      if(scr==='trazabilidad') setTimeout(renderTrazabilidad,100);
     };
   }
 });
 
-// ── Enganchar en aplicarPrestadores (reuses the one from script anterior) ─
-const _origAP2=window.aplicarPrestadores;
+// ── toastMsg helper ───────────────────────────────────────────────
+window.toastMsg = function(msg){
+  const t=document.getElementById('notif-toast');
+  if(t){t.textContent=msg;t.style.display='block';setTimeout(()=>{t.style.display='none';},4000);}
+};
+
+// ── Persistir estado sanciones ────────────────────────────────────
+function getSanEstados(){ try{return JSON.parse(localStorage.getItem('rs_san_estados')||'{}');}catch(e){return{};} }
+function saveSanEstados(obj){ try{localStorage.setItem('rs_san_estados',JSON.stringify(obj));}catch(e){} }
+
+// Sobrescribir cambiarEstadoSancion para persistir + actualizar _SAN_DATA
+window.cambiarEstadoSancion=function(btn,nuevoEstado){
+  const row=btn.closest('.san-row'); if(!row) return;
+  const nit=row.querySelector('[style*="Mono"]')?.textContent?.replace('NIT ','').trim()||'';
+  // Actualizar _SAN_DATA
+  const entrada=_SAN_DATA.find(s=>s.nit===nit||row.textContent.includes(s.nombre));
+  if(entrada) entrada.estado=nuevoEstado;
+  // Persistir
+  const estados=getSanEstados();
+  if(nit) estados[nit]=nuevoEstado;
+  saveSanEstados(estados);
+  // Re-render
+  const tab=document.querySelector('#screen-sanciones .tab.active')?.textContent?.toLowerCase()||'todos';
+  const lista=tab==='todos'?_SAN_DATA:_SAN_DATA.filter(s=>s.estado===tab);
+  renderListaSanciones(lista);
+  toastMsg(`Sanción ${nuevoEstado} · ${nit||'registro'}`);
+};
 if(typeof _origAP2==='function'){
   window.aplicarPrestadores=function(){
     _origAP2.apply(this,arguments);
@@ -12925,7 +12886,7 @@ window.generarAlertasCompletas = function(){
       alertas.push({nivel:pct>50?'critica':'media',fuente:'habilitacion',
         titulo:`${p.nombre} — Sin habilitación`,
         desc:`${p.noHab} de ${p.total} servicios NO HABILITADOS · ${pct}% del portafolio${p.regional?' · '+p.regional:''}`,
-        nit:p.nit,valor:pct,icono:'🏥'});
+        nit:p.nit,regional:p.regional||'',valor:pct,icono:'🏥'});
     });
   }
 
@@ -13018,6 +12979,12 @@ window.generarAlertasCompletas = function(){
   const ord={critica:0,media:1,informativa:2};
   alertas.sort((a,b)=>(ord[a.nivel]-ord[b.nivel])||b.valor-a.valor);
   window._ALERTAS_CACHE=alertas;
+  // Poblar filtro de regionales
+  const selReg=document.getElementById('al-f-regional');
+  if(selReg){
+    const regs=[...new Set(alertas.map(a=>a.regional||'').filter(Boolean))].sort();
+    selReg.innerHTML='<option value="">Todas las regionales</option>'+regs.map(r=>`<option value="${r}">${r}</option>`).join('');
+  }
   renderAlertas(alertas);
 };
 
@@ -13070,9 +13037,11 @@ function renderListaAlertas(lista){
 window.filtrarAlertas=function(){
   const nivel=document.getElementById('al-f-nivel')?.value||'';
   const fuente=document.getElementById('al-f-fuente')?.value||'';
+  const regional=document.getElementById('al-f-regional')?.value||'';
   let lista=window._ALERTAS_CACHE||[];
   if(nivel)  lista=lista.filter(a=>a.nivel===nivel);
   if(fuente) lista=lista.filter(a=>a.fuente===fuente);
+  if(regional) lista=lista.filter(a=>(a.regional||'')===regional);
   renderListaAlertas(lista);
 };
 
