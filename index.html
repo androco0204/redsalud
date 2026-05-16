@@ -12530,7 +12530,7 @@ function renderHallazgos(){
     return;
   }
   const notifs=getNotificaciones();
-  body.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">` + lista.map(h=>{
+  body.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">` + lista.map(h=>{
     const color=h.nivel==='critico'?'var(--red)':'var(--amber)';
     const bc=h.nivel==='critico'?'bg-r':'bg-a';
     const hist=notifs.filter(n=>n.nit===h.nit);
@@ -12912,124 +12912,129 @@ window.poblarSelectorReportes = function poblarSelectorReportes(){
 window.generarFormatoSupervision=function(){
   const sel=document.getElementById('rep-prest-selector');
   const nit=sel?.value; if(!nit){toastMsg('Selecciona un prestador primero');return;}
+  if(!window.XLSX){toastMsg('Libreria XLSX no cargada');return;}
+  const XLSX=window.XLSX;
   const prest=DATOS_CARGADOS.prestadores||[];
-  const p=prest.find(x=>String(x.nit||x.nombre||'')===nit)||{};
   const normNit=nit.replace(/\./g,'').trim();
+  const p=prest.find(x=>String(x.nit||'').replace(/\./g,'').trim()===normNit)||{nit,nombre:nit};
 
-  // Datos de habilitación
+  // Habilitacion
   const habRows=(DATOS_CARGADOS.homologacion_rows||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
   const norm=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const habSi=habRows.filter(r=>norm(r.resultado).includes('SI HABILITADO')).length;
   const habTotal=habRows.length;
-  const habPct=habTotal?Math.round(habSi/habTotal*100):null;
+  const habRes=habTotal?`Numerador: ${habSi}  Denominador: ${habTotal}  Resultado: ${Math.round(habSi/habTotal*100)}%`:'Numerador: XX  Denominador: XX  Resultado: XX%';
+  const habCumple=habTotal&&habSi===habTotal?'X':'';
+  const habNoCumple=habTotal&&habSi<habTotal?'X':'';
+  const habNoAplica=habTotal?'':'X';
 
-  // Datos de glosa
+  // Glosa
   const cmRows=(DATOS_CARGADOS.cuentas_medicas||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const subTotal=cmRows.reduce((a,r)=>a+r.subtotal,0);
-  const glosTotal=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
-  const glosPct=subTotal?((glosTotal/subTotal)*100).toFixed(1):null;
+  const sub=cmRows.reduce((a,r)=>a+r.subtotal,0);
+  const glos=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
+  const glosPct=sub?`Resultado: ${((glos/sub)*100).toFixed(1)}%`:'Resultado: XX%';
+  const glosCumple=sub&&(glos/sub)<0.15?'X':'';
+  const glosNoCumple=sub&&(glos/sub)>=0.15?'X':'';
 
-  // PQRS
-  const pqrsData=window.PQRS_RED_DATA||[];
-  const pqrNit=pqrsData.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const totalPqr=pqrNit.reduce((a,r)=>a+r.total,0);
+  // PQR
+  const pqrsAll=window.PQRS_RED_DATA||[];
+  const pqrN=pqrsAll.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+  const totalPqr=pqrN.reduce((a,r)=>a+r.total,0);
+  const pqrRes=totalPqr?`Promedio 1T: ${totalPqr}  Promedio 2T: XX  Diferencia: XX`:'Promedio 1T: XX  Promedio 2T: XX  Diferencia: XX';
 
   const hoy=new Date().toLocaleDateString('es-CO');
-  const nombre=p.nombre||p.razon_social||nit;
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const periodo=`${meses[new Date().getMonth()]} ${new Date().getFullYear()}`;
 
-  if(!window.XLSX){toastMsg('Librería XLSX no cargada');return;}
-  const XLSX=window.XLSX;
+  const F=[
+    ['SUPERVISION DE CONTRATOS PRESTADORES DE SERVICIOS DE SALUD'],
+    ['Informacion Inicial'],
+    ['Fecha de Informe','','',hoy,'','','','','Periodo Evaluado','','',periodo],
+    [''],
+    ['Informacion Basica del Prestador'],
+    ['NIT o No. ID del Prestador:','','',p.nit||nit,'','','','Nombre del Prestador:','','','',p.nombre||'','','Nombre de Sede:','',p.nombre||'','Regional:',p.regional||''],
+    [''],
+    ['Nombre del Representante Legal:','','',p.representante_legal||'','','Tipo ID:',p.tipo_id||'CC','No. Identificacion:','',p.nit||nit,'','','Telefono o Celular:','',p.telefonos||p.telefono||'','Email:',p.email||p.correo||''],
+    [''],
+    ['Informacion del Contrato'],
+    ['No. De Contrato:','',p.contrato||'','','Regimen del Contrato:','','',p.descripcion_plan||'|1 - REGIMEN CONTRIBUTIVO|','','Periodicidad de Supervision:','','Mensual','','Fecha de Firma Contrato:','',p.fecha_inicio||''],
+    [''],
+    ['Modalidad Contrato:','','',p.modelo||p.forma_contratacion||'','','Duracion Contrato (Meses):','','24','','Prorroga Automatica:','','Si','Tiene Otro si?:','','Si','','Poblacion Certificada:',''],
+    [''],
+    ['Vigilancia Tecnica'],
+    ['Objeto del Contrato'],
+    [''],
+    ['Clasificacion','Atributo','','Descripcion','','','','','Cumplimiento','','','','','Observaciones'],
+    ['','','','','','','','','Resultado','','Cumple','No Cumple','No Aplica',''],
+    ['Habilitacion','Habilitacion','','El prestador se encuentra inscrito en el REPS y los servicios anexos al contrato se encuentran habilitados','','','','',habRes,'',habCumple,habNoCumple,habNoAplica,''],
+    ['Calidad','Oportunidad','','El prestador cumple con la meta esperada del indicador de oportunidad en los servicios contratados','','','','','% Cumplimiento Oportunidad: XXX%','','','','X','Sin dato Apps Script'],
+    ['Calidad','Accesibilidad','','El prestador cumple con la meta esperada del indicador de accesibilidad','','','','','% Accesibilidad: XXX%','','','','X','Sin dato Apps Script'],
+    ['Calidad','Visita Calidad','','El prestador cumple con los parametros de calidad establecidos en el SOGC','','','','','Calificacion Obtenida o Promedio: XX%','','','','X','Sin dato Apps Script'],
+    ['Calidad','Quejas','','El prestador cumple la meta esperada del indicador de PQR concertada en el contrato','','','','',pqrRes,'',totalPqr&&totalPqr<20?'X':'',totalPqr>=20?'X':'',!totalPqr?'X':'',''],
+    ['Calidad','Satisfaccion','','El prestador cumple con la meta esperada del indicador de Satisfaccion global','','','','','Porcentaje de Satisfaccion: XXX%','','','','X','Sin dato Apps Script'],
+    ['Resultados en salud','Resultados en Salud','','El prestador cumple con las metas establecidas para los indicadores de resultados en salud pactados contractualmente','','','','','Numerador: XX  Denominador: XX  Resultado: XXX%','','','','X','Sin dato Apps Script'],
+    ['Gestion','Nota tecnica','','El prestador cumple con la meta establecida de los indicadores de nota tecnica','','','','','','','','','X','Sin dato Apps Script'],
+    ['Gestion','Bases de ejecucion','','El prestador cumple con el reporte oportuno de las bases de ejecucion','','','','','','','','','X','Sin dato Apps Script'],
+    ['Gestion','Reportes normativos','','El prestador realiza el cargue en PISIS del MPS los datos relacionados con la resolucion 256 de 2016','','','','','','','','','X','Sin dato Apps Script'],
+    ['Gestion','Reportes normativos','','El prestador realiza el cargue de la informacion de oportunidad de la Resolucion 1552','','','','','','','','','X','Sin dato Apps Script'],
+    ['Gestion','Reportes normativos','','El prestador realiza el cargue de la informacion de cohortes de Cuenta de Alto Costo (CAC)','','','','','','','','','X','Sin dato Apps Script'],
+    ['Gestion','Reportes normativos','','El prestador realiza el cargue de la informacion de las Resoluciones 3280 y 202','','','','','','','','','X','Sin dato Apps Script'],
+    ['Sanciones','Indicadores de Sancion','','El prestador cumple con las metas establecidas para los indicadores de sancion o glosa pactados contractualmente','','','','',sub?glosPct:'Resultado: XXX%','',glosCumple,glosNoCumple,!sub?'X':'',''],
+    ['Evaluacion procesos','Capacidad instalada','','El prestador cumple con el reporte de la capacidad instalada','','','','','','','','','X','Sin dato Apps Script'],
+    ['Recomendaciones, Observaciones y/o Sugerencias frente a la Vigilancia Tecnica'],
+    [''],[''],
+    ['Vigilancia Administrativa y Juridica'],
+    ['Clasificacion','Atributo','','Descripcion','','','','','Cumplimiento','','','','','Observaciones'],
+    ['','','','','','','','','Resultado','','Cumple','No Cumple','No Aplica',''],
+    ['Pagos al Talento Humano','Pagos al Talento Humano (Nomina)','','El prestador certifica que cumple con el pago de salarios, prestaciones legales, aportes a la seguridad social','','','','','','','','','X','Pendiente certificacion prestador'],
+    ['Pagos al Talento Humano','Pagos al Talento Humano (Contratistas)','','El prestador certifica que sus contratistas se encuentran afiliados y hacen correctamente sus aportes al SGSS','','','','','','','','','X','Pendiente certificacion prestador'],
+    ['Polizas','Polizas','','El prestador mantiene vigentes las garantias contractuales exigidas por la EPS SANITAS','','','','','','','','','X','Pendiente verificacion polizas'],
+    ['Sarlaft','Sarlaft','','Los empleados, contratistas, accionistas no se encuentran reportados en listas vinculantes (ONU, OFAC)','','','','','','','','','X','Pendiente verificacion Sarlaft'],
+    ['Recomendaciones, Observaciones y/o Sugerencias frente a la Vigilancia Administrativa y Juridica'],
+    [''],[''],
+    ['Vigilancia Financiera y Contable'],
+    ['Clasificacion','Atributo','','Descripcion','','','','','Cumplimiento','','','','','Observaciones'],
+    ['','','','','','','','','Resultado','','Cumple','No Cumple','No Aplica',''],
+    ['Gestion','Gestion Cuentas','','El prestador cumple con la meta establecida para el indicador de radicacion pactado contractualmente','','','','','Resultado: XX%','','','','X','Sin dato Apps Script'],
+    ['Gestion','Gestion Cuentas','','El prestador cumple con la meta establecida para el indicador de devoluciones pactado contractualmente','','','','','Resultado: XX%','','','','X','Sin dato Apps Script'],
+    ['Gestion','Gestion Cuentas','','El prestador cumple con la meta establecida para el indicador de glosa pactado contractualmente','','','','',sub?glosPct:'Resultado: XX%','',glosCumple,glosNoCumple,!sub?'X':'',''],
+    ['Recomendaciones, Observaciones y/o Sugerencias frente a la Vigilancia Financiera y Contable'],
+    [''],[''],
+    ['g) Conclusiones Generales de la Supervision'],
+    ['El supervisor debera realizar una evaluacion integral del desempeno del proveedor, considerando el cumplimiento de los aspectos revisados en cada vigilancia.','','','','','','','','','','','Cumple con el objeto contractual?','',habTotal&&habSi===habTotal&&(!sub||glos/sub<0.15)?'Si':'Requiere evaluacion integral'],
+    [''],[''],
+    ['h) Firmas del Supervisor y de quien apoyo la Supervision'],
+    [''],
+    ['Supervisor EPS Sanitas','','','','','','','','','Apoyo de Supervision 1'],
+    ['Nombre:','','','','','','','','','Nombre:'],
+    ['Tipo ID:','','No. ID:','','','','','','','Tipo ID:','','No. ID:'],
+    ['Cargo:','','','','','','','','','Cargo:'],
+    ['Correo:','','','','','','','','','Correo:'],
+    ['Version 3'],
+  ];
+
   const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(F);
+  ws['!cols']=[{wch:22},{wch:18},{wch:4},{wch:55},{wch:4},{wch:4},{wch:4},{wch:4},{wch:30},{wch:4},{wch:8},{wch:10},{wch:10},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,ws,'Formato');
 
-  // ── Hoja 1: Formato de Supervisión ──
-  const rows=[
-    ['SUPERVISIÓN DE CONTRATOS PRESTADORES DE SERVICIOS DE SALUD'],
-    [''],
-    ['Fecha de Informe', hoy, '', 'Periodo Evaluado', new Date().toLocaleDateString('es-CO',{month:'long',year:'numeric'})],
-    [''],
-    ['Información Básica del Prestador'],
-    ['NIT ó No. ID del Prestador:', p.nit||nit, '', 'Nombre del Prestador:', nombre, '', '', 'Regional:', p.regional||'—'],
-    ['Nombre Representante Legal:', p.representante_legal||'—', '', 'Teléfono:', p.telefono||p.telefonos||'—', '', '', 'Email:', p.email||p.correo||'—'],
-    [''],
-    ['Información del Contrato'],
-    ['No. De Contrato:', p.contrato||p.numero_contrato||'—', '', 'Modalidad Contrato:', p.modelo||'—', '', '', 'Fecha Firma Contrato:', p.fecha_inicio||p.vigencia||'—'],
-    ['Ciudad:', p.ciudad||'—', '', 'Departamento:', p.departamento||'—'],
-    [''],
-    ['VIGILANCIA TÉCNICA'],
-    ['Clasificación','Atributo','Descripción','Resultado','Cumple','No Cumple','No Aplica','Observaciones'],
-    ['Habilitación','Habilitación',
-      'El prestador se encuentra inscrito en REPS y servicios anexos están habilitados',
-      habTotal?`Numerador: ${habSi}  Denominador: ${habTotal}  Resultado: ${habPct}%`:'Sin datos',
-      habPct===100?'X':'', habPct!==null&&habPct<100?'X':'', habTotal===0?'X':'', ''],
-    ['Calidad','Quejas','El prestador cumple la meta esperada del indicador PQR',
-      totalPqr?`Total PQR período: ${totalPqr}`:'Sin datos App Script', '','','X',''],
-    ['Calidad','Oportunidad','El prestador cumple meta de oportunidad en servicios contratados','Sin datos App Script','','','X',''],
-    ['Calidad','Accesibilidad','El prestador cumple meta de accesibilidad en servicios evaluados','Sin datos App Script','','','X',''],
-    ['Calidad','Satisfacción','El prestador cumple meta de satisfacción global','Sin datos App Script','','','X',''],
-    ['Resultados en salud','Resultados en Salud','El prestador cumple metas de resultados en salud pactados','Sin datos App Script','','','X',''],
-    ['Gestión','Bases de ejecución','El prestador cumple con reporte oportuno de bases de ejecución','—','','','X',''],
-    ['Gestión','Reportes normativos','Cargue plataforma PISIS Resolución 256 de 2016','—','','','X',''],
-    ['Gestión','Reportes normativos','Cargue información oportunidad Resolución 1552','—','','','X',''],
-    ['Sanciones','Indicadores de Sanción','El prestador cumple metas de indicadores de sanción pactados',
-      glosPct?`Glosa: ${glosPct}% del valor radicado`:'Sin datos cuentas médicas',
-      glosPct!==null&&parseFloat(glosPct)<15?'X':'', glosPct!==null&&parseFloat(glosPct)>=15?'X':'', glosPct===null?'X':'', ''],
-    [''],
-    ['VIGILANCIA ADMINISTRATIVA Y JURÍDICA'],
-    ['Clasificación','Atributo','Descripción','Resultado','Cumple','No Cumple','No Aplica','Observaciones'],
-    ['Pagos Talento Humano','Nómina','Certifica pago salarios, prestaciones, aportes seguridad social','—','','','',''],
-    ['Pólizas','Pólizas','Mantiene vigentes garantías contractuales exigidas por EPS Sanitas','—','','','',''],
-    ['Sarlaft','Sarlaft','Empleados no reportados en listas vinculantes','—','','','',''],
-    [''],
-    ['VIGILANCIA FINANCIERA Y CONTABLE'],
-    ['Clasificación','Atributo','Descripción','Resultado','Cumple','No Cumple','No Aplica','Observaciones'],
-    ['Gestión','Gestión Cuentas','Indicador de radicación pactado contractualmente','—','','','X',''],
-    ['Gestión','Gestión Cuentas','Indicador de devoluciones pactado contractualmente','—','','','X',''],
-    ['Gestión','Gestión Cuentas',`Indicador de glosa pactado contractualmente`,
-      glosPct?`Resultado: ${glosPct}%`:'Sin datos',
-      glosPct!==null&&parseFloat(glosPct)<15?'X':'', glosPct!==null&&parseFloat(glosPct)>=15?'X':'', glosPct===null?'X':'', ''],
-    [''],
-    ['CONCLUSIONES GENERALES'],
-    ['Evaluación integral del desempeño del proveedor'],
-    [''],
-    ['¿El prestador cumple con el objeto contractual?', habPct===100?'Sí — Habilitación completa':'Pendiente evaluación integral'],
-    [''],
-    ['FIRMAS'],
-    ['Supervisor EPS Sanitas','','','','Apoyo de Supervisión'],
-    ['Nombre:','','','','Nombre:'],
-    ['Cargo:','','','','Cargo:'],
-    ['Correo:','','','','Correo:'],
-    ['','','','','Versión 3'],
-  ];
-
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:30},{wch:20},{wch:50},{wch:30},{wch:8},{wch:10},{wch:10},{wch:25}];
-  XLSX.utils.book_append_sheet(wb,ws,'Formato Supervisión');
-
-  // ── Hoja 2: Datos del prestador ──
-  const datosRows=[
-    ['Campo','Valor'],
-    ['NIT',p.nit||nit],
-    ['Nombre',nombre],
-    ['Regional',p.regional||'—'],
-    ['Ciudad',p.ciudad||'—'],
-    ['Departamento',p.departamento||'—'],
-    ['Contrato',p.contrato||'—'],
-    ['Modelo',p.modelo||'—'],
-    ['Email',p.email||p.correo||'—'],
-    ['Teléfono',p.telefono||p.telefonos||'—'],
-    ['Habilitación',habTotal?`${habSi}/${habTotal} servicios habilitados (${habPct}%)`:'Sin datos homologación'],
-    ['Glosa',glosPct?`${glosPct}% del valor radicado (${glosTotal.toLocaleString('es-CO')} / ${subTotal.toLocaleString('es-CO')})`:'Sin datos cuentas médicas'],
-    ['Total PQR período',totalPqr||'Sin datos PQRS'],
-    ['Facturación 2025',p.fact_2025?(p.fact_2025/1e6).toFixed(1)+' M':'—'],
-    ['Fecha generación',hoy],
-  ];
-  const ws2=XLSX.utils.aoa_to_sheet(datosRows);
-  ws2['!cols']=[{wch:25},{wch:50}];
+  const d2=[['Campo','Valor'],['NIT',p.nit||nit],['Nombre',p.nombre||''],['Regional',p.regional||''],['Ciudad',p.ciudad||''],['Departamento',p.departamento||''],
+    ['Direccion',p.direccion||''],['Telefonos',p.telefonos||p.telefono||''],['Correo',p.email||p.correo||''],['Contrato',p.contrato||''],
+    ['Modalidad',p.modelo||p.forma_contratacion||''],['Especialidad',p.especialidad||''],['Habilitacion REPS',p.habilitacion||''],
+    ['Facturacion 2024',(p.facturacion||0).toLocaleString('es-CO')],['Facturacion 2025',(p.fact_2025||0).toLocaleString('es-CO')],
+    ['',''],['Datos cruzados del sistema',''],
+    ['Servicios habilitados (homologacion)',habTotal?`${habSi} de ${habTotal} (${Math.round(habSi/habTotal*100)}%)`:'Sin datos homologacion'],
+    ['Glosa vs radicado (cuentas medicas)',sub?`${((glos/sub)*100).toFixed(1)}% de glosa sobre radicado`:'Sin datos cuentas medicas'],
+    ['PQR en periodo',totalPqr||'Sin datos PQRS'],['Fecha generacion',hoy]];
+  const ws2=XLSX.utils.aoa_to_sheet(d2);
+  ws2['!cols']=[{wch:30},{wch:45}];
   XLSX.utils.book_append_sheet(wb,ws2,'Datos Prestador');
 
-  XLSX.writeFile(wb,`Supervision_${nombre.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30)}_${hoy.replace(/\//g,'-')}.xlsx`);
-  toastMsg(`✓ Excel generado para ${nombre.substring(0,30)}`);
+  const nombreFile=String(p.nombre||nit).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9\s]/g,'').trim().replace(/\s+/g,'_').substring(0,30);
+  XLSX.writeFile(wb,`Supervision_${nombreFile}_${hoy.replace(/\//g,'-')}.xlsx`);
+  toastMsg(`Formato Supervision generado para ${p.nombre||nit}`);
 };
+
 
 // Reporte gestores farmacéuticos
 window.generarReporteGestores=function(){
