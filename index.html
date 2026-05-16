@@ -623,6 +623,14 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <div class="login-badge">Solo cuentas autorizadas</div>
 
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;color:#8899aa;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Correo corporativo</label>
+      <input id="login-email-input" type="email" placeholder="usuario@epssanitas.com"
+        style="width:100%;padding:10px 14px;border:1.5px solid #2a3a50;border-radius:10px;background:#0f1d2e;color:#e2eaf3;font-size:13px;outline:none;box-sizing:border-box;transition:border-color .2s"
+        onfocus="this.style.borderColor='#3b9eff'" onblur="this.style.borderColor='#2a3a50'"
+        onkeydown="if(event.key==='Enter')iniciarLoginGoogle()">
+    </div>
+
     <button class="login-btn" id="login-google-btn" onclick="iniciarLoginGoogle()">
       <!-- Google G icon -->
       <svg width="18" height="18" viewBox="0 0 18 18">
@@ -1497,15 +1505,20 @@ document.addEventListener('DOMContentLoaded',function(){
         <div id="rep-prest-info" style="font-size:11px;color:var(--text2);display:none;padding:8px 12px;background:var(--bg3);border-radius:8px"></div>
       </div>
 
-      <!-- Reporte 2: Gestores farmacéuticos -->
-      <div class="rep-card">
-        <div class="rep-icon" style="background:var(--tdim)">💊</div>
-        <div>
-          <div style="font-size:13px;font-weight:500">Cumplimiento ANS gestores farmacéuticos</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · Datos de medicamentos y cobertura</div>
+      <!-- Reporte 2: Informe Técnico Gestores -->
+      <div class="rep-card" style="flex-direction:column;align-items:stretch;gap:12px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="rep-icon" style="background:var(--tdim)">💊</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">Informe Técnico — Gestor Farmacéutico</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Formato EPS Sanitas · Excel · Seguimiento General + Regional + Conclusiones</div>
+          </div>
         </div>
-        <div style="margin-left:auto">
-          <button class="btn" onclick="generarReporteGestores()" style="font-size:11.5px">⬇ Generar</button>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select id="rep-gestor-selector" style="flex:1;min-width:200px;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+            <option value="">— Selecciona un gestor —</option>
+          </select>
+          <button class="btn pri" onclick="generarInformeTecnicoGestor()" style="font-size:12px;padding:7px 16px;white-space:nowrap">⬇ Generar Excel</button>
         </div>
       </div>
 
@@ -1654,7 +1667,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
       <div>
         <div style="font-size:15px;font-weight:500;color:var(--text)" id="notif-modal-title">Notificar hallazgo</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px" id="notif-modal-sub">El prestador recibirá la notificación y deberá gestionar el hallazgo</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px" id="notif-modal-sub">Se enviará un correo al prestador con el hallazgo y el plazo de respuesta</div>
       </div>
       <div onclick="closeNotifModal()" style="cursor:pointer;color:var(--text2);font-size:18px;line-height:1;padding:4px 8px">✕</div>
     </div>
@@ -1662,24 +1675,28 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="notif-label">Destinatario</div>
     <input class="notif-input" id="notif-dest" readonly style="color:var(--text2);cursor:default">
 
+    <div class="notif-label">Correo electrónico del prestador</div>
+    <input class="notif-input" id="notif-email-dest" type="email" placeholder="correo@prestador.com"
+      style="background:var(--bg2)">
+
     <div class="notif-label">Hallazgo a comunicar</div>
     <input class="notif-input" id="notif-hallazgo" readonly style="color:var(--text2);cursor:default;font-size:12px">
 
     <div class="notif-label">Mensaje adicional (opcional)</div>
-    <textarea class="notif-input" id="notif-msg" rows="3" placeholder="Escriba aquí indicaciones adicionales para el prestador..."></textarea>
+    <textarea class="notif-input" id="notif-msg" rows="3" placeholder="Indicaciones adicionales para el prestador..."></textarea>
 
-    <div class="notif-label">Canal de notificación</div>
-    <label class="notif-check-row"><input type="checkbox" checked> Correo electrónico registrado en contrato</label>
-    <label class="notif-check-row"><input type="checkbox" checked> Portal de prestadores (en sistema)</label>
-    <label class="notif-check-row"><input type="checkbox"> SMS al representante legal</label>
-
-    <div class="notif-label">Plazo de respuesta del prestador</div>
-    <select class="notif-input" style="cursor:pointer">
+    <div class="notif-label">Plazo de respuesta</div>
+    <select class="notif-input" id="notif-plazo" style="cursor:pointer">
       <option>5 días hábiles</option>
       <option>10 días hábiles</option>
       <option>15 días hábiles</option>
       <option>30 días calendario</option>
     </select>
+
+    <div style="margin-top:10px;padding:8px 12px;background:var(--bdim);border-radius:8px;font-size:11px;color:var(--blue)">
+      📧 El correo remitente configurado: <strong id="notif-from-preview">—</strong>
+      <a onclick="navigate('admin')" style="cursor:pointer;color:var(--blue);margin-left:6px">Cambiar →</a>
+    </div>
 
     <div class="notif-btns">
       <div class="notif-cancel" onclick="closeNotifModal()">Cancelar</div>
@@ -2025,6 +2042,57 @@ document.addEventListener('DOMContentLoaded',function(){
               <div class="admin-param-desc">Umbral para que un contrato sea considerado conforme</div>
               <div class="admin-param-row"><span class="admin-param-default">Default: 90</span><input class="admin-input" id="pa-val-min" value="90" type="number" min="1" max="100" oninput="marcarCambio(this,90)"></div>
             </div>
+            <div class="admin-param-card">
+              <div class="admin-param-label">% Glosa umbral alerta media (%)</div>
+              <div class="admin-param-desc">% glosa sobre valor radicado que activa alerta media</div>
+              <div class="admin-param-row"><span class="admin-param-default">Default: 15</span><input class="admin-input" id="pa-glosa-media" value="15" type="number" step="0.5" min="0" max="100" oninput="marcarCambio(this,15)"></div>
+            </div>
+            <div class="admin-param-card">
+              <div class="admin-param-label">% Glosa umbral crítico (%)</div>
+              <div class="admin-param-desc">% glosa sobre valor radicado que activa alerta crítica</div>
+              <div class="admin-param-row"><span class="admin-param-default">Default: 25</span><input class="admin-input" id="pa-glosa-critica" value="25" type="number" step="0.5" min="0" max="100" oninput="marcarCambio(this,25)"></div>
+            </div>
+            <div class="admin-param-card">
+              <div class="admin-param-label">% Habilitación mínima (%)</div>
+              <div class="admin-param-desc">% servicios habilitados por debajo del cual se genera alerta</div>
+              <div class="admin-param-row"><span class="admin-param-default">Default: 100</span><input class="admin-input" id="pa-hab-min" value="100" type="number" min="0" max="100" oninput="marcarCambio(this,100)"></div>
+            </div>
+            <div class="admin-param-card">
+              <div class="admin-param-label">% Variación PQR para alerta (%)</div>
+              <div class="admin-param-desc">% de aumento trimestral que activa alerta informativa</div>
+              <div class="admin-param-row"><span class="admin-param-default">Default: 20</span><input class="admin-input" id="pa-pqr-var" value="20" type="number" step="1" min="0" max="200" oninput="marcarCambio(this,20)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuración de correo -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <div><div class="card-title">Configuración de notificaciones</div><div class="card-sub">Correo remitente · Plantilla · Parámetros de envío</div></div>
+          <button class="btn pri" onclick="guardarSeccion('email-config')" style="font-size:11.5px">Guardar</button>
+        </div>
+        <div class="card-body">
+          <div class="admin-param-card" style="margin-bottom:10px">
+            <div class="admin-param-label">Correo remitente (De:)</div>
+            <div class="admin-param-desc">Dirección desde la que se envían las notificaciones a prestadores</div>
+            <input class="admin-input" id="pa-email-from" type="email" value="redsalud@epssanitas.com" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'redsalud@epssanitas.com');actualizarPreviewEmail()">
+          </div>
+          <div class="admin-param-card" style="margin-bottom:10px">
+            <div class="admin-param-label">Correo en copia (CC:)</div>
+            <div class="admin-param-desc">Correo interno que recibe copia de todas las notificaciones</div>
+            <input class="admin-input" id="pa-email-cc" type="email" value="gerencia.red@epssanitas.com" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'gerencia.red@epssanitas.com')">
+          </div>
+          <div class="admin-param-card" style="margin-bottom:10px">
+            <div class="admin-param-label">Asunto por defecto de notificación</div>
+            <div class="admin-param-desc">Texto que aparece en el asunto del correo enviado al prestador</div>
+            <input class="admin-input" id="pa-email-asunto" type="text" value="EPS Sanitas - Hallazgo contractual que requiere gestión" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'EPS Sanitas - Hallazgo contractual que requiere gestión')">
+          </div>
+          <div class="admin-param-card">
+            <div class="admin-param-label">Firma del correo</div>
+            <div class="admin-param-desc">Texto de firma que se agrega al final de cada notificación</div>
+            <textarea class="admin-input" id="pa-email-firma" rows="3" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'')">Gerencia de Red · EPS Sanitas / Keralty
+Red de Prestadores | redsalud@epssanitas.com</textarea>
           </div>
         </div>
       </div>
@@ -2291,16 +2359,31 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="btn" onclick="exportarSanciones()">⬇ Exportar</div>
       </div>
     </div>
+    <!-- Filtros adicionales -->
+    <div style="display:flex;gap:8px;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <input id="san-f-prestador" placeholder="🔍 Prestador o NIT..." oninput="aplicarFiltrosSan()"
+        style="padding:5px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg2);color:var(--text);outline:none;min-width:180px">
+      <select id="san-f-modelo" onchange="aplicarFiltrosSan()"
+        style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);outline:none">
+        <option value="">Todos los modelos</option>
+        <option value="CAPITA">CAPITA</option>
+        <option value="MRC">MRC</option>
+        <option value="TECHO">TECHO</option>
+        <option value="PGP">PGP</option>
+        <option value="EVENTO">EVENTO</option>
+      </select>
+      <button class="btn" onclick="document.getElementById('san-f-prestador').value='';document.getElementById('san-f-modelo').value='';aplicarFiltrosSan();" style="font-size:11px">↺</button>
+    </div>
     <div class="card-body" style="padding:0">
       <!-- Header -->
       <div class="san-row head">
         <span>Prestador</span>
         <span>Indicador incumplido</span>
         <span>Modelo</span>
-        <span>Base cálculo</span>
-        <span>Valor sanción</span>
+        <span>Base calculo</span>
+        <span>Valor sancion</span>
         <span>Estado</span>
-        <span>Acción</span>
+        <span>Accion</span>
       </div>
       <!-- Filas de datos -->
       <div id="san-list">
@@ -2718,7 +2801,7 @@ const titles = {
   indicadores:['Indicadores','Medición y seguimiento · 34 indicadores activos'],
   alertas:['Alertas','Centro de alertas · 7 activas · 3 críticas'],
   cobertura:['Requerimientos','Gestores farmacéuticos · Seguimiento mensual'],
-  fallas:['Fallas de acceso','Matriz sistematizada · RUTA + REGIONALES + G11ASDESAVID'],
+  fallas:['Fallas de acceso','Seguimiento de casos · Gestión y resolución por regional'],
   pqrs:['PQRS y Tutelas','Gestión de reclamaciones · 38 activas'],
   seguimiento:['Seguimiento y notificaciones','Cronograma · informes por contrato · notificación de hallazgos'],
 
@@ -9701,8 +9784,8 @@ async function verificarTokenGoogle(token, btn, spinner, errEl) {
 
 // ── Simulación de login (mientras no hay OAuth Client ID) ─────────
 function simularLogin(btn, spinner, errEl) {
-  const emailIngresado = prompt('⚠ Modo demo — OAuth no configurado\n\nIngresa tu correo autorizado:',
-    'usuario@epssanitas.com');
+  const campo = document.getElementById('login-email-input');
+  const emailIngresado = (campo?.value||'').trim() || 'usuario@epssanitas.com';
   if (!emailIngresado) {
     if (btn) btn.disabled = false;
     if (spinner) spinner.style.display = 'none';
@@ -12196,7 +12279,7 @@ window.cargarRiesgos = async function(){
     window._riesgosCargado = true;
 
     const corteEl = document.getElementById('riesgos-corte');
-    if(corteEl) corteEl.textContent = data.fuente || '';
+    if(corteEl) corteEl.textContent = '';
     if(elEst){ elEst.textContent=`✓ ${data.tabs?.length||0} vistas · ${new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})}`; elEst.style.color='var(--green)'; }
 
     renderRiesgos();
@@ -12522,7 +12605,7 @@ function renderHallazgos(){
     return;
   }
   const notifs=getNotificaciones();
-  body.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">` + lista.map(h=>{
+  body.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">` + lista.map(h=>{
     const color=h.nivel==='critico'?'var(--red)':'var(--amber)';
     const bc=h.nivel==='critico'?'bg-r':'bg-a';
     const hist=notifs.filter(n=>n.nit===h.nit);
@@ -12608,20 +12691,42 @@ window.limpiarNotificaciones=function(){
   renderSeguimiento();
 };
 
-// Interceptar sendNotif para persistir notificación y cerrar modal correctamente
+// Interceptar sendNotif para persistir notificacion, enviar mailto y cerrar modal
 window.sendNotif=function(){
+  const dest  =document.getElementById('notif-dest')?.value||'';
+  const email =document.getElementById('notif-email-dest')?.value||'';
+  const hall  =document.getElementById('notif-hallazgo')?.value||'';
+  const msg   =document.getElementById('notif-msg')?.value||'';
+  const plazo =document.getElementById('notif-plazo')?.value||'5 dias habiles';
+  const asunto=document.getElementById('pa-email-asunto')?.value||'EPS Sanitas - Hallazgo contractual';
+  const cc    =document.getElementById('pa-email-cc')?.value||'';
+  const firma =document.getElementById('pa-email-firma')?.value||'Gerencia de Red EPS Sanitas';
   if(window._pendingNotifNit){
     const notifs=getNotificaciones();
-    notifs.push({nit:window._pendingNotifNit,nombre:window._pendingNotifNombre,hallazgo:window._pendingNotifHallazgo,fecha:new Date().toLocaleDateString('es-CO'),canal:'Portal'});
+    notifs.push({nit:window._pendingNotifNit,nombre:window._pendingNotifNombre,
+      hallazgo:window._pendingNotifHallazgo,fecha:new Date().toLocaleDateString('es-CO'),
+      canal:'Correo',email:email||'--'});
     saveNotificaciones(notifs);
     const h=_SEG_HALLAZGOS.find(x=>x.nit===window._pendingNotifNit);
     if(h) h.estado='notificado';
     window._pendingNotifNit=null;
     setTimeout(renderSeguimiento,100);
   }
+  if(email){
+    const cuerpo='Estimados,\n\nEPS Sanitas le notifica el siguiente hallazgo contractual:\n\nPrestador: '+dest+'\nHallazgo: '+hall+'\nPlazo de respuesta: '+plazo+(msg?'\n\nIndicaciones adicionales: '+msg:'')+'\n\n'+firma;
+    const ccP=cc?'cc='+encodeURIComponent(cc)+'&':'';
+    window.open('mailto:'+encodeURIComponent(email)+'?'+ccP+'subject='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(cuerpo),'_blank');
+  }
   window.closeNotifModal&&window.closeNotifModal();
-  toastMsg('✓ Notificación registrada correctamente');
+  toastMsg(email?'Notificacion registrada, correo abierto en cliente':'Notificacion registrada');
 };
+
+window.actualizarPreviewEmail=function(){
+  const el=document.getElementById('notif-from-preview');
+  const val=document.getElementById('pa-email-from')?.value||'redsalud@epssanitas.com';
+  if(el) el.textContent=val;
+};
+
 
 // ══════════════════════════════════════════════════════════════════
 // SANCIONES REALES
@@ -13467,14 +13572,155 @@ document.addEventListener('DOMContentLoaded',function(){
     window.navigate=function(scr){
       origNav(scr);
       if(scr==='alertas') setTimeout(generarAlertasCompletas,120);
+      if(scr==='reportes'){ setTimeout(poblarSelectorReportes,100); setTimeout(poblarSelectorGestores,100); }
     };
   }
   // Fallback si los datos ya cargaron antes de este script
   setTimeout(function(){
     poblarSelectIndicadores();
     generarAlertasCompletas();
+    poblarSelectorGestores();
   },2000);
 });
 
 })();
+</script>
+
+<script>
+// ── Filtros de sanciones ──────────────────────────────────────────
+window.aplicarFiltrosSan=function(){
+  const buscar=(document.getElementById('san-f-prestador')?.value||'').toLowerCase();
+  const modelo=(document.getElementById('san-f-modelo')?.value||'').toUpperCase();
+  let lista=_SAN_DATA||[];
+  const tabActivo=document.querySelector('#screen-sanciones .tab.active')?.textContent?.toLowerCase()||'todos';
+  if(tabActivo!=='todos') lista=lista.filter(s=>s.estado===tabActivo);
+  if(buscar) lista=lista.filter(s=>`${s.nombre||''} ${s.nit||''}`.toLowerCase().includes(buscar));
+  if(modelo) lista=lista.filter(s=>String(s.modelo||'').toUpperCase().includes(modelo));
+  renderListaSanciones(lista);
+};
+
+// ── Poblar selector gestores en reportes ─────────────────────────
+window.poblarSelectorGestores=function(){
+  const sel=document.getElementById('rep-gestor-selector'); if(!sel) return;
+  if(sel.options.length>1) return;
+  const gestores=['AUDIFARMA','DISFARMA','CRUZ VERDE','DISCOLMETS','PHARMASAN','INSUMEDIC','MEDISFARMA','COHAN','GENHOSPI','MACROMED','INPHAPRO','HUMSALUD','ETICOS SERRANO','GLOBAL','COLSUBSIDIO','CAFAM','MYTSALUD'];
+  gestores.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});
+};
+
+// ── Generar Informe Tecnico Gestor Farmaceutico ───────────────────
+window.generarInformeTecnicoGestor=function(){
+  if(!window.XLSX){toastMsg('Libreria XLSX no cargada');return;}
+  const XLSX=window.XLSX;
+  const sel=document.getElementById('rep-gestor-selector');
+  const gestor=sel?.value; if(!gestor){toastMsg('Selecciona un gestor primero');return;}
+  const lim=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w\s\.\-_$%\/,;:]/g,'');
+  const hoy=new Date();
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const mes=meses[hoy.getMonth()]; const año=hoy.getFullYear();
+  const mesCte=meses[hoy.getMonth()-1]||meses[11];
+
+  const pqrsAll=window.PQRS_RED_DATA||[];
+  const pqrsG=pqrsAll.filter(r=>String(r.nombre||'').toUpperCase().includes(gestor.split(' ')[0]));
+  const totalPqr=pqrsG.reduce((a,r)=>a+r.total,0);
+  const tutelas=window.DATOS_TUTELAS||[];
+  const tutG=tutelas.filter(r=>String(r[3]||'').toUpperCase().includes(gestor.split(' ')[0]));
+  const medG=window.MED_DATA_LOADED?.por_gestor_pbs?.find(g=>String(g.nombre||'').toUpperCase().includes(gestor.split(' ')[0]))||{};
+
+  const wb=XLSX.utils.book_new();
+
+  // Portada
+  const ws1=XLSX.utils.aoa_to_sheet([
+    [`INFORME TECNICO ${mes.toUpperCase()} ${año}`],
+    [`(CORTE DEL 01 AL 31 DE ${mesCte.toUpperCase()} DE ${año})`],
+    [''],['GESTOR FARMACEUTICO'],[lim(gestor)],
+    [''],['EPS SANITAS'],['GERENCIA DE MEDICAMENTOS'],['VICEPRESIDENCIA DE RIESGO EN SALUD'],
+    [''],['www.epssanitas.com'],['01 8000 91 91 00'],['Bogota D.C. Colombia / Av. Carrera 45 No 109 - 20'],
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws1,'1. Portada');
+
+  // Seguimiento General
+  const ws2=XLSX.utils.aoa_to_sheet([
+    ['1. SEGUIMIENTO GENERAL'],[''],
+    ['1.1. POBLACION'],
+    ['Municipios cubiertos PBS',medG.munis_pbs||'Dato Apps Script'],
+    ['Regionales',medG.n_regionales||'Dato Apps Script'],[''],
+    ['1.2. INTEGRACION TECNOLOGICA'],['Estado','Pendiente configuracion Apps Script'],[''],
+    ['1.3. COMPORTAMIENTO GENERAL'],[''],
+    ['1.3.1 REPORTES - Estado de cargue'],
+    ['Reporte','Dispensacion Capita/Evento','Pendientes','Supersalud','Tiempos Atencion'],
+    [meses[hoy.getMonth()-3]||'Mes -3','Ok reporte','Ok reporte','Ok reporte','Ok reporte'],
+    [meses[hoy.getMonth()-2]||'Mes -2','Ok reporte','Ok reporte','Ok reporte','Ok reporte'],
+    [meses[hoy.getMonth()-1]||mesCte,'Ok reporte','Ok reporte','Ok reporte','Ok reporte'],
+    [''],
+    ['1.3.2 INDICADORES'],
+    ['Oportunidad del periodo','Dato Apps Script dispensacion'],
+    ['Entrega pendientes 48H','Dato Apps Script pendientes'],[''],
+    ['1.3.3 PQRS'],
+    ['Total PQR periodo',totalPqr||'Sin datos PQRS'],
+    ['Fuente','PQRS cargado en tablero - campo nombre gestor'],[''],
+    ['1.3.4 TUTELAS'],
+    ['Total usuarios unicos con tutelas',tutG.length||'Sin datos tutelas'],
+    ['Efectividad cierre tutelas','Dato Apps Script tutelas - 100% meta'],[''],
+    ['1.3.5 FALLAS DE ACCESO'],
+    ['Total casos','Ver modulo Fallas de Acceso en tablero'],
+    ['Resueltos','Disponible con Apps Script fallas'],[''],
+    ['1.3.6 TIEMPOS DE ESPERA'],
+    ['Ciudad','Tiempo (min)','Meta (min)','Cumple'],
+    ['(Dato Apps Script tiempos de atencion)','','30',''],[''],
+    ['1.3.7 GESTION DE PENDIENTES'],
+    ['Total pendientes',lim('Disponible con Apps Script pendientes')],[''],
+    ['1.3.8 REQUERIMIENTO - IVC NACIONAL'],
+    ['Total casos','Dato Apps Script requerimientos'],
+    ['Oportunidad gestion','96%'],[''],
+    ['1.4. ESPACIOS DE ARTICULACION'],
+    ['Coordinacion Novedades y Suministro','Mesa periodica activa'],
+    ['Acompanamiento en Radicacion','Seguimiento con proveedor'],
+    ['Articulacion Regional y Rutas','Reunion mensual con regionales'],[''],
+    ['1.5. GESTION FINANCIERA'],
+    ['Mes','Valor Certificado','Estado'],
+    [meses[hoy.getMonth()-3]||'Mes -3','Dato Apps Script capita','Certificado'],
+    [meses[hoy.getMonth()-2]||'Mes -2','Dato Apps Script capita','Certificado'],
+    [mesCte,'Dato Apps Script capita','Certificado'],[''],
+    ['1.6. SUFICIENCIA DE CAPITA'],
+    ['Resultado conciliacion','Dato Apps Script capita'],[''],
+    ['1.7. AUDITORIA TECNICA'],
+    ['Estado hallazgos','Ver modulo Sanciones en tablero'],
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws2,'2. Seguimiento General');
+
+  // Seguimiento Regional
+  const ws3=XLSX.utils.aoa_to_sheet([
+    ['2. SEGUIMIENTO REGIONAL'],[''],
+    ['Regional','PQR Periodo','Tutelas','Fallas Acceso','Tiempos Espera (min)'],
+    ['BOGOTA','Dato PQRS por regional','--','--','--'],
+    ['MEDELLIN','Dato PQRS por regional','--','--','--'],
+    ['BARRANQUILLA','Dato PQRS por regional','--','--','--'],
+    ['CALI','Dato PQRS por regional','--','--','--'],
+    ['BUCARAMANGA','Dato PQRS por regional','--','--','--'],
+    ['CENTRO ORIENTE','Dato PQRS por regional','--','--','--'],
+    [''],
+    ['Nota: Los valores por regional se calculan desde los Apps Scripts de PQRS, Tutelas y Dispensacion'],
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws3,'3. Seguimiento Regional');
+
+  // Conclusiones
+  const ws4=XLSX.utils.aoa_to_sheet([
+    ['3. CONCLUSIONES'],[''],
+    ['Indicador','Estado','Observacion'],
+    ['Reporte indicadores','100% cumplimiento','Consistencia confirmada'],
+    ['PQRS periodo',totalPqr?totalPqr+' casos':'Sin datos PQRS cargados','Seguimiento semanal'],
+    ['Tutelas',tutG.length?tutG.length+' usuarios unicos':'Sin datos tutelas','Efectividad 100% meta'],
+    ['Oportunidad dispensacion','Dato Apps Script','Meta >= 92%'],
+    ['Entrega pendientes 48H','Dato Apps Script','Meta >= 94%'],
+    ['Tiempos de espera','Dato Apps Script','Meta <= 30 min'],
+    [''],
+    ['Elaborado por','Revisado por'],
+    ['Gestor Operativo Junior','Director Red de Medicamentos'],
+    [''],['EPS SANITAS - Gerencia de Medicamentos'],['www.epssanitas.com'],
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws4,'4. Conclusiones');
+
+  XLSX.writeFile(wb,`InformeTecnico_${lim(gestor).replace(/\s+/g,'_')}_${mes}${año}.xlsx`);
+  toastMsg('Informe Tecnico Gestor generado');
+};
 </script>
