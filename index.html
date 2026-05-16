@@ -1739,8 +1739,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <button class="btn" onclick="restaurarDefaults()" style="flex-shrink:0;border-color:var(--red);color:var(--red)">↺ Restaurar defaults</button>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-
+  <div style="display:grid;grid-template-columns:1.4fr 1.2fr 1fr;gap:16px">
     <!-- COLUMNA 1 -->
     <div>
 
@@ -12531,7 +12530,7 @@ function renderHallazgos(){
     return;
   }
   const notifs=getNotificaciones();
-  body.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">` + lista.map(h=>{
+  body.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">` + lista.map(h=>{
     const color=h.nivel==='critico'?'var(--red)':'var(--amber)';
     const bc=h.nivel==='critico'?'bg-r':'bg-a';
     const hist=notifs.filter(n=>n.nit===h.nit);
@@ -13713,7 +13712,7 @@ ${totalPqr?`<p>Se registraron <strong>${totalPqr}</strong> PQR para ${gesN} en e
 </p>
 </div>
 
-<script>window.onload=function(){window.print();}</script>
+<script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
 
   const win=window.open('','_blank');
@@ -13723,5 +13722,11 @@ ${totalPqr?`<p>Se registraron <strong>${totalPqr}</strong> PQR para ${gesN} en e
   toastMsg('PDF listo — usa Ctrl+P o Imprimir → Guardar como PDF');
 };
 
+// ── Poblar selector gestores en reportes ─────────────────────────
+window.poblarSelectorGestores=function(){
+  const sel=document.getElementById('rep-gestor-selector'); if(!sel) return;
+  if(sel.options.length>1) return;
+  ['AUDIFARMA','DISFARMA','CRUZ VERDE','DISCOLMETS','PHARMASAN','INSUMEDIC','MEDISFARMA','COHAN','GENHOSPI','MACROMED','INPHAPRO','HUMSALUD','ETICOS SERRANO','GLOBAL','COLSUBSIDIO','CAFAM','MYTSALUD']
+    .forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});
 };
 </script>
