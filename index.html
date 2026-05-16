@@ -1746,17 +1746,33 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <div class="screen" id="screen-trazabilidad">
   <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Dispensaciones trazadas</div><div class="kpi-value" style="color:var(--teal)">48,291</div><div class="kpi-delta up">↑ 3.1%</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Trazabilidad completa</div><div class="kpi-value" style="color:var(--green)">87.3%</div><div class="kpi-delta up">↑ 2.4%</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Con brecha</div><div class="kpi-value" style="color:var(--amber)">12.7%</div><div class="kpi-delta warn">En mejora</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Lotes bajo seguimiento</div><div class="kpi-value" style="color:var(--purple)">1,847</div><div class="kpi-delta neu">INVIMA</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Gestores con cobertura</div><div class="kpi-value" style="color:var(--teal)" id="traz-kpi-gestores">—</div><div class="kpi-delta up" id="traz-kpi-gestores-d">PBS y No PBS</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Municipios cubiertos</div><div class="kpi-value" style="color:var(--green)" id="traz-kpi-munis">—</div><div class="kpi-delta up" id="traz-kpi-munis-d">Red nacional</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura PBS</div><div class="kpi-value" style="color:var(--blue)" id="traz-kpi-pct">—</div><div class="kpi-delta neu">% municipios con acceso</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Brechas identificadas</div><div class="kpi-value" style="color:var(--amber)" id="traz-kpi-brechas">—</div><div class="kpi-delta warn">Gestores <60% cobertura</div></div>
   </div>
-  <div class="card"><div class="card-head"><div><div class="card-title">Línea de trazabilidad · EPS → Gestor → Paciente</div></div><div class="card-act">Ver lote específico</div></div>
-  <div class="card-body"><div class="scroll">
-    <div class="tl-item"><div class="tl-dot-wrap"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-line"></div></div><div style="flex:1"><div class="tl-title">Enalapril 10mg · Lote ENL-2025-4421 · 500 uds.</div><div class="tl-meta">Paciente #A-284710 · Audifarma · Bogotá Centro · Cadena completa verificada</div></div><div class="tl-time">Hoy 09:14</div></div>
-    <div class="tl-item"><div class="tl-dot-wrap"><div class="tl-dot" style="background:var(--amber)"></div><div class="tl-line"></div></div><div style="flex:1"><div class="tl-title">Insulina NPH · Lote INS-2025-0891 · 10 viales ⚠</div><div class="tl-meta">Paciente #A-394821 · Pharmos Dom. · Domicilio · Sin confirmación recepción</div></div><div class="tl-time">Ayer 18:30</div></div>
-    <div class="tl-item" style="border-bottom:none"><div class="tl-dot-wrap"><div class="tl-dot" style="background:var(--red)"></div></div><div style="flex:1"><div class="tl-title">Erlotinib 150mg · Lote ERL-2026-0044 · 30 tab. 🔴</div><div class="tl-meta">Paciente #A-218430 · Cruz Verde · Fórmula entregada, dispensación no registrada</div></div><div class="tl-time">Ayer 14:21</div></div>
-  </div></div></div>
+  <div class="grid-21">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Cobertura por gestor PBS</div><div class="card-sub" id="traz-sub">Municipios cubiertos · Trazabilidad de red</div></div></div>
+      <div class="card-body" style="padding:0 16px;max-height:400px;overflow-y:auto" id="traz-gestor-body">
+        <div style="text-align:center;padding:32px;color:var(--text2);font-size:12px">⏳ Cargando datos de cobertura...</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Cobertura por regional</div><div class="card-sub">Municipios PBS · % integral</div></div></div>
+        <div class="card-body" style="padding:10px 16px" id="traz-regional-body">
+          <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">⏳ Cargando...</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div><div class="card-title">Gestores No PBS</div><div class="card-sub">Red complementaria · Medicamentos especializados</div></div></div>
+        <div class="card-body" style="padding:10px 16px" id="traz-nopbs-body">
+          <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">⏳ Cargando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="screen" id="screen-reportes">
@@ -1779,10 +1795,10 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- ══ SEGUIMIENTO Y NOTIFICACIONES ══ -->
 <div class="screen" id="screen-seguimiento">
   <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cortes programados 2026</div><div class="kpi-value" style="color:var(--blue)">12</div><div class="kpi-delta neu">Mensual · 4 completados</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Informes generados</div><div class="kpi-value" style="color:var(--green)">38</div><div class="kpi-delta up">Por contrato · descargables</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Hallazgos pendientes</div><div class="kpi-value" style="color:var(--amber)">14</div><div class="kpi-delta warn">Sin notificar al prestador</div></div>
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Notificaciones enviadas</div><div class="kpi-value" style="color:var(--teal)">27</div><div class="kpi-delta up">Este período</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cortes programados 2026</div><div class="kpi-value" style="color:var(--blue)" id="seg-kpi-cortes">12</div><div class="kpi-delta neu" id="seg-kpi-cortes-d">Mensual</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Prestadores en red</div><div class="kpi-value" style="color:var(--green)" id="seg-kpi-prest">—</div><div class="kpi-delta up" id="seg-kpi-prest-d">Con contrato vigente</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Hallazgos activos</div><div class="kpi-value" style="color:var(--amber)" id="seg-kpi-hallazgos">—</div><div class="kpi-delta warn" id="seg-kpi-hallazgos-d">Sin notificar</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Notificaciones enviadas</div><div class="kpi-value" style="color:var(--teal)" id="seg-kpi-notif">—</div><div class="kpi-delta up">Registradas en sistema</div></div>
   </div>
 
   <!-- CRONOGRAMA -->
@@ -1870,37 +1886,18 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- HALLAZGOS CON NOTIFICACION -->
     <div class="card" style="margin-bottom:0">
       <div class="card-head">
-        <div><div class="card-title">Hallazgos · Notificación al prestador</div><div class="card-sub">Período Mar 2026 · Pendientes de comunicar</div></div>
-        <div class="card-act" onclick="openNotifModal('Todos los prestadores con hallazgos','Notificación masiva')">Notificar todos →</div>
+        <div><div class="card-title">Hallazgos · Notificación al prestador</div><div class="card-sub" id="seg-hallazgos-sub">Generados desde datos reales</div></div>
+        <div class="card-act" onclick="notificarTodosHallazgos()">Notificar todos →</div>
       </div>
-      <div class="tabs"><div class="tab active">Pendientes</div><div class="tab">Notificados</div><div class="tab">Gestionados</div></div>
-      <div class="card-body">
-
-        <div class="hallazgo-card" style="border-left:3px solid var(--red)">
-          <div class="hallazgo-head">
-            <div>
-              <div class="hallazgo-title">Clínica Palermo — Habilitación vencida + mora 67 días</div>
-              <div class="hallazgo-meta">Score 44 · Suspendido · Contrato MRC · Valor en riesgo: $842 M</div>
-            </div>
-            <div class="hallazgo-btns">
-              <div class="h-btn download" onclick="simulateDownload('Informe-Palermo-Mar2026')">⬇ Informe</div>
-              <div class="h-btn notify" onclick="openNotifModal('Clínica Palermo','Hallazgo crítico: habilitación vencida + mora 67 días')">✉ Notificar</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <span class="badge bg-r"><span class="bd"></span>Crítico</span>
-            <span class="badge bg-r">Habilitación</span>
-            <span class="badge bg-r">Financiero</span>
-            <span style="font-size:10.5px;color:var(--text3);align-self:center">Sin notificar</span>
-          </div>
-        </div>
-
-        <div class="hallazgo-card" style="border-left:3px solid var(--red)">
-          <div class="hallazgo-head">
-            <div>
-              <div class="hallazgo-title">Pharmos Domicilios — ANS 63% · Mora 45 días · 3 tutelas</div>
-              <div class="hallazgo-meta">Score 61 · Gestor domiciliario · Capita · Cartera: $1,240 M</div>
-            </div>
+      <div class="tabs">
+        <div class="tab active" onclick="segFiltrarTab('pendiente',this)">Pendientes</div>
+        <div class="tab" onclick="segFiltrarTab('notificado',this)">Notificados</div>
+        <div class="tab" onclick="segFiltrarTab('gestionado',this)">Gestionados</div>
+      </div>
+      <div class="card-body" id="seg-hallazgos-body">
+        <div style="text-align:center;padding:32px;color:var(--text2);font-size:12px">⏳ Generando hallazgos...</div>
+      </div>
+    </div>
             <div class="hallazgo-btns">
               <div class="h-btn download" onclick="simulateDownload('Informe-Pharmos-Mar2026')">⬇ Informe</div>
               <div class="h-btn notify" onclick="openNotifModal('Pharmos Domicilios','ANS incumplido 63% · Mora 45 días · 3 tutelas activas')">✉ Notificar</div>
@@ -1959,38 +1956,17 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- INFORMES POR CONTRATO + HISTORIAL NOTIFICACIONES -->
     <div style="display:flex;flex-direction:column;gap:14px">
       <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Informes por contrato</div><div class="card-sub">Descarga directa · Basado en contrato vigente</div></div></div>
-        <div class="card-body" style="padding:10px 16px">
-          <div class="tl-item">
-            <div class="tl-dot-wrap"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-line"></div></div>
-            <div style="flex:1"><div class="tl-title" style="font-size:12px">Audifarma S.A. — Contrato CA-2024-001</div><div class="tl-meta">Capita · 18 puntos · Score 91 · Feb 2026</div></div>
-            <div class="h-btn download" style="font-size:10.5px" onclick="simulateDownload('Audifarma-CA-2024-001')">⬇</div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot-wrap"><div class="tl-dot" style="background:var(--teal)"></div><div class="tl-line"></div></div>
-            <div style="flex:1"><div class="tl-title" style="font-size:12px">Medipharma Eje — Contrato CA-2024-004</div><div class="tl-meta">Capita · 8 puntos · Score 86 · Feb 2026</div></div>
-            <div class="h-btn download" style="font-size:10.5px" onclick="simulateDownload('Medipharma-CA-2024-004')">⬇</div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot-wrap"><div class="tl-dot" style="background:var(--amber)"></div><div class="tl-line"></div></div>
-            <div style="flex:1"><div class="tl-title" style="font-size:12px">Cruz Verde — Contrato CA-2024-002</div><div class="tl-meta">Capita · 12 puntos · Score 74 · Feb 2026</div></div>
-            <div class="h-btn download" style="font-size:10.5px" onclick="simulateDownload('CruzVerde-CA-2024-002')">⬇</div>
-          </div>
-          <div class="tl-item" style="border-bottom:none">
-            <div class="tl-dot-wrap"><div class="tl-dot" style="background:var(--red)"></div></div>
-            <div style="flex:1"><div class="tl-title" style="font-size:12px">Pharmos Dom. — Contrato CA-2024-003</div><div class="tl-meta">Capita · Nacional · Score 61 · Feb 2026</div></div>
-            <div class="h-btn download" style="font-size:10.5px" onclick="simulateDownload('Pharmos-CA-2024-003')">⬇</div>
-          </div>
+        <div class="card-head"><div><div class="card-title">Resumen por prestador</div><div class="card-sub">Contratos vigentes · Score y estado actual</div></div></div>
+        <div class="card-body" style="padding:10px 16px;max-height:280px;overflow-y:auto" id="seg-resumen-contratos">
+          <div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">⏳ Cargando...</div>
         </div>
       </div>
 
       <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Historial de notificaciones</div><div class="card-sub">Últimas enviadas</div></div></div>
-        <div class="card-body" style="padding:10px 16px">
-          <div class="stat-row"><div style="flex:1"><div style="font-size:12px;color:var(--text)">Pharmos — Plan mejora ANS</div><div style="font-size:10.5px;color:var(--text2)">Enviada 18/02/2026 · Leída</div></div><span class="badge bg-g">Leída</span></div>
-          <div class="stat-row"><div style="flex:1"><div style="font-size:12px;color:var(--text)">Cruz Verde — Alerta PQRS</div><div style="font-size:10.5px;color:var(--text2)">Enviada 15/02/2026 · En gestión</div></div><span class="badge bg-a">En gestión</span></div>
-          <div class="stat-row"><div style="flex:1"><div style="font-size:12px;color:var(--text)">IPS San Rafael — Score umbral</div><div style="font-size:10.5px;color:var(--text2)">Enviada 01/02/2026 · Respondida</div></div><span class="badge bg-g">Respondida</span></div>
-          <div class="stat-row" style="border-bottom:none"><div style="flex:1"><div style="font-size:12px;color:var(--text)">Clínica Palermo — Habilitación</div><div style="font-size:10.5px;color:var(--text2)">Enviada 28/01/2026 · Sin respuesta</div></div><span class="badge bg-r">Sin respuesta</span></div>
+        <div class="card-head"><div><div class="card-title">Historial de notificaciones</div><div class="card-sub" id="seg-notif-sub">Registradas en sistema</div></div>
+        <button class="btn" onclick="limpiarNotificaciones()" style="font-size:11px">↺ Limpiar</button></div>
+        <div class="card-body" style="padding:10px 16px;max-height:240px;overflow-y:auto" id="seg-notif-historial">
+          <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">Sin notificaciones registradas</div>
         </div>
       </div>
     </div>
@@ -2558,24 +2534,24 @@ document.addEventListener('DOMContentLoaded',function(){
   <!-- KPIs superiores -->
   <div class="kpi-strip cols-4">
     <div class="kpi" style="--kc:var(--red)">
-      <div class="kpi-label">Total sanciones período</div>
-      <div class="kpi-value" style="color:var(--red)">$48.2M</div>
-      <div class="kpi-delta warn">↑ 12.4% vs. período ant.</div>
+      <div class="kpi-label">Total sanciones calculadas</div>
+      <div class="kpi-value" style="color:var(--red)" id="san-kpi-total">—</div>
+      <div class="kpi-delta warn" id="san-kpi-total-d">Período actual</div>
     </div>
     <div class="kpi" style="--kc:var(--amber)">
       <div class="kpi-label">Pendientes de validar</div>
-      <div class="kpi-value" style="color:var(--amber)">14</div>
-      <div class="kpi-delta warn">Requieren revisión</div>
+      <div class="kpi-value" style="color:var(--amber)" id="san-kpi-pend">—</div>
+      <div class="kpi-delta warn">Estado calculada</div>
     </div>
     <div class="kpi" style="--kc:var(--green)">
-      <div class="kpi-label">Aplicadas y comunicadas</div>
-      <div class="kpi-value" style="color:var(--green)">8</div>
-      <div class="kpi-delta up">Este período</div>
+      <div class="kpi-label">Indicadores con sanción</div>
+      <div class="kpi-value" style="color:var(--green)" id="san-kpi-inds">—</div>
+      <div class="kpi-delta up">De la batería oficial</div>
     </div>
     <div class="kpi" style="--kc:var(--blue)">
       <div class="kpi-label">Prestadores con sanción</div>
-      <div class="kpi-value" style="color:var(--blue)">22</div>
-      <div class="kpi-delta neu">De 1,248 evaluados</div>
+      <div class="kpi-value" style="color:var(--blue)" id="san-kpi-prest">—</div>
+      <div class="kpi-delta neu" id="san-kpi-prest-d">Evaluados</div>
     </div>
   </div>
 
@@ -2669,6 +2645,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <div class="tab" onclick="filtrarSanciones('validada',this)">Validadas</div>
           <div class="tab" onclick="filtrarSanciones('aplicada',this)">Aplicadas</div>
         </div>
+        <div class="btn" onclick="calcularSanciones()">↺ Recalcular</div>
         <div class="btn" onclick="exportarSanciones()">⬇ Exportar</div>
       </div>
     </div>
@@ -2685,60 +2662,7 @@ document.addEventListener('DOMContentLoaded',function(){
       </div>
       <!-- Filas de datos -->
       <div id="san-list">
-        <div class="san-row" data-estado="calculada">
-          <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Clínica El Bosque</div><div style="font-size:10.5px;color:var(--text2)">NIT: 800.123.456</div></div>
-          <div style="font-size:11.5px;color:var(--text)">Oportunidad Medicina General<div style="font-size:10.5px;color:var(--red)">Resultado: 4.2 días · Meta: ≤3 días</div></div>
-          <span class="san-modelo capita">Capita</span>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$2,840M/mes</div>
-          <div class="san-valor">$11.36M</div>
-          <span class="san-estado calculada">● Calculada</span>
-          <button class="san-accion validar" onclick="cambiarEstadoSancion(this,'validada')">Validar</button>
-        </div>
-        <div class="san-row" data-estado="calculada">
-          <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Fundación Santa Fe</div><div style="font-size:10.5px;color:var(--text2)">NIT: 860.007.386</div></div>
-          <div style="font-size:11.5px;color:var(--text)">Oportunidad en citas Cardiología<div style="font-size:10.5px;color:var(--red)">Resultado: 48 días · Meta: ≤40 días</div></div>
-          <span class="san-modelo mrc">MRC</span>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">Liquidación: $420M</div>
-          <div class="san-valor">$4.20M</div>
-          <span class="san-estado calculada">● Calculada</span>
-          <button class="san-accion validar" onclick="cambiarEstadoSancion(this,'validada')">Validar</button>
-        </div>
-        <div class="san-row" data-estado="validada">
-          <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Hospital Universitario</div><div style="font-size:10.5px;color:var(--text2)">NIT: 900.456.789</div></div>
-          <div style="font-size:11.5px;color:var(--text)">Oportunidad Cirugía General<div style="font-size:10.5px;color:var(--red)">Resultado: 26 días · Meta: ≤20 días</div></div>
-          <span class="san-modelo techo">Techo</span>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">Cierre: $1,200M</div>
-          <div class="san-valor">$2.40M</div>
-          <span class="san-estado validada">● Validada</span>
-          <button class="san-accion aplicar" onclick="cambiarEstadoSancion(this,'aplicada')">Aplicar</button>
-        </div>
-        <div class="san-row" data-estado="validada">
-          <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Clínica Shaio</div><div style="font-size:10.5px;color:var(--text2)">NIT: 860.035.827</div></div>
-          <div style="font-size:11.5px;color:var(--text)">Tamización cáncer de cérvix<div style="font-size:10.5px;color:var(--red)">Resultado: 58% · Meta: ≥70%</div></div>
-          <span class="san-modelo capita">Capita</span>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">$3,100M/mes</div>
-          <div class="san-valor">$12.71M</div>
-          <span class="san-estado validada">● Validada</span>
-          <button class="san-accion aplicar" onclick="cambiarEstadoSancion(this,'aplicada')">Aplicar</button>
-        </div>
-        <div class="san-row" data-estado="aplicada">
-          <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Centro Médico Imbanaco</div><div style="font-size:10.5px;color:var(--text2)">NIT: 890.303.070</div></div>
-          <div style="font-size:11.5px;color:var(--text)">Oportunidad Dermatología<div style="font-size:10.5px;color:var(--red)">Resultado: 38 días · Meta: ≤30 días</div></div>
-          <span class="san-modelo pgp">PGP</span>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">Liquidación: $680M</div>
-          <div class="san-valor">$0.68M</div>
-          <span class="san-estado aplicada">● Aplicada</span>
-          <button class="san-accion" style="color:var(--text2);cursor:default">Ver notif.</button>
-        </div>
-        <div class="san-row" data-estado="aplicada">
-          <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Clínica Las Américas</div><div style="font-size:10.5px;color:var(--text2)">NIT: 811.001.222</div></div>
-          <div style="font-size:11.5px;color:var(--text)">Oportunidad Neumología<div style="font-size:10.5px;color:var(--red)">Resultado: 36 días · Meta: ≤30 días</div></div>
-          <span class="san-modelo mrc">MRC</span>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">Liquidación: $290M</div>
-          <div class="san-valor">$2.90M</div>
-          <span class="san-estado aplicada">● Aplicada</span>
-          <button class="san-accion" style="color:var(--text2);cursor:default">Ver notif.</button>
-        </div>
+        <div style="text-align:center;padding:32px;color:var(--text2);font-size:12px">⏳ Calculando sanciones desde datos reales...</div>
       </div>
     </div>
   </div>
@@ -12069,11 +11993,17 @@ function scorePqrRed(nit){
 
 // Glosa: % glosa real → score (inverso: menos glosa = más score)
 function scoreGlosa(nit){
-  const rows = (DATOS_CARGADOS.cuentas_medicas || []).filter(r => String(r.nit||'').trim() === nit);
+  const normNit = String(nit||'').trim().replace(/\.0$/,'');
+  const rows = (DATOS_CARGADOS.cuentas_medicas || []).filter(r => {
+    const rNit = String(r.nit||'').trim().replace(/\.0$/,'');
+    return rNit === normNit;
+  });
   if(!rows.length) return null;
   const tot  = rows.reduce((a,r)=>a+r.subtotal,0);
   const glos = rows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
-  if(!tot) return null;
+  // Si hay filas pero subtotal=0, posible problema de detección de columna —
+  // usamos glosado como proxy si existe, y asumimos sin glosa = score 100
+  if(!tot) return glos > 0 ? 0 : 100;
   const pct = (glos/tot)*100;
   if(pct < 10) return 100;
   if(pct < 15) return Math.round(70 + ((15-pct)/5)*30);
@@ -12195,7 +12125,7 @@ window.calcularRanking = function(){
         // Obtener todos los NITs únicos de las fuentes disponibles
         const nitsHab  = new Set((DATOS_CARGADOS.homologacion_rows||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
         const nitsPqr  = new Set((window.PQRS_RED_DATA||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
-        const nitsGlos = new Set((DATOS_CARGADOS.cuentas_medicas||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
+        const nitsGlos = new Set((DATOS_CARGADOS.cuentas_medicas||[]).map(r=>String(r.nit||'').trim().replace(/\.0$/,'')).filter(Boolean));
         const todosNits = new Set([...nitsHab,...nitsPqr,...nitsGlos]);
 
         // Obtener nombres desde cualquier fuente disponible
@@ -12797,7 +12727,496 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 </script>
 
-<!-- ══ MOTOR DE ALERTAS REALES + INDICADORES CON DATOS REALES ══ -->
+<!-- ══ AUDITORÍA: SEGUIMIENTO · SANCIONES · TRAZABILIDAD ══ -->
+<script>
+(function(){
+
+// ── Helpers comunes ───────────────────────────────────────────────
+const fmtCOP2=v=>{if(!v)return'—';const n=Math.abs(v);if(n>=1e9)return'$'+(v/1e9).toFixed(1)+' mil mill.';if(n>=1e6)return'$'+(v/1e6).toFixed(0)+' M';if(n>=1e3)return'$'+(v/1e3).toFixed(0)+' K';return'$'+Number(v).toLocaleString('es-CO');};
+const fmtN2=v=>Number(v||0).toLocaleString('es-CO');
+const MESES_ES2=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const hoy=new Date();
+
+// ══════════════════════════════════════════════════════════════════
+// SEGUIMIENTO Y NOTIFICACIONES
+// ══════════════════════════════════════════════════════════════════
+
+let _SEG_HALLAZGOS=[]; // caché de hallazgos activos
+let _SEG_TAB='pendiente';
+
+// ── Persistencia de notificaciones en localStorage ────────────────
+function getNotificaciones(){ try{return JSON.parse(localStorage.getItem('rs_notificaciones')||'[]');}catch(e){return[];} }
+function saveNotificaciones(arr){ try{localStorage.setItem('rs_notificaciones',JSON.stringify(arr));}catch(e){} }
+
+function renderSeguimiento(){
+  const prest=DATOS_CARGADOS.prestadores||[];
+  const habRows=DATOS_CARGADOS.homologacion_rows||[];
+  const notifs=getNotificaciones();
+
+  // KPIs
+  const se=id=>{const e=document.getElementById(id);return e||{textContent:'',style:{}};};
+  se('seg-kpi-prest').textContent=fmtN2(prest.length);
+  se('seg-kpi-prest-d').textContent=prest.length?`${[...new Set(prest.map(p=>p.regional||'').filter(Boolean))].length} regionales`:' ';
+
+  // ── Generar hallazgos desde datos reales ─────────────────────
+  const hallazgos=[];
+  const notifNits=new Set(notifs.map(n=>n.nit));
+
+  // 1. Habilitación NO CUMPLE
+  if(habRows.length){
+    const byNit={};
+    habRows.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      if(!byNit[nit]) byNit[nit]={nit,nombre:String(r.nombre||r.razon_social||nit).substring(0,50),total:0,noHab:0};
+      byNit[nit].total++;
+      const res=String(r.resultado||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if(res.includes('NO HABILITADO')||res.includes('NO CUMPLE')) byNit[nit].noHab++;
+    });
+    Object.values(byNit).forEach(p=>{
+      if(!p.noHab) return;
+      const pct=Math.round(p.noHab/p.total*100);
+      const estado=notifNits.has(p.nit)?'notificado':'pendiente';
+      hallazgos.push({nit:p.nit,nombre:p.nombre,nivel:pct>50?'critico':'medio',
+        titulo:`${p.nombre} — Habilitación incompleta`,
+        meta:`${p.noHab} de ${p.total} servicios no habilitados (${pct}%)`,
+        tipos:['Habilitación'],estado,icono:'🏥'});
+    });
+  }
+
+  // 2. Glosa alta (cuentas_medicas)
+  const cmRows=DATOS_CARGADOS.cuentas_medicas||[];
+  if(cmRows.length){
+    const byNit={};
+    cmRows.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      if(!byNit[nit]) byNit[nit]={nit,nombre:String(r.nombre||nit).substring(0,50),sub:0,glosa:0};
+      byNit[nit].sub+=r.subtotal||0; byNit[nit].glosa+=r.glosa_real||r.glosado||0;
+    });
+    Object.values(byNit).forEach(p=>{
+      if(!p.sub) return;
+      const pct=(p.glosa/p.sub)*100;
+      if(pct<15) return;
+      const estado=notifNits.has(p.nit)?'notificado':'pendiente';
+      hallazgos.push({nit:p.nit,nombre:p.nombre,nivel:pct>=25?'critico':'medio',
+        titulo:`${p.nombre} — Glosa elevada`,
+        meta:`${pct.toFixed(1)}% del valor radicado · Radicado ${fmtCOP2(p.sub)}`,
+        tipos:['Glosa'],estado,icono:'💳'});
+    });
+  }
+
+  // 3. PQRS alta variación
+  const pqrsData=window.PQRS_RED_DATA||[];
+  if(pqrsData.length){
+    const maxA=Math.max(...pqrsData.map(r=>r.año));
+    const ultM=Math.max(...pqrsData.filter(r=>r.año===maxA).map(r=>r.mesNum));
+    const tA=Math.ceil(ultM/3),tP=tA>1?tA-1:4,añoP=tA>1?maxA:maxA-1;
+    const byNit={};
+    pqrsData.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      const k=`${r.año}-${Math.ceil(r.mesNum/3)}`;
+      if(!byNit[nit]) byNit[nit]={nombre:String(r.nombre||nit).substring(0,50)};
+      byNit[nit][k]=(byNit[nit][k]||0)+r.total;
+    });
+    Object.entries(byNit).forEach(([nit,d])=>{
+      const act=d[`${maxA}-${tA}`]||0,ant=d[`${añoP}-${tP}`]||0;
+      if(!ant||!act) return;
+      const varPct=((act-ant)/ant)*100;
+      if(varPct<30) return;
+      const estado=notifNits.has(nit)?'notificado':'pendiente';
+      hallazgos.push({nit,nombre:d.nombre,nivel:'medio',
+        titulo:`${d.nombre} — Aumento PQR ${varPct.toFixed(0)}%`,
+        meta:`${ant} → ${act} PQR · T${tP} → T${tA} ${maxA}`,
+        tipos:['PQRS'],estado,icono:'📋'});
+    });
+  }
+
+  // Ordenar: críticos primero
+  hallazgos.sort((a,b)=>(a.nivel==='critico'?0:1)-(b.nivel==='critico'?0:1));
+  _SEG_HALLAZGOS=hallazgos;
+
+  const pendientes=hallazgos.filter(h=>h.estado==='pendiente').length;
+  se('seg-kpi-hallazgos').textContent=pendientes;
+  se('seg-kpi-hallazgos-d').textContent=pendientes>0?'Sin notificar al prestador':'Sin hallazgos activos';
+  se('seg-kpi-notif').textContent=notifs.length;
+
+  // Cronograma: actualizar mes actual
+  const mesIdx=hoy.getMonth();
+  const añoAct=hoy.getFullYear();
+  const seg_sub=document.getElementById('seg-hallazgos-sub');
+  if(seg_sub) seg_sub.textContent=`${MESES_ES2[mesIdx]} ${añoAct} · ${pendientes} pendientes de comunicar`;
+
+  renderHallazgos();
+  renderResumenContratos();
+  renderHistorialNotif();
+}
+
+function renderHallazgos(){
+  const body=document.getElementById('seg-hallazgos-body'); if(!body) return;
+  const lista=_SEG_HALLAZGOS.filter(h=>h.estado===_SEG_TAB);
+  if(!lista.length){
+    const msgs={pendiente:'✅ Sin hallazgos pendientes de notificación',notificado:'Sin hallazgos notificados aún',gestionado:'Sin hallazgos gestionados'};
+    body.innerHTML=`<div style="text-align:center;padding:32px;color:var(--text2);font-size:12px">${msgs[_SEG_TAB]||'Sin datos'}</div>`;
+    return;
+  }
+  body.innerHTML=lista.map(h=>{
+    const color=h.nivel==='critico'?'var(--red)':'var(--amber)';
+    const badgeCls=h.nivel==='critico'?'bg-r':'bg-a';
+    return `<div class="hallazgo-card" style="border-left:3px solid ${color}">
+      <div class="hallazgo-head">
+        <div>
+          <div class="hallazgo-title">${h.titulo}</div>
+          <div class="hallazgo-meta">${h.meta}${h.nit?' · NIT '+h.nit:''}</div>
+        </div>
+        <div class="hallazgo-btns">
+          ${h.estado==='pendiente'?`<div class="h-btn notify" onclick="notificarHallazgo('${h.nit}','${h.nombre.replace(/'/g,"\\'")}','${h.titulo.replace(/'/g,"\\'")}')">✉ Notificar</div>`:'<span style="font-size:11px;color:var(--green)">✓ Notificado</span>'}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge ${badgeCls}"><span class="bd"></span>${h.nivel==='critico'?'Crítico':'Medio'}</span>
+        ${h.tipos.map(t=>`<span class="badge ${badgeCls}">${t}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderResumenContratos(){
+  const el=document.getElementById('seg-resumen-contratos'); if(!el) return;
+  const prest=DATOS_CARGADOS.prestadores||[];
+  if(!prest.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--text2);font-size:12px">Sin datos de contratos</div>';return;}
+  const top=prest.slice(0,20);
+  el.innerHTML=top.map((p,i)=>{
+    const sH=typeof scoreHabilitacion==='function'?scoreHabilitacion(String(p.nit||'').trim()):null;
+    const c=sH===null?'var(--text3)':sH>=80?'var(--green)':sH>=60?'var(--amber)':'var(--red)';
+    const last=i===top.length-1?'border-bottom:none':'';
+    return `<div class="stat-row" style="${last}">
+      <div style="flex:1"><div style="font-size:12px;color:var(--text)">${String(p.nombre||p.nit||'').substring(0,40)}</div><div style="font-size:10.5px;color:var(--text2)">${p.modelo||'—'} · ${p.regional||'—'}</div></div>
+      <span style="font-size:12px;font-weight:600;color:${c}">${sH!==null?sH+'%':'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderHistorialNotif(){
+  const el=document.getElementById('seg-notif-historial'); if(!el) return;
+  const notifs=getNotificaciones();
+  const sub=document.getElementById('seg-notif-sub');
+  if(sub) sub.textContent=`${notifs.length} registradas en sistema`;
+  if(!notifs.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--text2);font-size:12px">Sin notificaciones registradas</div>';return;}
+  el.innerHTML=[...notifs].reverse().slice(0,20).map((n,i)=>`
+    <div class="stat-row" style="${i===0?'':''}">
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--text)">${n.nombre} — ${n.hallazgo.substring(0,40)}</div>
+        <div style="font-size:10.5px;color:var(--text2)">Enviada ${n.fecha} · NIT ${n.nit}</div>
+      </div>
+      <span class="badge bg-b">Enviada</span>
+    </div>`).join('');
+}
+
+window.segFiltrarTab=function(tab,el){
+  _SEG_TAB=tab;
+  document.querySelectorAll('#screen-seguimiento .tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderHallazgos();
+};
+
+window.notificarHallazgo=function(nit,nombre,hallazgo){
+  openNotifModal&&openNotifModal(nombre,hallazgo);
+  // Marcar como notificado al enviar
+  window._pendingNotifNit=nit; window._pendingNotifNombre=nombre; window._pendingNotifHallazgo=hallazgo;
+};
+
+window.notificarTodosHallazgos=function(){
+  const pendientes=_SEG_HALLAZGOS.filter(h=>h.estado==='pendiente');
+  if(!pendientes.length){alert('Sin hallazgos pendientes');return;}
+  const notifs=getNotificaciones();
+  const fecha=hoy.toLocaleDateString('es-CO');
+  pendientes.forEach(h=>{
+    h.estado='notificado';
+    notifs.push({nit:h.nit,nombre:h.nombre,hallazgo:h.titulo,fecha,canal:'Portal'});
+  });
+  saveNotificaciones(notifs);
+  renderSeguimiento();
+};
+
+window.limpiarNotificaciones=function(){
+  if(!confirm('¿Borrar el historial de notificaciones?')) return;
+  saveNotificaciones([]);
+  _SEG_HALLAZGOS.forEach(h=>{if(h.estado==='notificado')h.estado='pendiente';});
+  renderSeguimiento();
+};
+
+// Interceptar sendNotif para persistir
+const _origSendNotif=window.sendNotif;
+window.sendNotif=function(){
+  if(window._pendingNotifNit){
+    const notifs=getNotificaciones();
+    notifs.push({nit:window._pendingNotifNit,nombre:window._pendingNotifNombre,hallazgo:window._pendingNotifHallazgo,fecha:hoy.toLocaleDateString('es-CO'),canal:'Portal'});
+    saveNotificaciones(notifs);
+    const h=_SEG_HALLAZGOS.find(x=>x.nit===window._pendingNotifNit);
+    if(h) h.estado='notificado';
+    window._pendingNotifNit=null;
+    renderSeguimiento();
+  }
+  if(typeof _origSendNotif==='function') _origSendNotif();
+  else { const m=document.getElementById('notif-modal'); if(m) m.style.display='none'; }
+};
+
+// ══════════════════════════════════════════════════════════════════
+// SANCIONES REALES
+// ══════════════════════════════════════════════════════════════════
+
+let _SAN_DATA=[]; // caché
+
+window.calcularSanciones=function(){
+  const habRows=DATOS_CARGADOS.homologacion_rows||[];
+  const prest=DATOS_CARGADOS.prestadores||[];
+  const cmRows=DATOS_CARGADOS.cuentas_medicas||[];
+  const san=[];
+
+  if(!habRows.length&&!cmRows.length){
+    document.getElementById('san-list').innerHTML='<div style="padding:32px;text-align:center;color:var(--text2);font-size:12px">Sin datos de homologación o cuentas médicas para calcular sanciones</div>';
+    return;
+  }
+
+  // Parámetros configurables desde la pantalla
+  const pCapOp=parseFloat(document.getElementById('p-capita-op')?.value||0.40)/100;
+  const pCapRs=parseFloat(document.getElementById('p-capita-rs')?.value||0.41)/100;
+  const pTecho=parseFloat(document.getElementById('p-techo')?.value||0.20)/100;
+  const pMrc=parseFloat(document.getElementById('p-mrc')?.value||1.00)/100;
+  const pPgp=parseFloat(document.getElementById('p-pgp')?.value||0.10)/100;
+
+  const paramPct={CAPITA:{op:pCapOp,rs:pCapRs,hab:pCapOp},MRC:{op:pMrc,rs:pMrc,hab:pMrc},TECHO:{op:pTecho,rs:pTecho,hab:pTecho},'PGP':{op:pPgp,rs:pPgp,hab:pPgp},EVENTO:{op:0.01,rs:0.01,hab:0.01}};
+  const normMod=m=>String(m||'').toUpperCase().split(/[\s+]/)[0];
+
+  // SANCIONES 1: Habilitación NO CUMPLE (indicador MRC/CAPITA con san)
+  const habInd=CATALOGO_INDICADORES.filter(i=>i.clas==='Habilitación'&&i.san&&i.san!=='NA');
+  if(habRows.length){
+    const byNit={};
+    habRows.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      if(!byNit[nit]) byNit[nit]={nit,nombre:String(r.nombre||r.razon_social||nit).substring(0,50),total:0,noHab:0};
+      byNit[nit].total++;
+      const res=String(r.resultado||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if(res.includes('NO HABILITADO')||res.includes('NO CUMPLE')) byNit[nit].noHab++;
+    });
+    Object.values(byNit).forEach(p=>{
+      if(!p.noHab) return;
+      const pObj=prest.find(x=>String(x.nit||'').trim()===p.nit)||{};
+      const modelo=normMod(pObj.modelo);
+      const baseVal=(pObj.facturacion||pObj.fact_2025||0);
+      const pct=paramPct[modelo]?.hab||pMrc;
+      const valorSan=baseVal*pct;
+      const pctHab=Math.round(p.noHab/p.total*100);
+      san.push({nit:p.nit,nombre:p.nombre,modelo:pObj.modelo||'—',
+        indicador:'Habilitación de servicios contratados',
+        detalle:`${p.noHab} de ${p.total} servicios no habilitados (${pctHab}%)`,
+        meta:'100% habilitados',base:baseVal,valorSan,estado:'calculada'});
+    });
+  }
+
+  // SANCIONES 2: Glosa > 15% (indicador Gestión Facturación con san)
+  const glosInd=CATALOGO_INDICADORES.find(i=>i.ind.includes('valor glosado')&&i.san&&i.san!=='NA');
+  if(cmRows.length){
+    const byNit={};
+    cmRows.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      if(!byNit[nit]) byNit[nit]={nit,nombre:String(r.nombre||nit).substring(0,50),sub:0,glosa:0};
+      byNit[nit].sub+=r.subtotal||0; byNit[nit].glosa+=r.glosa_real||r.glosado||0;
+    });
+    Object.values(byNit).forEach(p=>{
+      if(!p.sub) return;
+      const pctGlosa=(p.glosa/p.sub)*100;
+      if(pctGlosa<15) return;
+      const pObj=prest.find(x=>String(x.nit||'').trim()===p.nit)||{};
+      const modelo=normMod(pObj.modelo);
+      const pct=paramPct[modelo]?.op||pMrc;
+      const valorSan=p.sub*pct;
+      san.push({nit:p.nit,nombre:p.nombre,modelo:pObj.modelo||'—',
+        indicador:'% valor glosado frente al valor radicado',
+        detalle:`Glosa real ${pctGlosa.toFixed(1)}% · Radicado ${fmtCOP2(p.sub)}`,
+        meta:'< 15%',base:p.sub,valorSan,estado:'calculada'});
+    });
+  }
+
+  // Ordenar por valor descendente
+  san.sort((a,b)=>b.valorSan-a.valorSan);
+  _SAN_DATA=san;
+
+  // KPIs
+  const totalSan=san.reduce((a,s)=>a+s.valorSan,0);
+  const se=id=>{const e=document.getElementById(id);return e||{textContent:'',style:{}};};
+  se('san-kpi-total').textContent=fmtCOP2(totalSan);
+  se('san-kpi-pend').textContent=san.filter(s=>s.estado==='calculada').length;
+  se('san-kpi-inds').textContent=CATALOGO_INDICADORES.filter(i=>i.san&&i.san!=='NA').length;
+  se('san-kpi-prest').textContent=san.length;
+  se('san-kpi-prest-d').textContent=`De ${prest.length||'—'} evaluados`;
+  se('san-kpi-total-d').textContent=`${san.length} sanción${san.length!==1?'es':''} calculada${san.length!==1?'s':''}`;
+
+  renderListaSanciones(san);
+};
+
+function renderListaSanciones(lista){
+  const el=document.getElementById('san-list'); if(!el) return;
+  if(!lista.length){
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text2);font-size:12px">✅ Sin sanciones calculadas para los datos disponibles</div>';
+    return;
+  }
+  const modCls={CAPITA:'capita',MRC:'mrc',TECHO:'techo',PGP:'pgp',EVENTO:'evento'};
+  el.innerHTML=lista.map(s=>{
+    const mc=modCls[String(s.modelo||'').toUpperCase().split(/[\s+]/)[0]]||'capita';
+    const estCls=s.estado==='calculada'?'calculada':s.estado==='validada'?'validada':'aplicada';
+    const btn=s.estado==='calculada'?`<button class="san-accion validar" onclick="cambiarEstadoSancion(this,'validada')">Validar</button>`:
+               s.estado==='validada'?`<button class="san-accion aplicar" onclick="cambiarEstadoSancion(this,'aplicada')">Aplicar</button>`:
+               `<button class="san-accion" style="color:var(--text2);cursor:default">Aplicada</button>`;
+    return `<div class="san-row" data-estado="${s.estado}">
+      <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">${s.nombre}</div><div style="font-size:10.5px;color:var(--text2)">NIT: ${s.nit}</div></div>
+      <div style="font-size:11.5px;color:var(--text)">${s.indicador}<div style="font-size:10.5px;color:var(--red);margin-top:2px">${s.detalle}</div></div>
+      <span class="san-modelo ${mc}">${String(s.modelo||'—').split(' ')[0]}</span>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${fmtCOP2(s.base)}</div>
+      <div class="san-valor">${fmtCOP2(s.valorSan)}</div>
+      <span class="san-estado ${estCls}">● ${s.estado.charAt(0).toUpperCase()+s.estado.slice(1)}</span>
+      ${btn}
+    </div>`;
+  }).join('');
+}
+
+// Sobreescribir filtrarSanciones para que funcione con datos reales
+const _origFiltrarSan=window.filtrarSanciones;
+window.filtrarSanciones=function(est,el){
+  document.querySelectorAll('#screen-sanciones .tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const lista=est==='todos'?_SAN_DATA:_SAN_DATA.filter(s=>s.estado===est);
+  renderListaSanciones(lista);
+};
+
+// ══════════════════════════════════════════════════════════════════
+// TRAZABILIDAD (MED_DATA_LOADED como proxy)
+// ══════════════════════════════════════════════════════════════════
+
+function renderTrazabilidad(){
+  const med=window.MED_DATA_LOADED;
+  const se=id=>{const e=document.getElementById(id);return e||{textContent:'',style:{}};};
+
+  if(!med){
+    ['traz-kpi-gestores','traz-kpi-munis','traz-kpi-pct','traz-kpi-brechas'].forEach(id=>se(id).textContent='—');
+    const b=document.getElementById('traz-gestor-body');
+    if(b) b.innerHTML='<div style="padding:32px;text-align:center;color:var(--text2);font-size:12px">Sin datos de medicamentos cargados · Conecta el archivo de cobertura para ver trazabilidad de red</div>';
+    return;
+  }
+
+  const pbs=med.por_gestor_pbs||[];
+  const nopbs=med.por_gestor_nopbs||[];
+  const regs=med.por_regional||[];
+  const maxMusis=264;
+  const totalMusis=[...new Set(pbs.flatMap(g=>g.munis_pbs))].length||
+    pbs.reduce((a,g)=>Math.max(a,g.munis_pbs),0);
+  const gestTot=(new Set([...pbs.map(g=>g.nombre),...nopbs.map(g=>g.nombre)])).size;
+  const munisTot=pbs.reduce((a,g)=>a+(g.munis_pbs||0),0);
+  const brechas=pbs.filter(g=>Math.round((g.munis_pbs/maxMusis)*100)<60).length;
+
+  se('traz-kpi-gestores').textContent=gestTot;
+  se('traz-kpi-gestores-d').textContent=`${pbs.length} PBS · ${nopbs.length} No PBS`;
+  se('traz-kpi-munis').textContent=fmtN2(med.resumen?.total_munis_pbs||munisTot);
+  se('traz-kpi-munis-d').textContent=`${regs.length} regionales`;
+  const pctPbs=Math.round((med.resumen?.total_munis_pbs||munisTot)/maxMusis*100);
+  se('traz-kpi-pct').textContent=pctPbs+'%';
+  se('traz-kpi-brechas').textContent=brechas;
+  const sub=document.getElementById('traz-sub');
+  if(sub) sub.textContent=`${pbs.length} gestores PBS · ${maxMusis} municipios posibles · ${pctPbs}% cobertura`;
+
+  // Gestores PBS
+  const gbody=document.getElementById('traz-gestor-body');
+  if(gbody&&pbs.length){
+    gbody.innerHTML=pbs.map((g,i)=>{
+      const pct=Math.round(g.munis_pbs/maxMusis*100);
+      const c=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+      const last=i===pbs.length-1?'border-bottom:none':'';
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border);${last}">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div>
+            <div style="font-size:12.5px;font-weight:500;color:var(--text)">${g.nombre}</div>
+            <div style="font-size:10.5px;color:var(--text2)">${g.n_regionales||'—'} regionales · Integral ${g.pct_integral||0}% · Propio ${g.pct_propio||0}%</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:${c}">${g.munis_pbs}</div>
+            <div style="font-size:10px;color:${c}">${pct}% de ${maxMusis}</div>
+          </div>
+        </div>
+        <div style="height:6px;background:var(--bg4);border-radius:3px">
+          <div style="width:${pct}%;height:100%;background:${c};border-radius:3px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Por regional
+  const rbody=document.getElementById('traz-regional-body');
+  if(rbody&&regs.length){
+    rbody.innerHTML=regs.map((r,i)=>{
+      const pct=Math.round((r.total||0)/maxMusis*100);
+      const c=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+      const last=i===regs.length-1?'border-bottom:none':'';
+      return `<div class="stat-row" style="${last}">
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text)">${r.regional||r.nombre||'—'}</div>
+          <div style="font-size:10.5px;color:var(--text2)">${r.total||0} municipios cubiertos</div>
+        </div>
+        <span style="font-size:12px;font-weight:600;color:${c}">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  // No PBS
+  const nbody=document.getElementById('traz-nopbs-body');
+  if(nbody&&nopbs.length){
+    nbody.innerHTML=nopbs.map((g,i)=>{
+      const last=i===nopbs.length-1?'border-bottom:none':'';
+      return `<div class="stat-row" style="${last}">
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text)">${g.nombre}</div>
+          <div style="font-size:10.5px;color:var(--text2)">${g.n_regionales||'—'} regionales</div>
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal);font-weight:600">${g.munis_nopbs||0} munis</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── Enganchar en navigate ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  const origNav=window.navigate;
+  if(typeof origNav==='function'){
+    window.navigate=function(scr){
+      origNav(scr);
+      if(scr==='seguimiento') setTimeout(renderSeguimiento,100);
+      if(scr==='sanciones')   setTimeout(calcularSanciones,100);
+      if(scr==='trazabilidad') setTimeout(renderTrazabilidad,100);
+    };
+  }
+});
+
+// ── Enganchar en aplicarPrestadores (reuses the one from script anterior) ─
+const _origAP2=window.aplicarPrestadores;
+if(typeof _origAP2==='function'){
+  window.aplicarPrestadores=function(){
+    _origAP2.apply(this,arguments);
+    setTimeout(renderSeguimiento,400);
+    setTimeout(calcularSanciones,500);
+  };
+}
+
+// Trazabilidad se dispara cuando MED_DATA_LOADED está listo
+const _origMed=window.aplicarMedicamentos||window.renderMedicamentos;
+// Fallback: verificar periódicamente si MED_DATA_LOADED existe
+let _trazCheck=setInterval(()=>{
+  if(window.MED_DATA_LOADED){
+    clearInterval(_trazCheck);
+    renderTrazabilidad();
+  }
+},800);
+setTimeout(()=>clearInterval(_trazCheck),15000);
+
+})();
+</script>
 <script>
 (function(){
 
@@ -12961,20 +13380,21 @@ function renderListaAlertas(lista){
   }
   const colores={critica:'var(--red)',media:'var(--amber)',informativa:'var(--blue)'};
   const labels={critica:'🔴 Crítica',media:'🟡 Media',informativa:'🔵 Informativa'};
-  el.innerHTML=lista.map(a=>{
+  const items=lista.map(a=>{
     const c=colores[a.nivel]||'var(--text2)';
-    return `<div class="al-item" style="--alc:${c};margin-bottom:8px">
-      <div style="font-size:20px;flex-shrink:0;line-height:1">${a.icono||'⚠'}</div>
+    return `<div class="al-item" style="--alc:${c};margin-bottom:0;height:100%">
+      <div style="font-size:18px;flex-shrink:0;line-height:1">${a.icono||'⚠'}</div>
       <div style="flex:1;min-width:0">
-        <div class="al-title">${a.titulo}</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:3px">
+          <div class="al-title" style="font-size:12px">${a.titulo}</div>
+          <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:${c}18;color:${c};white-space:nowrap;flex-shrink:0">${labels[a.nivel]}</span>
+        </div>
         <div class="al-meta">${a.desc}</div>
-        ${a.nit?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px">NIT ${a.nit}</div>`:''}
-      </div>
-      <div style="flex-shrink:0;text-align:right">
-        <span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;background:${c}18;color:${c}">${labels[a.nivel]}</span>
+        ${a.nit?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px">NIT ${a.nit}</div>`:''}
       </div>
     </div>`;
   }).join('');
+  el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${items}</div>`;
 }
 
 window.filtrarAlertas=function(){
