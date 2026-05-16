@@ -645,9 +645,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <div class="login-error" id="login-error"></div>
 
-    <div class="login-network">
-      🔐 Acceso restringido a correos <strong>@epssanitas.com</strong> y <strong>@gmail.com</strong> autorizados
-    </div>
+
 
     <div class="login-footer">
       RedSalud Monitor v3.1 · Impulsa para EPS Sanitas / Keralty<br>
@@ -1741,9 +1739,9 @@ document.addEventListener('DOMContentLoaded',function(){
     <button class="btn" onclick="restaurarDefaults()" style="flex-shrink:0;border-color:var(--red);color:var(--red)">↺ Restaurar defaults</button>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
 
-    <!-- COLUMNA IZQUIERDA -->
+    <!-- COLUMNA 1 -->
     <div>
 
       <!-- Semáforos -->
@@ -2001,7 +1999,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </div><!-- /col izq -->
 
-    <!-- COLUMNA DERECHA -->
+    <!-- COLUMNA 2 -->
     <div>
 
       <!-- Sanciones -->
@@ -2066,7 +2064,10 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
       </div>
 
-      <!-- Configuración de correo -->
+    <!-- COLUMNA 3 -->
+    <div>
+
+      <!-- Configuración de correo (movida de sanciones) -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-head">
           <div><div class="card-title">Configuración de notificaciones</div><div class="card-sub">Correo remitente · Plantilla · Parámetros de envío</div></div>
@@ -2075,22 +2076,22 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="card-body">
           <div class="admin-param-card" style="margin-bottom:10px">
             <div class="admin-param-label">Correo remitente (De:)</div>
-            <div class="admin-param-desc">Dirección desde la que se envían las notificaciones a prestadores</div>
-            <input class="admin-input" id="pa-email-from" type="email" value="redsalud@epssanitas.com" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'redsalud@epssanitas.com');actualizarPreviewEmail()">
+            <div class="admin-param-desc">Dirección desde la que se envían las notificaciones</div>
+            <input class="admin-input" id="pa-email-from" type="email" value="redsalud@epssanitas.com" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'redsalud@epssanitas.com')">
           </div>
           <div class="admin-param-card" style="margin-bottom:10px">
             <div class="admin-param-label">Correo en copia (CC:)</div>
-            <div class="admin-param-desc">Correo interno que recibe copia de todas las notificaciones</div>
+            <div class="admin-param-desc">Correo interno que recibe copia de cada notificación</div>
             <input class="admin-input" id="pa-email-cc" type="email" value="gerencia.red@epssanitas.com" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'gerencia.red@epssanitas.com')">
           </div>
           <div class="admin-param-card" style="margin-bottom:10px">
-            <div class="admin-param-label">Asunto por defecto de notificación</div>
-            <div class="admin-param-desc">Texto que aparece en el asunto del correo enviado al prestador</div>
+            <div class="admin-param-label">Asunto por defecto</div>
+            <div class="admin-param-desc">Texto del asunto del correo al prestador</div>
             <input class="admin-input" id="pa-email-asunto" type="text" value="EPS Sanitas - Hallazgo contractual que requiere gestión" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'EPS Sanitas - Hallazgo contractual que requiere gestión')">
           </div>
           <div class="admin-param-card">
             <div class="admin-param-label">Firma del correo</div>
-            <div class="admin-param-desc">Texto de firma que se agrega al final de cada notificación</div>
+            <div class="admin-param-desc">Texto de firma en cada notificación</div>
             <textarea class="admin-input" id="pa-email-firma" rows="3" style="width:100%;margin-top:6px" oninput="marcarCambio(this,'')">Gerencia de Red · EPS Sanitas / Keralty
 Red de Prestadores | redsalud@epssanitas.com</textarea>
           </div>
@@ -2103,89 +2104,14 @@ Red de Prestadores | redsalud@epssanitas.com</textarea>
           <div><div class="card-title">Gestión de usuarios</div><div class="card-sub">RN-09-09 · Perfiles y accesos del sistema</div></div>
           <div class="btn pri" style="font-size:11.5px">+ Nuevo usuario</div>
         </div>
-        <div class="card-body" style="padding:0">
-          <div class="user-row head">
-            <span>Usuario</span><span>Perfil</span><span>Último acceso</span><span>Estado</span>
-          </div>
-          <div class="user-row">
-            <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Maria González</div><div style="font-size:10.5px;color:var(--text2)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cba6aca4a5b1aaa7aeb18baebbb8e5a8a4a6e5a8a4">[email&#160;protected]</a></div></div>
-            <span class="role-badge admin">Administrador</span>
-            <span style="font-size:11px;color:var(--text2)">Hoy 09:14</span>
-            <span class="badge bg-g" style="font-size:10.5px">Activo</span>
-          </div>
-          <div class="user-row">
-            <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Carlos Pérez</div><div style="font-size:10.5px;color:var(--text2)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0566756077607f456075762b666a682b666a">[email&#160;protected]</a></div></div>
-            <span class="role-badge analista">Analista</span>
-            <span style="font-size:11px;color:var(--text2)">Hoy 08:42</span>
-            <span class="badge bg-g" style="font-size:10.5px">Activo</span>
-          </div>
-          <div class="user-row">
-            <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Ana Rodríguez</div><div style="font-size:10.5px;color:var(--text2)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7c1d0e13180e151b0919063c190c0f521f1311521f13">[email&#160;protected]</a></div></div>
-            <span class="role-badge analista">Analista</span>
-            <span style="font-size:11px;color:var(--text2)">Ayer 16:30</span>
-            <span class="badge bg-g" style="font-size:10.5px">Activo</span>
-          </div>
-          <div class="user-row">
-            <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Luis Martínez</div><div style="font-size:10.5px;color:var(--text2)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="781415190a0c11161d02381d080b561b1715561b17">[email&#160;protected]</a></div></div>
-            <span class="role-badge directivo">Directivo</span>
-            <span style="font-size:11px;color:var(--text2)">Lun 11:20</span>
-            <span class="badge bg-g" style="font-size:10.5px">Activo</span>
-          </div>
-          <div class="user-row">
-            <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Sandra Torres</div><div style="font-size:10.5px;color:var(--text2)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95e6e1fae7e7f0e6d5f0e5e6bbf6faf8bbf6fa">[email&#160;protected]</a></div></div>
-            <span class="role-badge auditor">Auditor</span>
-            <span style="font-size:11px;color:var(--text2)">Vie 14:08</span>
-            <span class="badge bg-g" style="font-size:10.5px">Activo</span>
-          </div>
-          <div class="user-row" style="border-bottom:none">
-            <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Roberto Silva</div><div style="font-size:10.5px;color:var(--text2)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0674756f6a7067466376752865696b286569">[email&#160;protected]</a></div></div>
-            <span class="role-badge analista">Analista</span>
-            <span style="font-size:11px;color:var(--text2)">Hace 8 días</span>
-            <span class="badge bg-r" style="font-size:10.5px">Inactivo</span>
-          </div>
+        <div class="card-body" style="padding:8px 0;font-size:12px;color:var(--text2);text-align:center">
+          Configuración de usuarios disponible próximamente
         </div>
       </div>
 
-      <!-- Log de auditoría -->
-      <div class="card">
-        <div class="card-head">
-          <div><div class="card-title">Log de auditoría</div><div class="card-sub">RN-09-08 · Registro de cambios en parámetros del sistema</div></div>
-          <button class="btn" onclick="exportarLog()" style="font-size:11.5px">⬇ Exportar</button>
-        </div>
-        <div class="card-body">
-          <div id="admin-log">
-            <div class="log-row">
-              <span class="log-time">02/04/2026 09:14</span>
-              <span class="log-user">mgonzalez</span>
-              <div class="log-action">Cambió umbral Score Verde: <span class="log-val">90 → 85</span></div>
-            </div>
-            <div class="log-row">
-              <span class="log-time">28/03/2026 14:32</span>
-              <span class="log-user">mgonzalez</span>
-              <div class="log-action">Cambió % sanción MRC: <span class="log-val">0.80% → 1.00%</span></div>
-            </div>
-            <div class="log-row">
-              <span class="log-time">15/03/2026 11:20</span>
-              <span class="log-user">mgonzalez</span>
-              <div class="log-action">Cambió días mora alerta crítica: <span class="log-val">45 → 60 días</span></div>
-            </div>
-            <div class="log-row">
-              <span class="log-time">01/03/2026 08:45</span>
-              <span class="log-user">mgonzalez</span>
-              <div class="log-action">Creó usuario: <span class="log-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1467607b66667167547164673a777b793a777b">[email&#160;protected]</a> — Auditor</span></div>
-            </div>
-            <div class="log-row">
-              <span class="log-time">15/02/2026 16:10</span>
-              <span class="log-user">mgonzalez</span>
-              <div class="log-action">Restauró parámetros a valores por defecto — confirmación requerida completada</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /col der -->
-  </div><!-- /grid -->
-</div>
+    </div><!-- /col 3 -->
+  </div><!-- /grid admin -->
+</div><!-- /screen-admin -->
 
 <!-- ══ MODAL CARGADOR DE DATOS ══ -->
 <div id="modal-cargador" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)" onclick="cerrarCargadorFuera(event)">
@@ -6998,7 +6924,7 @@ async function cargarFallas(){
     });
     DATOS_FALLAS=todos;
     console.log('[FALLAS] Total consolidado:',DATOS_FALLAS.length);
-    if(el){el.textContent=`✓ ${DATOS_FALLAS.length.toLocaleString('es-CO')} fallas (${HOJAS_FALLAS.join(' + ')})`;el.style.color='var(--green)';}
+    if(el){el.textContent=`✓ ${DATOS_FALLAS.length.toLocaleString('es-CO')} casos cargados`;el.style.color='var(--green)';}
     poblarFiltrosFallas();
     aplicarFiltrosFallas();
   }catch(e){
@@ -12965,7 +12891,7 @@ document.addEventListener('DOMContentLoaded',function(){
 // ══ REPORTES: GENERADORES EXCEL ══════════════════════════════════
 
 // Poblar selector de prestadores en reportes
-function poblarSelectorReportes(){
+window.poblarSelectorReportes = function poblarSelectorReportes(){
   const sel=document.getElementById('rep-prest-selector'); if(!sel) return;
   const prest=DATOS_CARGADOS.prestadores||[];
   if(!prest.length) return;
@@ -13609,15 +13535,13 @@ window.poblarSelectorGestores=function(){
 
 // ── Generar Informe Tecnico Gestor Farmaceutico ───────────────────
 window.generarInformeTecnicoGestor=function(){
-  if(!window.XLSX){toastMsg('Libreria XLSX no cargada');return;}
-  const XLSX=window.XLSX;
   const sel=document.getElementById('rep-gestor-selector');
   const gestor=sel?.value; if(!gestor){toastMsg('Selecciona un gestor primero');return;}
-  const lim=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w\s\.\-_$%\/,;:]/g,'');
   const hoy=new Date();
   const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const mes=meses[hoy.getMonth()]; const año=hoy.getFullYear();
   const mesCte=meses[hoy.getMonth()-1]||meses[11];
+  const gesN=gestor.toUpperCase();
 
   const pqrsAll=window.PQRS_RED_DATA||[];
   const pqrsG=pqrsAll.filter(r=>String(r.nombre||'').toUpperCase().includes(gestor.split(' ')[0]));
@@ -13626,101 +13550,178 @@ window.generarInformeTecnicoGestor=function(){
   const tutG=tutelas.filter(r=>String(r[3]||'').toUpperCase().includes(gestor.split(' ')[0]));
   const medG=window.MED_DATA_LOADED?.por_gestor_pbs?.find(g=>String(g.nombre||'').toUpperCase().includes(gestor.split(' ')[0]))||{};
 
-  const wb=XLSX.utils.book_new();
+  const html=`<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Informe Técnico ${mes} ${año} - ${gesN}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Arial',sans-serif;color:#1a2332;background:#fff;font-size:11pt}
+  .cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;page-break-after:always}
+  .cover h1{color:#005b9a;font-size:16pt;margin-bottom:8px}
+  .cover h2{color:#007ACA;font-size:22pt;margin:24px 0;text-transform:uppercase;border-top:2px solid #007ACA;border-bottom:2px solid #007ACA;padding:16px 40px}
+  .cover .footer-cover{color:#005b9a;font-size:10pt;margin-top:40px;line-height:1.8}
+  .cover .sub{color:#555;font-size:12pt;margin-top:8px}
+  .page{padding:24px 32px;page-break-inside:avoid}
+  h3{color:#005b9a;font-size:13pt;border-bottom:2px solid #007ACA;padding-bottom:4px;margin:20px 0 10px}
+  h4{color:#007ACA;font-size:11pt;margin:14px 0 6px}
+  p{margin-bottom:8px;line-height:1.6;color:#333}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10pt}
+  th{background:#005b9a;color:#fff;padding:7px 10px;text-align:left}
+  td{padding:6px 10px;border-bottom:1px solid #dde4ec}
+  tr:nth-child(even)td{background:#f0f5fb}
+  .kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:12px 0}
+  .kpi{background:#f0f5fb;border-left:4px solid #007ACA;padding:12px 16px;border-radius:4px}
+  .kpi-val{font-size:18pt;font-weight:700;color:#005b9a}
+  .kpi-lbl{font-size:9pt;color:#555;margin-top:3px}
+  .nota{background:#fff8e6;border-left:3px solid #f0a500;padding:8px 14px;font-size:10pt;color:#7a5500;margin:10px 0;border-radius:3px}
+  .firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;padding-top:20px;border-top:1px solid #ccc}
+  .firma-box{text-align:center}
+  .firma-line{border-top:1px solid #333;margin-top:40px;padding-top:6px;font-size:10pt}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
 
-  // Portada
-  const ws1=XLSX.utils.aoa_to_sheet([
-    [`INFORME TECNICO ${mes.toUpperCase()} ${año}`],
-    [`(CORTE DEL 01 AL 31 DE ${mesCte.toUpperCase()} DE ${año})`],
-    [''],['GESTOR FARMACEUTICO'],[lim(gestor)],
-    [''],['EPS SANITAS'],['GERENCIA DE MEDICAMENTOS'],['VICEPRESIDENCIA DE RIESGO EN SALUD'],
-    [''],['www.epssanitas.com'],['01 8000 91 91 00'],['Bogota D.C. Colombia / Av. Carrera 45 No 109 - 20'],
-  ]);
-  XLSX.utils.book_append_sheet(wb,ws1,'1. Portada');
+<!-- PORTADA -->
+<div class="cover">
+  <img src="EPS.png" alt="EPS Sanitas" style="height:70px;margin-bottom:20px" onerror="this.style.display='none'">
+  <div class="sub">INFORME TÉCNICO ${mes.toUpperCase()} ${año}</div>
+  <div class="sub" style="font-size:10pt;color:#777">(CORTE DEL 01 AL 31 DE ${mesCte.toUpperCase()} DE ${año})</div>
+  <h2>GESTOR FARMACÉUTICO<br>${gesN}</h2>
+  <div class="footer-cover">
+    <strong>EPS SANITAS</strong><br>
+    GERENCIA DE MEDICAMENTOS<br>
+    VICEPRESIDENCIA DE RIESGO EN SALUD<br><br>
+    www.epssanitas.com · Línea: 01 8000 91 91 00<br>
+    Bogotá D.C. Colombia / Av. Carrera 45 No 109 – 20<br>
+    <em>EFICIENCIA Y SERVICIO: EL CORAZÓN DE LA EPS SANITAS</em>
+  </div>
+</div>
 
-  // Seguimiento General
-  const ws2=XLSX.utils.aoa_to_sheet([
-    ['1. SEGUIMIENTO GENERAL'],[''],
-    ['1.1. POBLACION'],
-    ['Municipios cubiertos PBS',medG.munis_pbs||'Dato Apps Script'],
-    ['Regionales',medG.n_regionales||'Dato Apps Script'],[''],
-    ['1.2. INTEGRACION TECNOLOGICA'],['Estado','Pendiente configuracion Apps Script'],[''],
-    ['1.3. COMPORTAMIENTO GENERAL'],[''],
-    ['1.3.1 REPORTES - Estado de cargue'],
-    ['Reporte','Dispensacion Capita/Evento','Pendientes','Supersalud','Tiempos Atencion'],
-    [meses[hoy.getMonth()-3]||'Mes -3','Ok reporte','Ok reporte','Ok reporte','Ok reporte'],
-    [meses[hoy.getMonth()-2]||'Mes -2','Ok reporte','Ok reporte','Ok reporte','Ok reporte'],
-    [meses[hoy.getMonth()-1]||mesCte,'Ok reporte','Ok reporte','Ok reporte','Ok reporte'],
-    [''],
-    ['1.3.2 INDICADORES'],
-    ['Oportunidad del periodo','Dato Apps Script dispensacion'],
-    ['Entrega pendientes 48H','Dato Apps Script pendientes'],[''],
-    ['1.3.3 PQRS'],
-    ['Total PQR periodo',totalPqr||'Sin datos PQRS'],
-    ['Fuente','PQRS cargado en tablero - campo nombre gestor'],[''],
-    ['1.3.4 TUTELAS'],
-    ['Total usuarios unicos con tutelas',tutG.length||'Sin datos tutelas'],
-    ['Efectividad cierre tutelas','Dato Apps Script tutelas - 100% meta'],[''],
-    ['1.3.5 FALLAS DE ACCESO'],
-    ['Total casos','Ver modulo Fallas de Acceso en tablero'],
-    ['Resueltos','Disponible con Apps Script fallas'],[''],
-    ['1.3.6 TIEMPOS DE ESPERA'],
-    ['Ciudad','Tiempo (min)','Meta (min)','Cumple'],
-    ['(Dato Apps Script tiempos de atencion)','','30',''],[''],
-    ['1.3.7 GESTION DE PENDIENTES'],
-    ['Total pendientes',lim('Disponible con Apps Script pendientes')],[''],
-    ['1.3.8 REQUERIMIENTO - IVC NACIONAL'],
-    ['Total casos','Dato Apps Script requerimientos'],
-    ['Oportunidad gestion','96%'],[''],
-    ['1.4. ESPACIOS DE ARTICULACION'],
-    ['Coordinacion Novedades y Suministro','Mesa periodica activa'],
-    ['Acompanamiento en Radicacion','Seguimiento con proveedor'],
-    ['Articulacion Regional y Rutas','Reunion mensual con regionales'],[''],
-    ['1.5. GESTION FINANCIERA'],
-    ['Mes','Valor Certificado','Estado'],
-    [meses[hoy.getMonth()-3]||'Mes -3','Dato Apps Script capita','Certificado'],
-    [meses[hoy.getMonth()-2]||'Mes -2','Dato Apps Script capita','Certificado'],
-    [mesCte,'Dato Apps Script capita','Certificado'],[''],
-    ['1.6. SUFICIENCIA DE CAPITA'],
-    ['Resultado conciliacion','Dato Apps Script capita'],[''],
-    ['1.7. AUDITORIA TECNICA'],
-    ['Estado hallazgos','Ver modulo Sanciones en tablero'],
-  ]);
-  XLSX.utils.book_append_sheet(wb,ws2,'2. Seguimiento General');
+<!-- SEGUIMIENTO GENERAL -->
+<div class="page">
+<h3>1. SEGUIMIENTO GENERAL</h3>
 
-  // Seguimiento Regional
-  const ws3=XLSX.utils.aoa_to_sheet([
-    ['2. SEGUIMIENTO REGIONAL'],[''],
-    ['Regional','PQR Periodo','Tutelas','Fallas Acceso','Tiempos Espera (min)'],
-    ['BOGOTA','Dato PQRS por regional','--','--','--'],
-    ['MEDELLIN','Dato PQRS por regional','--','--','--'],
-    ['BARRANQUILLA','Dato PQRS por regional','--','--','--'],
-    ['CALI','Dato PQRS por regional','--','--','--'],
-    ['BUCARAMANGA','Dato PQRS por regional','--','--','--'],
-    ['CENTRO ORIENTE','Dato PQRS por regional','--','--','--'],
-    [''],
-    ['Nota: Los valores por regional se calculan desde los Apps Scripts de PQRS, Tutelas y Dispensacion'],
-  ]);
-  XLSX.utils.book_append_sheet(wb,ws3,'3. Seguimiento Regional');
+<h4>1.1. POBLACIÓN</h4>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-val">${medG.munis_pbs||'—'}</div><div class="kpi-lbl">Municipios PBS cubiertos</div></div>
+  <div class="kpi"><div class="kpi-val">${medG.n_regionales||'—'}</div><div class="kpi-lbl">Regionales activas</div></div>
+  <div class="kpi"><div class="kpi-val">${medG.pct_integral||'—'}${medG.pct_integral?'%':''}</div><div class="kpi-lbl">Cobertura integral</div></div>
+</div>
 
-  // Conclusiones
-  const ws4=XLSX.utils.aoa_to_sheet([
-    ['3. CONCLUSIONES'],[''],
-    ['Indicador','Estado','Observacion'],
-    ['Reporte indicadores','100% cumplimiento','Consistencia confirmada'],
-    ['PQRS periodo',totalPqr?totalPqr+' casos':'Sin datos PQRS cargados','Seguimiento semanal'],
-    ['Tutelas',tutG.length?tutG.length+' usuarios unicos':'Sin datos tutelas','Efectividad 100% meta'],
-    ['Oportunidad dispensacion','Dato Apps Script','Meta >= 92%'],
-    ['Entrega pendientes 48H','Dato Apps Script','Meta >= 94%'],
-    ['Tiempos de espera','Dato Apps Script','Meta <= 30 min'],
-    [''],
-    ['Elaborado por','Revisado por'],
-    ['Gestor Operativo Junior','Director Red de Medicamentos'],
-    [''],['EPS SANITAS - Gerencia de Medicamentos'],['www.epssanitas.com'],
-  ]);
-  XLSX.utils.book_append_sheet(wb,ws4,'4. Conclusiones');
+<h4>1.2. INTEGRACIÓN TECNOLÓGICA</h4>
+<p>Estado de integración tecnológica: <strong>Datos disponibles al conectar Apps Script de dispensación</strong></p>
+<div class="nota">Para ver avance de integración tecnológica real, conectar el Apps Script de Dispensación Cápita y Evento.</div>
 
-  XLSX.writeFile(wb,`InformeTecnico_${lim(gestor).replace(/\s+/g,'_')}_${mes}${año}.xlsx`);
-  toastMsg('Informe Tecnico Gestor generado');
+<h4>1.3. COMPORTAMIENTO GENERAL</h4>
+<h4>1.3.1 REPORTES</h4>
+<table>
+  <tr><th>Reporte - Mes</th><th>Dispensación Cápita y Evento</th><th>Pendientes</th><th>Supersalud</th><th>Tiempos de Atención</th></tr>
+  <tr><td>${meses[hoy.getMonth()-3]||'Mes -3'}</td><td>Ok reporte</td><td>Ok reporte</td><td>Ok reporte</td><td>Ok reporte</td></tr>
+  <tr><td>${meses[hoy.getMonth()-2]||'Mes -2'}</td><td>Ok reporte</td><td>Ok reporte</td><td>Ok reporte</td><td>Ok reporte</td></tr>
+  <tr><td>${mesCte}</td><td>Ok reporte</td><td>Ok reporte</td><td>Ok reporte</td><td>Ok reporte</td></tr>
+</table>
+
+<h4>1.3.2 INDICADORES</h4>
+<div class="nota">Oportunidad y pendientes 48H disponibles al conectar Apps Script de dispensación y pendientes.</div>
+
+<h4>1.3.3 PQRS</h4>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-val">${totalPqr||'—'}</div><div class="kpi-lbl">Total PQR período</div></div>
+  <div class="kpi"><div class="kpi-val">—</div><div class="kpi-lbl">% Vencidas</div></div>
+  <div class="kpi"><div class="kpi-val">—</div><div class="kpi-lbl">Posición en ranking</div></div>
+</div>
+${totalPqr?`<p>Se registraron <strong>${totalPqr}</strong> PQR para ${gesN} en el período.</p>`:'<div class="nota">Datos PQRS cargados en el tablero. Conectar Apps Script PQRS para detalle por municipio.</div>'}
+
+<h4>1.3.4 TUTELAS</h4>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-val">${tutG.length||'—'}</div><div class="kpi-lbl">Usuarios únicos con tutelas</div></div>
+  <div class="kpi"><div class="kpi-val">100%</div><div class="kpi-lbl">Efectividad de cierre (meta)</div></div>
+  <div class="kpi"><div class="kpi-val">—</div><div class="kpi-lbl">Total medicamentos</div></div>
+</div>
+
+<h4>1.3.5 FALLAS DE ACCESO</h4>
+<div class="nota">Casos disponibles en el módulo de Fallas de Acceso del tablero RedSalud.</div>
+
+<h4>1.3.6 TIEMPOS DE ESPERA</h4>
+<table>
+  <tr><th>Ciudad</th><th>Tiempo promedio (min)</th><th>ANS (min)</th><th>Cumple</th></tr>
+  <tr><td colspan="4" style="text-align:center;color:#888;font-style:italic">Datos disponibles al conectar Apps Script de tiempos de atención</td></tr>
+</table>
+
+<h4>1.3.7 GESTIÓN DE PENDIENTES</h4>
+<div class="nota">Pendientes y TOP 10 moléculas disponibles al conectar Apps Script de pendientes.</div>
+
+<h4>1.3.8 REQUERIMIENTOS</h4>
+<h4>1.3.8.1 IVC NACIONAL</h4>
+<div class="nota">Datos de requerimientos IVC disponibles al conectar Apps Script de requerimientos.</div>
+
+<h4>1.4. ESPACIOS DE ARTICULACIÓN</h4>
+<p>Se mantienen activas las siguientes mesas de seguimiento:</p>
+<ul style="margin:8px 0 8px 20px;line-height:2">
+  <li><strong>Coordinación de Novedades y Suministro:</strong> Mesa periódica con equipo de Novedades</li>
+  <li><strong>Acompañamiento en la Radicación:</strong> Seguimiento con proveedor KPO</li>
+  <li><strong>Articulación Regional y Rutas de Aplicación:</strong> Reunión mensual con regionales</li>
+</ul>
+
+<h4>1.5. GESTIÓN FINANCIERA</h4>
+<table>
+  <tr><th>Mes Certificado</th><th>Valor Certificado</th><th>Estado</th></tr>
+  <tr><td>${meses[hoy.getMonth()-3]||'Mes -3'}</td><td>Dato Apps Script</td><td>Certificado</td></tr>
+  <tr><td>${meses[hoy.getMonth()-2]||'Mes -2'}</td><td>Dato Apps Script</td><td>Certificado</td></tr>
+  <tr><td>${mesCte}</td><td>Dato Apps Script</td><td>Certificado</td></tr>
+</table>
+
+<h4>1.6. SUFICIENCIA DE CÁPITA</h4>
+<div class="nota">Resultado de conciliación disponible al conectar Apps Script de cápita.</div>
+
+<h4>1.7. AUDITORÍA TÉCNICA</h4>
+<p>Estado de hallazgos de auditoría disponible en el módulo de Sanciones del tablero RedSalud.</p>
+</div>
+
+<!-- SEGUIMIENTO REGIONAL -->
+<div class="page" style="page-break-before:always">
+<h3>2. SEGUIMIENTO REGIONAL</h3>
+<table>
+  <tr><th>Regional</th><th>PQR Período</th><th>Tutelas</th><th>Fallas Acceso</th><th>Tiempos Espera</th></tr>
+  ${['BOGOTÁ','MEDELLÍN','BARRANQUILLA','CALI','BUCARAMANGA','CENTRO ORIENTE'].map(r=>`<tr><td>${r}</td><td>Dato PQRS</td><td>—</td><td>—</td><td>— min</td></tr>`).join('')}
+</table>
+<div class="nota">Datos por regional disponibles al conectar Apps Scripts de PQRS, Tutelas y Dispensación por regional.</div>
+</div>
+
+<!-- CONCLUSIONES -->
+<div class="page" style="page-break-before:always">
+<h3>3. CONCLUSIONES</h3>
+<ul style="margin:10px 0 10px 20px;line-height:2.2">
+  <li>Se logró cumplimiento en el reporte de indicadores para el período ${mesCte} de ${año}.</li>
+  ${totalPqr?`<li>El gestor registró <strong>${totalPqr}</strong> PQR en el período de evaluación.</li>`:'<li>Datos PQRS: conectar Apps Script para detalle de PQR por municipio y estado.</li>'}
+  ${tutG.length?`<li>Se atendieron <strong>${tutG.length}</strong> usuarios únicos con tutelas.</li>`:''}
+  ${medG.munis_pbs?`<li>Cobertura PBS: <strong>${medG.munis_pbs}</strong> municipios cubiertos (${medG.pct_integral||'—'}% integral).</li>`:''}
+  <li>Oportunidad de dispensación: dato disponible al conectar Apps Script de dispensación.</li>
+  <li>Tiempos de espera: se mantiene seguimiento activo; meta: ≤ 30 minutos.</li>
+  <li>Se mantienen activas las mesas de seguimiento de las regionales y los espacios de articulación.</li>
+</ul>
+
+<div class="firmas">
+  <div class="firma-box"><div class="firma-line">Elaborado por<br><small>Gestor Operativo Junior</small></div></div>
+  <div class="firma-box"><div class="firma-line">Revisado por<br><small>Director Red de Medicamentos</small></div></div>
+</div>
+<p style="text-align:center;margin-top:32px;font-size:9pt;color:#999">
+  www.epssanitas.com · Línea nacional: 01 8000 91 91 00<br>
+  Bogotá D.C. Colombia / Av. Carrera 45 No 109 – 20<br>
+  EFICIENCIA Y SERVICIO: EL CORAZÓN DE LA EPS SANITAS
+</p>
+</div>
+
+<script>window.onload=function(){window.print();}</script>
+</body></html>`;
+
+  const win=window.open('','_blank');
+  if(!win){toastMsg('Activa las ventanas emergentes para generar el PDF');return;}
+  win.document.write(html);
+  win.document.close();
+  toastMsg('PDF listo — usa Ctrl+P o Imprimir → Guardar como PDF');
+};
+
 };
 </script>
