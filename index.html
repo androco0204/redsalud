@@ -13181,8 +13181,54 @@ window.descargarScriptPython=function(){
 window.generarFormatoSupervision=function(){
   const sel=document.getElementById('rep-prest-selector');
   const nit=sel?.value; if(!nit){toastMsg('Selecciona un prestador primero');return;}
-  if(!window.XLSX){toastMsg('Libreria XLSX no cargada');return;}
-  const XLSX=window.XLSX;
+  const prest=DATOS_CARGADOS.prestadores||[];
+  const normNit=nit.replace(/\./g,'').trim();
+  const p=prest.find(x=>String(x.nit||'').replace(/\./g,'').trim()===normNit)||{nit,nombre:nit};
+  const habRows=(DATOS_CARGADOS.homologacion_rows||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+  const normS=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const habSi=habRows.filter(r=>normS(r.resultado).includes('SI HABILITADO')).length;
+  const cmRows=(DATOS_CARGADOS.cuentas_medicas||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+  const sub=cmRows.reduce((a,r)=>a+r.subtotal,0);
+  const glos=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
+  const pqrRows=(window.PQRS_RED_DATA||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+  const totalPqr=pqrRows.reduce((a,r)=>a+r.total,0);
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const datos={
+    periodo:`${meses[new Date().getMonth()]} ${new Date().getFullYear()}`,
+    prestador:{nit:p.nit||nit,nombre:p.nombre||'',regional:p.regional||'',ciudad:p.ciudad||'',
+      departamento:p.departamento||'',contrato:p.contrato||'',modelo:p.modelo||p.forma_contratacion||'',
+      email:p.email||p.correo||'',telefonos:p.telefonos||p.telefono||'',direccion:p.direccion||'',
+      especialidad:p.especialidad||'',fecha_inicio:p.fecha_inicio||'',
+      descripcion_plan:p.descripcion_plan||'REGIMEN CONTRIBUTIVO',
+      representante_legal:p.representante_legal||'',facturacion_2025:p.fact_2025||0},
+    habilitacion:{total:habRows.length,habilitados:habSi,
+      observacion:habRows.length?`${habSi} de ${habRows.length} servicios habilitados`:''},
+    glosa:{subtotal:sub,glosado:glos},
+    pqr:{total:totalPqr}
+  };
+
+  // Intentar servidor local primero (python server.py)
+  toastMsg('Generando Excel con formato...');
+  fetch('http://localhost:8080/generar-supervision',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(datos)
+  }).then(r=>{
+    if(!r.ok) throw new Error('Error del servidor');
+    return r.blob();
+  }).then(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const nf=String(p.nombre||nit).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9\s]/g,'').trim().replace(/\s+/g,'_').substring(0,30);
+    a.href=url; a.download=`Supervision_${nf}_${new Date().toLocaleDateString('es-CO').replace(/\//g,'-')}.xlsx`;
+    a.click(); URL.revokeObjectURL(url);
+    toastMsg('✓ Excel con formato completo generado');
+  }).catch(()=>{
+    // Sin servidor local: exportar JSON para usar con supervision.py
+    toastMsg('Servidor local no activo — exportando datos para generar offline');
+    setTimeout(()=>exportarDatosPrestador(),500);
+  });
+};
 
   // Cargar el template real desde base64 (preserva colores, bordes, merges)
   const wb=XLSX.read(_FORMATO_TPL_B64,{type:'base64'});
