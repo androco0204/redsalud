@@ -693,7 +693,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="nav-item" data-screen="ranking"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1 3h3l-2.5 2 1 3L7 7.5 4.5 9l1-3L3 4h3z" stroke="currentColor" stroke-width="1.2"/></svg>Ranking y cumplimiento</div>
     <!-- Modelos de contratación: integrado en Red de prestadores -->
     <div class="nav-item" data-screen="indicadores"><svg viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Indicadores</div>
-    <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge">7</span></div>
+    <div class="nav-item" data-screen="alertas"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.2 2.4 1.2 4L7 9.1l-3.5 2.3 1.2-4L1.5 5H5.5z" stroke="currentColor" stroke-width="1.2"/></svg>Alertas <span class="nav-badge" id="nav-badge-alertas" style="display:none">0</span></div>
     <div class="nav-sec">Auditoría</div>
     <div class="nav-item" data-screen="seguimiento"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h12M5 2V1M9 2V1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="9" r="1" fill="currentColor"/><circle cx="7" cy="9" r="1" fill="currentColor"/><circle cx="10" cy="9" r="1" fill="currentColor"/></svg>Seguimiento y notif.</div>
     <div class="nav-item" data-screen="sanciones"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1L2 4v4c0 3 2.5 4.5 5 5 2.5-.5 5-2 5-5V4L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7l1.5 1.5L9 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sanciones</div>
@@ -726,7 +726,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="topbar">
   <div class="tb-left"><span class="tb-title" id="tb-title">Resumen ejecutivo</span><span class="sep">/</span><span class="tb-sub" id="tb-sub">Red de prestadores y gestores · Mar 2026</span></div>
   <div class="tb-right">
-    <button id="btn-logout" onclick="cerrarSesion()" style="display:none;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer" title="Cerrar sesión">⏻ Salir</button>
+    <button id="btn-logout" onclick="cerrarSesion()" style="padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer" title="Cerrar sesión">⏻ Salir</button>
     <div class="btn" onclick="abrirCargador()" style="background:var(--gdim);border-color:var(--green);color:var(--green);display:flex;align-items:center;gap:6px">
       <span id="datos-estado-icon">📂</span> <span id="datos-estado-lbl">Sincronizar</span>
     </div>
@@ -757,25 +757,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div id="lista-modelos"></div>
       </div>
     </div>
-    <div class="btn" id="btn-periodo" onclick="togglePeriodoPanel()" style="position:relative">
-      📅 <span id="periodo-label">Mar 2026 · T1</span> ▾
-      <div id="periodo-panel" style="display:none;position:absolute;top:38px;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:16px;min-width:280px;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.4)">
-        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Período de evaluación</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-          <div class="periodo-opt active-per" onclick="setPeriodo(this,'Mar 2026 · Mensual')">Mensual</div>
-          <div class="periodo-opt" onclick="setPeriodo(this,'T1 2026 · Trimestral')">Trimestral</div>
-          <div class="periodo-opt" onclick="setPeriodo(this,'S1 2026 · Semestral')">Semestral</div>
-          <div class="periodo-opt" onclick="setPeriodo(this,'2025 · Anual')">Anual</div>
-        </div>
-        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Corte específico</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="month" id="corte-desde" value="2026-01" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px">
-          <span style="color:var(--text2);font-size:11px">→</span>
-          <input type="month" id="corte-hasta" value="2026-03" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px">
-        </div>
-        <div onclick="applyPeriodo()" style="margin-top:10px;background:var(--gdim);border:1px solid var(--green);color:var(--green);border-radius:7px;padding:7px;text-align:center;font-size:12px;cursor:pointer;font-weight:500">Aplicar período</div>
-      </div>
-    </div>
+
   </div>
 </div>
 
@@ -1071,13 +1053,36 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <div class="screen" id="screen-alertas">
   <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Críticas</div><div class="kpi-value" style="color:var(--red)">3</div><div class="kpi-delta dn">Acción inmediata</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Medias</div><div class="kpi-value" style="color:var(--amber)">4</div><div class="kpi-delta warn">Gestión en curso</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Informativas</div><div class="kpi-value" style="color:var(--blue)">12</div><div class="kpi-delta neu">Monitoreo</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Resueltas hoy</div><div class="kpi-value" style="color:var(--green)">5</div><div class="kpi-delta up">↑ vs ayer</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Críticas</div><div class="kpi-value" style="color:var(--red)" id="al-kpi-crit">—</div><div class="kpi-delta dn">Acción inmediata</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Medias</div><div class="kpi-value" style="color:var(--amber)" id="al-kpi-med">—</div><div class="kpi-delta warn">Gestión en curso</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Informativas</div><div class="kpi-value" style="color:var(--blue)" id="al-kpi-inf">—</div><div class="kpi-delta neu">Monitoreo</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Fuentes activas</div><div class="kpi-value" style="color:var(--green)" id="al-kpi-src">—</div><div class="kpi-delta up" id="al-kpi-src-d">Con datos cargados</div></div>
   </div>
-  <div class="card"><div class="card-head"><div><div class="card-title">Centro de alertas</div><div class="card-sub">Todas · ordenadas por criticidad · incluye impacto financiero</div></div></div>
-  <div class="card-body" style="padding:20px;color:var(--text2)">Alertas generadas automáticamente.</div>
+  <div class="card">
+    <div class="card-head">
+      <div><div class="card-title">Centro de alertas</div><div class="card-sub" id="al-sub">Calculando con datos reales...</div></div>
+      <button class="btn" onclick="generarAlertasCompletas()" style="font-size:11.5px">↺ Recalcular</button>
+    </div>
+    <div style="display:flex;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <select id="al-f-nivel" onchange="filtrarAlertas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);outline:none">
+        <option value="">Todos los niveles</option>
+        <option value="critica">🔴 Críticas</option>
+        <option value="media">🟡 Medias</option>
+        <option value="informativa">🔵 Informativas</option>
+      </select>
+      <select id="al-f-fuente" onchange="filtrarAlertas()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);outline:none">
+        <option value="">Todas las fuentes</option>
+        <option value="habilitacion">🏥 Habilitación</option>
+        <option value="glosa">💳 Cuentas médicas</option>
+        <option value="pqrs">📋 PQRS</option>
+        <option value="tutelas">⚖ Tutelas</option>
+        <option value="medicamentos">💊 Medicamentos</option>
+      </select>
+      <span id="al-f-count" style="font-size:11px;color:var(--text2);align-self:center"></span>
+    </div>
+    <div class="card-body" style="padding:16px 20px" id="al-lista">
+      <div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">⏳ Generando alertas desde los datos cargados...</div>
+    </div>
   </div>
 </div>
 <div class="screen" id="screen-cobertura">
@@ -5403,9 +5408,9 @@ async function cargarDesdeDrive() {
       setTimeout(()=>{ toast.style.display='none'; }, 5000);
     }
   } else {
-    if(icon) icon.textContent = '⚠️';
-    if(lbl)  lbl.textContent  = 'Reconectar datos';
-    const bd2=document.getElementById('btn-datos');if(bd2){bd2.style.background='var(--adim)';bd2.style.color='var(--amber)';bd2.style.borderColor='var(--amber)';}
+    if(icon) icon.textContent = '🔄';
+    if(lbl)  lbl.textContent  = 'Actualizar';
+    const bd2=document.getElementById('btn-datos');if(bd2){bd2.style.background='';bd2.style.color='';bd2.style.borderColor='';}
   }
 
   if(btn){
@@ -9155,9 +9160,9 @@ function parsearCuentasMedicas(raw) {
     nombre:           fi('NOMBRE PRESTADOR','NOMBRE DEL PRESTADOR','NOMBRES DE PRESTADOR','RAZON SOCIAL','NOMBRE'),
     tipo_contrato:    fi('TIPO CONTRATO','TIPO DE CONTRATO','TIPO'),
     validacion:       fi('VALIDACION','VALIDACON','ESTADO VALIDACION','ESTADO VAL','ESTADO'),
-    subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL','TOTAL RADICADO','TOTAL'),
-    glosado:          fiOrIdx(6,'VALOR GLOSADO','V GLOSADO','VR GLOSADO','VLR GLOSADO','GLOSADO'),
-    glosa_real:       fiOrIdx(7,'GLOSA REAL','VALOR GLOSA REAL','GLOSA REAL VALOR','VR GLOSA REAL','VLR GLOSA REAL'),
+    subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL','TOTAL RADICADO','TOTAL FACTURADO','VR TOTAL','VLR TOTAL','VALOR TOTAL','TOTAL'),
+    glosado:          fiOrIdx(6,'VALOR GLOSADO','V GLOSADO','VR GLOSADO','VLR GLOSADO','GLOSADO','VALOR GLOSA'),
+    glosa_real:       fiOrIdx(7,'GLOSA REAL','VALOR GLOSA REAL','GLOSA REAL VALOR','VR GLOSA REAL','VLR GLOSA REAL','GLOSA NETA','VR GLOSA','GLOSA'),
     devoluciones:     fi('DEVOLUCIONES','DEVOLUCION','DEV'),
   };
   console.log('[CuentasMédicas] cols detectados:', JSON.stringify(cols));
@@ -12067,7 +12072,7 @@ function scoreGlosa(nit){
   const rows = (DATOS_CARGADOS.cuentas_medicas || []).filter(r => String(r.nit||'').trim() === nit);
   if(!rows.length) return null;
   const tot  = rows.reduce((a,r)=>a+r.subtotal,0);
-  const glos = rows.reduce((a,r)=>a+r.glosa_real,0);
+  const glos = rows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
   if(!tot) return null;
   const pct = (glos/tot)*100;
   if(pct < 10) return 100;
@@ -12787,6 +12792,366 @@ document.addEventListener('DOMContentLoaded', function(){
       if(scr==='red-resultados' && !window._riesgosCargado) setTimeout(cargarRiesgos,80);
     };
   }
+});
+
+})();
+</script>
+
+<!-- ══ MOTOR DE ALERTAS REALES + INDICADORES CON DATOS REALES ══ -->
+<script>
+(function(){
+
+// ── Almacén global de alertas ─────────────────────────────────────
+window._ALERTAS_CACHE = [];
+
+// ── Helpers ───────────────────────────────────────────────────────
+function fmtPct(v){ return v.toFixed(1)+'%'; }
+function fmtCOP(v){
+  if(!v) return '—';
+  const n=Math.abs(v);
+  if(n>=1e9) return '$'+(v/1e9).toFixed(1)+' mil mill.';
+  if(n>=1e6) return '$'+(v/1e6).toFixed(0)+' M';
+  if(n>=1e3) return '$'+(v/1e3).toFixed(0)+' K';
+  return '$'+Number(v).toLocaleString('es-CO');
+}
+
+// ── Motor principal de alertas ────────────────────────────────────
+window.generarAlertasCompletas = function(){
+  const alertas = [];
+
+  // FUENTE 1: Habilitación (homologacion_rows)
+  const habRows = DATOS_CARGADOS.homologacion_rows || [];
+  if(habRows.length){
+    const byNit = {};
+    habRows.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      if(!byNit[nit]) byNit[nit]={nit,nombre:String(r.nombre||r.razon_social||nit).substring(0,50),total:0,noHab:0,regional:r.regional||''};
+      byNit[nit].total++;
+      const res=String(r.resultado||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if(res.includes('NO HABILITADO')||res.includes('NO CUMPLE')||res.includes('INHABILITADO')) byNit[nit].noHab++;
+    });
+    Object.values(byNit).forEach(p=>{
+      if(!p.noHab) return;
+      const pct=Math.round(p.noHab/p.total*100);
+      alertas.push({nivel:pct>50?'critica':'media',fuente:'habilitacion',
+        titulo:`${p.nombre} — Sin habilitación`,
+        desc:`${p.noHab} de ${p.total} servicios NO HABILITADOS · ${pct}% del portafolio${p.regional?' · '+p.regional:''}`,
+        nit:p.nit,valor:pct,icono:'🏥'});
+    });
+  }
+
+  // FUENTE 2: Glosa (cuentas_medicas)
+  const cmRows = DATOS_CARGADOS.cuentas_medicas || [];
+  if(cmRows.length){
+    const byNit={};
+    cmRows.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      if(!byNit[nit]) byNit[nit]={nit,nombre:String(r.nombre||nit).substring(0,50),sub:0,glosa:0};
+      byNit[nit].sub+=r.subtotal||0;
+      byNit[nit].glosa+=r.glosa_real||r.glosado||0;
+    });
+    Object.values(byNit).forEach(p=>{
+      if(!p.sub) return;
+      const pct=(p.glosa/p.sub)*100;
+      if(pct<10) return;
+      alertas.push({nivel:pct>=25?'critica':pct>=15?'media':'informativa',fuente:'glosa',
+        titulo:`${p.nombre} — Glosa elevada`,
+        desc:`Glosa real ${fmtPct(pct)} del valor radicado · Radicado ${fmtCOP(p.sub)} · Glosado ${fmtCOP(p.glosa)} · Umbral: 15%`,
+        nit:p.nit,valor:pct,icono:'💳'});
+    });
+  }
+
+  // FUENTE 3: PQRS alta variación trimestral
+  const pqrsData = window.PQRS_RED_DATA || [];
+  if(pqrsData.length){
+    const maxAño=Math.max(...pqrsData.map(r=>r.año));
+    const ultMes=Math.max(...pqrsData.filter(r=>r.año===maxAño).map(r=>r.mesNum));
+    const trimAct=Math.ceil(ultMes/3);
+    const trimAnt=trimAct>1?trimAct-1:4;
+    const añoAnt=trimAct>1?maxAño:maxAño-1;
+    const kA=`${maxAño}-${trimAct}`,kP=`${añoAnt}-${trimAnt}`;
+    const byNit={};
+    pqrsData.forEach(r=>{
+      const nit=String(r.nit||'').trim(); if(!nit) return;
+      const k=`${r.año}-${Math.ceil(r.mesNum/3)}`;
+      if(!byNit[nit]) byNit[nit]={nombre:String(r.nombre||nit).substring(0,50)};
+      byNit[nit][k]=(byNit[nit][k]||0)+r.total;
+    });
+    Object.entries(byNit).forEach(([nit,d])=>{
+      const act=d[kA]||0,ant=d[kP]||0;
+      if(!ant||!act) return;
+      const varPct=((act-ant)/ant)*100;
+      if(varPct<20) return;
+      alertas.push({nivel:varPct>=50?'media':'informativa',fuente:'pqrs',
+        titulo:`${d.nombre} — Aumento de PQR`,
+        desc:`+${varPct.toFixed(0)}% vs trimestre anterior · ${ant} → ${act} PQR · T${trimAnt}→T${trimAct} ${maxAño}`,
+        nit,valor:varPct,icono:'📋'});
+    });
+  }
+
+  // FUENTE 4: Tutelas sin ANS
+  const tutelas=window.DATOS_TUTELAS||[];
+  if(tutelas.length && window.COL_T){
+    const byGestor={};
+    tutelas.forEach(r=>{
+      const g=String(r[COL_T.gestor??3]||'').trim(); if(!g||g==='N/A') return;
+      if(!byGestor[g]) byGestor[g]={total:0,sinAns:0};
+      byGestor[g].total++;
+      const cumple=typeof esCumple==='function'?esCumple(r[COL_T.cumpleAns??37]):false;
+      if(!cumple) byGestor[g].sinAns++;
+    });
+    Object.entries(byGestor).forEach(([g,d])=>{
+      if(!d.sinAns) return;
+      const pct=Math.round(d.sinAns/d.total*100);
+      alertas.push({nivel:pct>30?'critica':'media',fuente:'tutelas',
+        titulo:`${g} — Tutelas sin ANS`,
+        desc:`${d.sinAns} de ${d.total} tutelas fuera de ANS (${pct}%)`,
+        valor:pct,icono:'⚖'});
+    });
+  }
+
+  // FUENTE 5: Medicamentos — baja cobertura PBS
+  const med=window.MED_DATA_LOADED;
+  if(med?.por_gestor_pbs?.length){
+    const maxM=264;
+    med.por_gestor_pbs.forEach(g=>{
+      const pct=Math.round(g.munis_pbs/maxM*100);
+      if(pct<60){
+        alertas.push({nivel:pct<40?'media':'informativa',fuente:'medicamentos',
+          titulo:`${g.nombre} — Baja cobertura PBS`,
+          desc:`${g.munis_pbs} de ${maxM} municipios cubiertos (${pct}%) · ${g.n_regionales||'—'} regionales`,
+          valor:pct,icono:'💊'});
+      }
+    });
+  }
+
+  // Ordenar: críticas → medias → informativas, luego por valor desc
+  const ord={critica:0,media:1,informativa:2};
+  alertas.sort((a,b)=>(ord[a.nivel]-ord[b.nivel])||b.valor-a.valor);
+  window._ALERTAS_CACHE=alertas;
+  renderAlertas(alertas);
+};
+
+// ── Render KPIs y lista ───────────────────────────────────────────
+function renderAlertas(alertas){
+  const crit=alertas.filter(a=>a.nivel==='critica').length;
+  const med=alertas.filter(a=>a.nivel==='media').length;
+  const inf=alertas.filter(a=>a.nivel==='informativa').length;
+  const fuentes=[...new Set(alertas.map(a=>a.fuente))].length;
+  const se=id=>{const e=document.getElementById(id);return e||{textContent:'',style:{}};};
+  se('al-kpi-crit').textContent=crit;
+  se('al-kpi-med').textContent=med;
+  se('al-kpi-inf').textContent=inf;
+  se('al-kpi-src').textContent=fuentes;
+  se('al-kpi-src-d').textContent=`${fuentes} fuente${fuentes!==1?'s':''} con datos`;
+  const badge=document.getElementById('nav-badge-alertas');
+  if(badge){ const u=crit+med; badge.textContent=u; badge.style.display=u>0?'':'none'; }
+  const sub=document.getElementById('al-sub');
+  if(sub) sub.textContent=`${alertas.length} alerta${alertas.length!==1?'s':''} · ${fuentes} fuente${fuentes!==1?'s':''} · ordenadas por criticidad`;
+  renderListaAlertas(alertas);
+}
+
+function renderListaAlertas(lista){
+  const el=document.getElementById('al-lista'); if(!el) return;
+  const count=document.getElementById('al-f-count');
+  if(count) count.textContent=`${lista.length} alerta${lista.length!==1?'s':''}`;
+  if(!lista.length){
+    el.innerHTML='<div style="text-align:center;padding:48px;color:var(--text2);font-size:13px">✅ Sin alertas para los filtros seleccionados</div>';
+    return;
+  }
+  const colores={critica:'var(--red)',media:'var(--amber)',informativa:'var(--blue)'};
+  const labels={critica:'🔴 Crítica',media:'🟡 Media',informativa:'🔵 Informativa'};
+  el.innerHTML=lista.map(a=>{
+    const c=colores[a.nivel]||'var(--text2)';
+    return `<div class="al-item" style="--alc:${c};margin-bottom:8px">
+      <div style="font-size:20px;flex-shrink:0;line-height:1">${a.icono||'⚠'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="al-title">${a.titulo}</div>
+        <div class="al-meta">${a.desc}</div>
+        ${a.nit?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px">NIT ${a.nit}</div>`:''}
+      </div>
+      <div style="flex-shrink:0;text-align:right">
+        <span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;background:${c}18;color:${c}">${labels[a.nivel]}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.filtrarAlertas=function(){
+  const nivel=document.getElementById('al-f-nivel')?.value||'';
+  const fuente=document.getElementById('al-f-fuente')?.value||'';
+  let lista=window._ALERTAS_CACHE||[];
+  if(nivel)  lista=lista.filter(a=>a.nivel===nivel);
+  if(fuente) lista=lista.filter(a=>a.fuente===fuente);
+  renderListaAlertas(lista);
+};
+
+// ═══ INDICADORES CON DATOS REALES ════════════════════════════════
+
+function poblarSelectIndicadores(){
+  const prest=DATOS_CARGADOS.prestadores||[];
+  const sel=document.getElementById('f-prestador');
+  if(sel&&prest.length){
+    const opts=prest
+      .filter(p=>p.nit||p.nombre)
+      .sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')))
+      .map(p=>`<option value="${p.nit||p.nombre}">${String(p.nombre||p.nit||'').substring(0,50)} · ${p.modelo||'—'}</option>`);
+    if(opts.length) sel.innerHTML='<option value="">— Selecciona un prestador —</option>'+opts.join('');
+  }
+  const selReg=document.getElementById('f-regional');
+  if(selReg&&prest.length){
+    const regs=[...new Set(prest.map(p=>p.regional||p.departamento).filter(Boolean))].sort();
+    if(regs.length) selReg.innerHTML='<option value="">— Selecciona una regional —</option>'+regs.map(r=>`<option value="${r}">${r}</option>`).join('');
+  }
+}
+
+window.cargarIndicadoresPrestador=function(){
+  const val=document.getElementById('f-prestador')?.value;
+  const body=document.getElementById('ind-prestador-body');
+  const badge=document.getElementById('prest-score-badge');
+  const cumEl=document.getElementById('prest-cumplimiento');
+  if(!val||!body) return;
+
+  const prest=DATOS_CARGADOS.prestadores||[];
+  const pObj=prest.find(p=>p.nit===val||p.nombre===val)||{nit:val,nombre:val,modelo:'—'};
+  const nit=pObj.nit||val;
+  const indicadores=[];
+
+  // 1. Habilitación
+  const habRows=(DATOS_CARGADOS.homologacion_rows||[]).filter(r=>String(r.nit||'').trim()===nit);
+  if(habRows.length){
+    const norm=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const si=habRows.filter(r=>norm(r.resultado).includes('SI HABILITADO')).length;
+    const pct=Math.round(si/habRows.length*100);
+    indicadores.push({atr:'Habilitación',ind:'Habilitación de servicios contratados',resultado:pct,meta:100,unid:'%',cumple:pct>=100,san:'NA',tendencia:'Positiva'});
+  }
+
+  // 2. Glosa
+  const cmRows=(DATOS_CARGADOS.cuentas_medicas||[]).filter(r=>String(r.nit||'').trim()===nit);
+  if(cmRows.length){
+    const sub=cmRows.reduce((a,r)=>a+r.subtotal,0);
+    const glos=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
+    if(sub>0){
+      const pct=parseFloat(((glos/sub)*100).toFixed(1));
+      indicadores.push({atr:'Gestión Facturación',ind:'Porcentaje del valor glosado frente al valor radicado',resultado:pct,meta:15,unid:'%',cumple:pct<15,san:'Menor 15%',tendencia:'Negativa'});
+    }
+  }
+
+  // 3. PQR
+  const pqrsAll=window.PQRS_RED_DATA||[];
+  const pqrNit=pqrsAll.filter(r=>String(r.nit||'').trim()===nit);
+  if(pqrNit.length){
+    const maxA=Math.max(...pqrNit.map(r=>r.año));
+    const ultM=Math.max(...pqrNit.filter(r=>r.año===maxA).map(r=>r.mesNum));
+    const tA=Math.ceil(ultM/3),tP=tA>1?tA-1:4,añoP=tA>1?maxA:maxA-1;
+    const byTrim={};
+    pqrNit.forEach(r=>{const k=`${r.año}-${Math.ceil(r.mesNum/3)}`;byTrim[k]=(byTrim[k]||0)+r.total;});
+    const act=byTrim[`${maxA}-${tA}`]||0,ant=byTrim[`${añoP}-${tP}`]||0;
+    if(ant>0){
+      const varPct=parseFloat(((ant-act)/ant*100).toFixed(1));
+      indicadores.push({atr:'Quejas',ind:'Porcentaje de disminución PQR del prestador',resultado:varPct,meta:10,unid:'%',cumple:varPct>=10,san:'NA',tendencia:'Negativa'});
+    }
+  }
+
+  if(!indicadores.length){
+    body.innerHTML='<div style="padding:48px;text-align:center;color:var(--text2);font-size:13px">Sin datos disponibles para este prestador.<br><span style="font-size:11px;margin-top:6px;display:block">Carga homologación, cuentas médicas o PQRS para ver indicadores reales.</span></div>';
+    if(badge) badge.style.display='none';
+    return;
+  }
+
+  const cumpleN=indicadores.filter(i=>i.cumple).length;
+  const score=Math.round(cumpleN/indicadores.length*100);
+  const sc=score>=80?{c:'var(--green)',bg:'var(--gdim)'}:score>=60?{c:'var(--amber)',bg:'var(--adim)'}:{c:'var(--red)',bg:'var(--rdim)'};
+  if(badge){badge.style.display='inline-block';badge.textContent=`Score: ${score}`;badge.style.background=sc.bg;badge.style.color=sc.c;}
+  if(cumEl) cumEl.textContent=`${cumpleN} de ${indicadores.length} indicadores cumplen la meta · ${pObj.nombre||val} · Modelo: ${pObj.modelo||'—'}`;
+
+  const hdr=`<div style="display:grid;grid-template-columns:150px 1fr 90px 90px 90px 90px;padding:8px 16px;background:var(--bg4);border-bottom:2px solid var(--border2);font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em"><span>Atributo</span><span>Indicador</span><span>Resultado</span><span>Meta</span><span>Estado</span><span>Sanción</span></div>`;
+  const rows=indicadores.map((r,i)=>{
+    const sem=typeof semColorInd==='function'?semColorInd(r.cumple,''):{color:r.cumple?'var(--green)':'var(--red)',bg:r.cumple?'var(--gdim)':'var(--rdim)',label:r.cumple?'Cumple':'No cumple'};
+    const bg=i%2===0?'':'background:var(--bg3)';
+    return `<div style="display:grid;grid-template-columns:150px 1fr 90px 90px 90px 90px;padding:10px 16px;border-bottom:1px solid var(--border);align-items:center;${bg}">
+      <span style="font-size:11.5px;color:var(--text2)">${r.atr}</span>
+      <span style="font-size:12px;color:var(--text)">${r.ind}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:${sem.color}">${r.resultado}${r.unid}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${r.tendencia==='Negativa'?'<':'≥'}${r.meta}${r.unid}</span>
+      <span style="font-size:11px;padding:3px 8px;border-radius:5px;background:${sem.bg};color:${sem.color};font-weight:500">${sem.label}</span>
+      <span style="font-size:10.5px;${r.san&&r.san!=='NA'?'color:var(--red);font-weight:500':'color:var(--text3)'}">${r.san&&r.san!=='NA'?'⚠ '+r.san:'Solo seguimiento'}</span>
+    </div>`;
+  }).join('');
+
+  const nota=`<div style="padding:12px 16px;font-size:11px;color:var(--text2);border-top:1px solid var(--border);background:var(--bg3)">ℹ Indicadores calculados con los datos disponibles en el sistema (homologación, cuentas médicas, PQRS). Para la batería completa de ${pObj.modelo||'contrato'} conecta el Apps Script de resolución 1552.</div>`;
+  body.innerHTML=hdr+`<div style="max-height:440px;overflow-y:auto">${rows}</div>`+nota;
+};
+
+window.cargarIndicadoresRegional=function(){
+  const regional=document.getElementById('f-regional')?.value;
+  const body=document.getElementById('ind-regional-body');
+  const resumen=document.getElementById('regional-resumen');
+  if(!regional||!body) return;
+
+  const prest=(DATOS_CARGADOS.prestadores||[]).filter(p=>(p.regional||p.departamento)===regional);
+  if(!prest.length){
+    body.innerHTML='<div style="padding:40px;text-align:center;color:var(--text2)">Sin prestadores para esta regional en la base de contratos.</div>';
+    return;
+  }
+
+  const filas=prest.map(p=>{
+    const nit=String(p.nit||'').trim();
+    const sH=typeof scoreHabilitacion==='function'?scoreHabilitacion(nit):null;
+    const sG=typeof scoreGlosa==='function'?scoreGlosa(nit):null;
+    const sP=typeof scorePqrRed==='function'?scorePqrRed(nit):null;
+    const dims=[sH,sG,sP].filter(v=>v!==null);
+    const score=dims.length?Math.round(dims.reduce((a,v)=>a+v,0)/dims.length):null;
+    return {nit,nombre:p.nombre||nit,modelo:p.modelo||'—',score,sH,sG,sP};
+  }).sort((a,b)=>(b.score??-1)-(a.score??-1));
+
+  const conScore=filas.filter(f=>f.score!==null);
+  const prom=conScore.length?Math.round(conScore.reduce((a,f)=>a+f.score,0)/conScore.length):null;
+  const verde=conScore.filter(f=>f.score>=80).length;
+  const rojo=conScore.filter(f=>f.score<60).length;
+  if(resumen) resumen.textContent=`${prest.length} prestadores · Score prom: ${prom??'—'} · ${verde} verde · ${rojo} rojo · ${regional}`;
+
+  const hdr=`<div style="display:grid;grid-template-columns:1fr 80px 80px 80px 80px 100px 100px;padding:8px 16px;background:var(--bg4);border-bottom:2px solid var(--border2);font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em"><span>Prestador</span><span>Modelo</span><span>Hab.</span><span>Glosa</span><span>PQR</span><span>Score</span><span>Estado</span></div>`;
+  const rows=filas.map((f,i)=>{
+    const sc=f.score===null?{c:'var(--text2)',bg:'var(--bg3)'}:f.score>=80?{c:'var(--green)',bg:'var(--gdim)'}:f.score>=60?{c:'var(--amber)',bg:'var(--adim)'}:{c:'var(--red)',bg:'var(--rdim)'};
+    const bg=i%2===0?'':'background:var(--bg3)';
+    const dim=v=>v===null?`<span style="color:var(--text3);font-size:11px">—</span>`:`<span style="font-size:12px;font-weight:600;color:${v>=80?'var(--green)':v>=60?'var(--amber)':'var(--red)'}">${v}</span>`;
+    const estado=f.score===null?'Sin datos':f.score>=80?'● Verde':f.score>=60?'● Ámbar':'● Rojo';
+    return `<div style="display:grid;grid-template-columns:1fr 80px 80px 80px 80px 100px 100px;padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;${bg}">
+      <div><div style="font-size:12.5px;font-weight:500;color:var(--text)">${String(f.nombre).substring(0,36)}</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace">${f.nit}</div></div>
+      <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg4);color:var(--text2)">${f.modelo.split('+')[0]}</span>
+      ${dim(f.sH)}${dim(f.sG)}${dim(f.sP)}
+      <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:${sc.c}">${f.score??'—'}</span>
+      <span style="font-size:11px;padding:3px 8px;border-radius:5px;background:${sc.bg};color:${sc.c};font-weight:500">${estado}</span>
+    </div>`;
+  }).join('');
+  body.innerHTML=hdr+`<div style="max-height:480px;overflow-y:auto">${rows}</div>`;
+};
+
+// ── Enganchar en aplicarPrestadores ──────────────────────────────
+const _origAP=window.aplicarPrestadores;
+if(typeof _origAP==='function'){
+  window.aplicarPrestadores=function(){
+    _origAP.apply(this,arguments);
+    poblarSelectIndicadores();
+    setTimeout(generarAlertasCompletas,300);
+  };
+}
+
+// ── Enganchar en navigate ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  const origNav=window.navigate;
+  if(typeof origNav==='function'){
+    window.navigate=function(scr){
+      origNav(scr);
+      if(scr==='alertas') setTimeout(generarAlertasCompletas,120);
+    };
+  }
+  // Fallback si los datos ya cargaron antes de este script
+  setTimeout(function(){
+    poblarSelectIndicadores();
+    generarAlertasCompletas();
+  },2000);
 });
 
 })();
