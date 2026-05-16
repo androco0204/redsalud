@@ -1582,6 +1582,22 @@ document.addEventListener('DOMContentLoaded',function(){
         <div><div class="card-title">Hallazgos · Notificación al prestador</div><div class="card-sub" id="seg-hallazgos-sub">Generados desde datos reales</div></div>
         <div class="card-act" onclick="notificarTodosHallazgos()">Notificar todos →</div>
       </div>
+      <div style="display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--bg3)">
+        <input id="seg-f-buscar" placeholder="🔍 Prestador o NIT..." oninput="renderHallazgos()"
+          style="padding:5px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg2);color:var(--text);outline:none;min-width:170px">
+        <select id="seg-f-regional" onchange="renderHallazgos()"
+          style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);outline:none">
+          <option value="">Todas las regionales</option>
+        </select>
+        <select id="seg-f-tipo" onchange="renderHallazgos()"
+          style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--text);outline:none">
+          <option value="">Todos los tipos</option>
+          <option value="habilitacion">🏥 Habilitación</option>
+          <option value="glosa">💳 Glosa</option>
+          <option value="pqrs">📋 PQRS</option>
+        </select>
+        <button class="btn" onclick="document.getElementById('seg-f-buscar').value='';document.getElementById('seg-f-regional').value='';document.getElementById('seg-f-tipo').value='';renderHallazgos();" style="font-size:11px">↺</button>
+      </div>
       <div class="tabs">
         <div class="tab active" onclick="segFiltrarTab('pendiente',this)">Pendientes</div>
         <div class="tab" onclick="segFiltrarTab('notificado',this)">Notificados</div>
@@ -8348,7 +8364,8 @@ function parsearSatisfaccion(data) {
   console.log('[Satisfacción] cols:', cols, '| headers:', hdr.slice(0,15));
 
   return data.slice(1).map(row => {
-    const nit = get(row, cols.nit).replace(/\.0$/,'');
+    // NIT: quitar puntos (800.012.345 → 800012345) y sufijos .0
+    const nit = get(row, cols.nit).replace(/\./g,'').replace(/\.0$/,'').trim();
     if(!nit && !get(row, cols.nombre)) return null;
     return {
       nit,
@@ -11559,7 +11576,8 @@ function semScore(s){
 
 // Habilitación: % SI HABILITADO → score directo
 function scoreHabilitacion(nit){
-  const rows = (DATOS_CARGADOS.homologacion_rows || []).filter(r => String(r.nit||'').trim() === nit);
+  const normNit = String(nit||'').replace(/\./g,'').trim();
+  const rows = (DATOS_CARGADOS.homologacion_rows || []).filter(r => String(r.nit||'').replace(/\./g,'').trim() === normNit);
   if(!rows.length) return null;
   const norm = s => String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const si = rows.filter(r => norm(r.resultado).includes('SI HABILITADO')).length;
@@ -11570,7 +11588,7 @@ function scoreHabilitacion(nit){
 // ≥+10% = 100, 0-10% = 60-100 proporcional, negativa = 0-59 proporcional
 function scorePqrRed(nit){
   if(!(window.PQRS_RED_DATA?.length)) return null;
-  // Calcula variación del último trimestre para este NIT (suma todas las regionales)
+  const normNit = String(nit||'').replace(/\./g,'').trim();
   const ult = typeof detectarUltimoTrimestre === 'function' ? detectarUltimoTrimestre() : {año:2025,trim:4};
   const getTrim = m => Math.ceil(m/3);
   let trimActAño=ult.año, trimActNum=ult.trim;
@@ -11579,7 +11597,7 @@ function scorePqrRed(nit){
 
   const byNitPer = {};
   PQRS_RED_DATA.forEach(r=>{
-    if(String(r.nit).trim()!==nit) return;
+    if(String(r.nit||'').replace(/\./g,'').trim()!==normNit) return;
     const trim=getTrim(r.mesNum);
     const key=`${r.año}-${trim}`;
     byNitPer[key]=(byNitPer[key]||0)+r.total;
@@ -11600,9 +11618,10 @@ function scorePqrRed(nit){
 
 // Glosa: % glosa real → score (inverso: menos glosa = más score)
 function scoreGlosa(nit){
-  const normNit = String(nit||'').trim().replace(/\.0$/,'');
+  // Quitar puntos de NIT (800.012.345 → 800012345) para match con cuentas medicas
+  const normNit = String(nit||'').replace(/\./g,'').trim();
   const rows = (DATOS_CARGADOS.cuentas_medicas || []).filter(r => {
-    const rNit = String(r.nit||'').trim().replace(/\.0$/,'');
+    const rNit = String(r.nit||'').replace(/\./g,'').trim();
     return rNit === normNit;
   });
   if(!rows.length) return null;
@@ -11730,9 +11749,9 @@ window.calcularRanking = function(){
     try {
       if(RANK_MODULO === 'prestadores'){
         // Obtener todos los NITs únicos de las fuentes disponibles
-        const nitsHab  = new Set((DATOS_CARGADOS.homologacion_rows||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
-        const nitsPqr  = new Set((window.PQRS_RED_DATA||[]).map(r=>String(r.nit||'').trim()).filter(Boolean));
-        const nitsGlos = new Set((DATOS_CARGADOS.cuentas_medicas||[]).map(r=>String(r.nit||'').trim().replace(/\.0$/,'')).filter(Boolean));
+        const nitsHab  = new Set((DATOS_CARGADOS.homologacion_rows||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
+        const nitsPqr  = new Set((window.PQRS_RED_DATA||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
+        const nitsGlos = new Set((DATOS_CARGADOS.cuentas_medicas||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
         const todosNits = new Set([...nitsHab,...nitsPqr,...nitsGlos]);
 
         // Obtener nombres desde cualquier fuente disponible
@@ -12458,30 +12477,42 @@ function renderSeguimiento(){
 
 function renderHallazgos(){
   const body=document.getElementById('seg-hallazgos-body'); if(!body) return;
-  const lista=_SEG_HALLAZGOS.filter(h=>h.estado===_SEG_TAB);
+  const buscar=(document.getElementById('seg-f-buscar')?.value||'').toLowerCase();
+  const regFil=document.getElementById('seg-f-regional')?.value||'';
+  const tipoFil=document.getElementById('seg-f-tipo')?.value||'';
+  const selReg=document.getElementById('seg-f-regional');
+  if(selReg&&selReg.options.length<=1){
+    [...new Set(_SEG_HALLAZGOS.map(h=>h.regional||'').filter(Boolean))].sort()
+      .forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;selReg.appendChild(o);});
+  }
+  let lista=_SEG_HALLAZGOS.filter(h=>h.estado===_SEG_TAB);
+  if(buscar) lista=lista.filter(h=>`${h.nombre} ${h.nit||''}`.toLowerCase().includes(buscar));
+  if(regFil) lista=lista.filter(h=>(h.regional||'')===regFil);
+  if(tipoFil) lista=lista.filter(h=>(h.tipos||[]).some(t=>t.toLowerCase().includes(tipoFil)));
   if(!lista.length){
-    const msgs={pendiente:'✅ Sin hallazgos pendientes de notificación',notificado:'Sin hallazgos notificados aún',gestionado:'Sin hallazgos gestionados'};
+    const msgs={pendiente:'Sin hallazgos para los filtros seleccionados',notificado:'Sin hallazgos notificados',gestionado:'Sin hallazgos gestionados'};
     body.innerHTML=`<div style="text-align:center;padding:32px;color:var(--text2);font-size:12px">${msgs[_SEG_TAB]||'Sin datos'}</div>`;
     return;
   }
+  const notifs=getNotificaciones();
   body.innerHTML=lista.map(h=>{
     const color=h.nivel==='critico'?'var(--red)':'var(--amber)';
-    const badgeCls=h.nivel==='critico'?'bg-r':'bg-a';
+    const bc=h.nivel==='critico'?'bg-r':'bg-a';
+    const hist=notifs.filter(n=>n.nit===h.nit);
+    const histHtml=hist.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><div style="font-size:10.5px;color:var(--text2);margin-bottom:3px">📬 Notificaciones (${hist.length})</div>${hist.slice(-3).reverse().map(n=>`<div style="font-size:10.5px;color:var(--text2)">· ${n.fecha} — ${n.hallazgo.substring(0,45)}</div>`).join('')}</div>`:'';
+    const nitSafe=(h.nit||'').replace(/'/g,"\'");
+    const nomSafe=h.nombre.replace(/'/g,"\'");
+    const titSafe=h.titulo.replace(/'/g,"\'");
     return `<div class="hallazgo-card" style="border-left:3px solid ${color}">
       <div class="hallazgo-head">
-        <div>
-          <div class="hallazgo-title">${h.titulo}</div>
-          <div class="hallazgo-meta">${h.meta}${h.nit?' · NIT '+h.nit:''}</div>
-        </div>
-        <div class="hallazgo-btns">
-          ${h.estado==='pendiente'?`<div class="h-btn notify" onclick="notificarHallazgo('${h.nit}','${h.nombre.replace(/'/g,"\\'")}','${h.titulo.replace(/'/g,"\\'")}')">✉ Notificar</div>`:'<span style="font-size:11px;color:var(--green)">✓ Notificado</span>'}
-        </div>
+        <div style="flex:1;min-width:0"><div class="hallazgo-title">${h.titulo}</div>
+        <div class="hallazgo-meta">${h.meta}${h.nit?' · NIT '+h.nit:''}${h.regional?' · '+h.regional:''}</div></div>
+        <div class="hallazgo-btns">${h.estado==='pendiente'?`<div class="h-btn notify" onclick="notificarHallazgo('${nitSafe}','${nomSafe}','${titSafe}')">✉ Notificar</div>`:'<span style="font-size:11px;color:var(--green)">✓ Notificado</span>'}</div>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span class="badge ${badgeCls}"><span class="bd"></span>${h.nivel==='critico'?'Crítico':'Medio'}</span>
-        ${h.tipos.map(t=>`<span class="badge ${badgeCls}">${t}</span>`).join('')}
-      </div>
-    </div>`;
+        <span class="badge ${bc}"><span class="bd"></span>${h.nivel==='critico'?'Crítico':'Medio'}</span>
+        ${(h.tipos||[]).map(t=>`<span class="badge ${bc}">${t}</span>`).join('')}
+      </div>${histHtml}</div>`;
   }).join('');
 }
 
@@ -12799,6 +12830,25 @@ document.addEventListener('DOMContentLoaded',function(){
     };
   }
 });
+
+// ── Modal de notificación ─────────────────────────────────────────
+window.openNotifModal = function(nombre, hallazgo){
+  const m=document.getElementById('notif-modal'); if(!m) return;
+  m.classList.add('open');
+  const dest=document.getElementById('notif-dest');
+  const hall=document.getElementById('notif-hallazgo');
+  const title=document.getElementById('notif-modal-title');
+  if(dest) dest.value=nombre||'';
+  if(hall) hall.value=hallazgo||'';
+  if(title) title.textContent=`Notificar: ${(nombre||'').substring(0,30)}`;
+  const msg=document.getElementById('notif-msg'); if(msg) msg.value='';
+};
+window.closeNotifModal = function(){
+  const m=document.getElementById('notif-modal'); if(m) m.classList.remove('open');
+};
+window.closeNotifModalOutside = function(e){
+  if(e.target===document.getElementById('notif-modal')) window.closeNotifModal();
+};
 
 // ── toastMsg helper ───────────────────────────────────────────────
 window.toastMsg = function(msg){
