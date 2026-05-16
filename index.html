@@ -1473,20 +1473,44 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 <div class="screen" id="screen-reportes">
-  <div class="kpi-strip cols-4">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Generados hoy</div><div class="kpi-value" style="color:var(--green)">3</div><div class="kpi-delta neu">Automáticos</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Programados mes</div><div class="kpi-value" style="color:var(--blue)">18</div><div class="kpi-delta neu">12 enviados</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Pendientes de envío</div><div class="kpi-value" style="color:var(--amber)">2</div><div class="kpi-delta warn">Vencen pronto</div></div>
-    <div class="kpi" style="--kc:var(--purple)"><div class="kpi-label">Exportaciones</div><div class="kpi-value" style="color:var(--purple)">47</div><div class="kpi-delta neu">Este mes</div></div>
+  <div class="card">
+    <div class="card-head">
+      <div><div class="card-title">Reportes disponibles</div><div class="card-sub">Generación con datos reales del sistema</div></div>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
+
+      <!-- Reporte 1: Formato Supervisión Prestadores -->
+      <div class="rep-card" style="flex-direction:column;align-items:stretch;gap:12px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="rep-icon" style="background:var(--rdim)">📋</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">Formato de Supervisión Contractual — Prestador</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Formato oficial EPS Sanitas V3 · Excel · Datos reales del sistema</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select id="rep-prest-selector" style="flex:1;min-width:220px;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+            <option value="">— Selecciona un prestador —</option>
+          </select>
+          <button class="btn pri" onclick="generarFormatoSupervision()" style="font-size:12px;padding:7px 16px;white-space:nowrap">⬇ Generar Excel</button>
+        </div>
+        <div id="rep-prest-info" style="font-size:11px;color:var(--text2);display:none;padding:8px 12px;background:var(--bg3);border-radius:8px"></div>
+      </div>
+
+      <!-- Reporte 2: Gestores farmacéuticos -->
+      <div class="rep-card">
+        <div class="rep-icon" style="background:var(--tdim)">💊</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">Cumplimiento ANS gestores farmacéuticos</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · Datos de medicamentos y cobertura</div>
+        </div>
+        <div style="margin-left:auto">
+          <button class="btn" onclick="generarReporteGestores()" style="font-size:11.5px">⬇ Generar</button>
+        </div>
+      </div>
+
+    </div>
   </div>
-  <div class="card"><div class="card-head"><div><div class="card-title">Reportes disponibles</div></div><div class="card-act btn pri">+ Nuevo reporte</div></div>
-  <div class="card-body">
-    <div class="rep-card"><div class="rep-icon" style="background:var(--rdim)">📋</div><div><div style="font-size:13px;font-weight:500">Informe mensual red de prestadores</div><div style="font-size:11px;color:var(--text2);margin-top:2px">SuperSalud · PDF · 01/03/2026 · Enviado</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
-    <div class="rep-card"><div class="rep-icon" style="background:var(--tdim)">💊</div><div><div style="font-size:13px;font-weight:500">Cumplimiento ANS gestores farmacéuticos</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · 05/03/2026</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
-    <div class="rep-card"><div class="rep-icon" style="background:var(--bdim)">💰</div><div><div style="font-size:13px;font-weight:500">Estado financiero y cartera vencida</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · Excel · Incluye modelos de contratación</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
-    <div class="rep-card"><div class="rep-icon" style="background:var(--adim)">⚠️</div><div><div style="font-size:13px;font-weight:500">Reporte PQRS y Tutelas</div><div style="font-size:11px;color:var(--amber);margin-top:2px">Min. Salud · PDF · Pendiente envío · Vence: 15/03</div></div><div style="margin-left:auto;font-size:11px;color:var(--amber);background:var(--adim);border:1px solid var(--amber);padding:5px 10px;border-radius:6px">Enviar</div></div>
-    <div class="rep-card"><div class="rep-icon" style="background:var(--pdim)">📊</div><div><div style="font-size:13px;font-weight:500">Ranking y cumplimiento · T1 2026</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Interno · PDF · Gestores + Prestadores</div></div><div style="margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:5px 10px;border-radius:6px">Descargar</div></div>
-  </div></div>
 </div>
 
 <!-- ══ SEGUIMIENTO Y NOTIFICACIONES ══ -->
@@ -1608,15 +1632,18 @@ document.addEventListener('DOMContentLoaded',function(){
       </div>
     </div>
 
-    <!-- HISTORIAL NOTIFICACIONES -->
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div class="card" style="margin-bottom:0">
-        <div class="card-head"><div><div class="card-title">Historial de notificaciones</div><div class="card-sub" id="seg-notif-sub">Registradas en sistema</div></div>
-        <button class="btn" onclick="limpiarNotificaciones()" style="font-size:11px">↺ Limpiar</button></div>
-        <div class="card-body" style="padding:10px 16px;max-height:420px;overflow-y:auto" id="seg-notif-historial">
-          <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">Sin notificaciones registradas</div>
-        </div>
-      </div>
+    <!-- Columna 2 vacía -->
+    <div></div>
+  </div>
+
+  <!-- HISTORIAL DE NOTIFICACIONES (abajo) -->
+  <div class="card" style="margin-top:4px">
+    <div class="card-head">
+      <div><div class="card-title">Historial de notificaciones</div><div class="card-sub" id="seg-notif-sub">Registradas en sistema</div></div>
+      <button class="btn" onclick="limpiarNotificaciones()" style="font-size:11px">↺ Limpiar</button>
+    </div>
+    <div class="card-body" style="padding:10px 16px;max-height:260px;overflow-y:auto" id="seg-notif-historial">
+      <div style="text-align:center;padding:16px;color:var(--text2);font-size:12px">Sin notificaciones registradas</div>
     </div>
   </div>
 </div>
@@ -12495,7 +12522,7 @@ function renderHallazgos(){
     return;
   }
   const notifs=getNotificaciones();
-  body.innerHTML=lista.map(h=>{
+  body.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">` + lista.map(h=>{
     const color=h.nivel==='critico'?'var(--red)':'var(--amber)';
     const bc=h.nivel==='critico'?'bg-r':'bg-a';
     const hist=notifs.filter(n=>n.nit===h.nit);
@@ -12513,7 +12540,7 @@ function renderHallazgos(){
         <span class="badge ${bc}"><span class="bd"></span>${h.nivel==='critico'?'Crítico':'Medio'}</span>
         ${(h.tipos||[]).map(t=>`<span class="badge ${bc}">${t}</span>`).join('')}
       </div>${histHtml}</div>`;
-  }).join('');
+  }).join('') + '</div>';
 }
 
 function renderResumenContratos(){
@@ -12581,20 +12608,19 @@ window.limpiarNotificaciones=function(){
   renderSeguimiento();
 };
 
-// Interceptar sendNotif para persistir
-const _origSendNotif=window.sendNotif;
+// Interceptar sendNotif para persistir notificación y cerrar modal correctamente
 window.sendNotif=function(){
   if(window._pendingNotifNit){
     const notifs=getNotificaciones();
-    notifs.push({nit:window._pendingNotifNit,nombre:window._pendingNotifNombre,hallazgo:window._pendingNotifHallazgo,fecha:hoy.toLocaleDateString('es-CO'),canal:'Portal'});
+    notifs.push({nit:window._pendingNotifNit,nombre:window._pendingNotifNombre,hallazgo:window._pendingNotifHallazgo,fecha:new Date().toLocaleDateString('es-CO'),canal:'Portal'});
     saveNotificaciones(notifs);
     const h=_SEG_HALLAZGOS.find(x=>x.nit===window._pendingNotifNit);
     if(h) h.estado='notificado';
     window._pendingNotifNit=null;
-    renderSeguimiento();
+    setTimeout(renderSeguimiento,100);
   }
-  if(typeof _origSendNotif==='function') _origSendNotif();
-  else { const m=document.getElementById('notif-modal'); if(m) m.style.display='none'; }
+  window.closeNotifModal&&window.closeNotifModal();
+  toastMsg('✓ Notificación registrada correctamente');
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -12827,6 +12853,193 @@ document.addEventListener('DOMContentLoaded',function(){
       origNav(scr);
       if(scr==='seguimiento') setTimeout(renderSeguimiento,100);
       if(scr==='sanciones')   setTimeout(calcularSanciones,100);
+    };
+  }
+});
+
+// ══ REPORTES: GENERADORES EXCEL ══════════════════════════════════
+
+// Poblar selector de prestadores en reportes
+function poblarSelectorReportes(){
+  const sel=document.getElementById('rep-prest-selector'); if(!sel) return;
+  const prest=DATOS_CARGADOS.prestadores||[];
+  if(!prest.length) return;
+  const sorted=[...prest].sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')));
+  sel.innerHTML='<option value="">— Selecciona un prestador —</option>'+
+    sorted.map(p=>`<option value="${String(p.nit||p.nombre||'').replace(/"/g,'')}">${String(p.nombre||p.nit||'').substring(0,55)} · ${p.modelo||'—'}</option>`).join('');
+  sel.onchange=function(){
+    const nit=this.value; if(!nit) return;
+    const p=prest.find(x=>String(x.nit||x.nombre||'')===nit)||{};
+    const info=document.getElementById('rep-prest-info');
+    if(info){
+      info.style.display='block';
+      info.textContent=`NIT: ${p.nit||'—'} · Contrato: ${p.contrato||'—'} · Modelo: ${p.modelo||'—'} · Regional: ${p.regional||'—'} · Ciudad: ${p.ciudad||'—'}`;
+    }
+  };
+}
+
+// Generar Formato Supervisión Contractual en Excel
+window.generarFormatoSupervision=function(){
+  const sel=document.getElementById('rep-prest-selector');
+  const nit=sel?.value; if(!nit){toastMsg('Selecciona un prestador primero');return;}
+  const prest=DATOS_CARGADOS.prestadores||[];
+  const p=prest.find(x=>String(x.nit||x.nombre||'')===nit)||{};
+  const normNit=nit.replace(/\./g,'').trim();
+
+  // Datos de habilitación
+  const habRows=(DATOS_CARGADOS.homologacion_rows||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+  const norm=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const habSi=habRows.filter(r=>norm(r.resultado).includes('SI HABILITADO')).length;
+  const habTotal=habRows.length;
+  const habPct=habTotal?Math.round(habSi/habTotal*100):null;
+
+  // Datos de glosa
+  const cmRows=(DATOS_CARGADOS.cuentas_medicas||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+  const subTotal=cmRows.reduce((a,r)=>a+r.subtotal,0);
+  const glosTotal=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
+  const glosPct=subTotal?((glosTotal/subTotal)*100).toFixed(1):null;
+
+  // PQRS
+  const pqrsData=window.PQRS_RED_DATA||[];
+  const pqrNit=pqrsData.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+  const totalPqr=pqrNit.reduce((a,r)=>a+r.total,0);
+
+  const hoy=new Date().toLocaleDateString('es-CO');
+  const nombre=p.nombre||p.razon_social||nit;
+
+  if(!window.XLSX){toastMsg('Librería XLSX no cargada');return;}
+  const XLSX=window.XLSX;
+  const wb=XLSX.utils.book_new();
+
+  // ── Hoja 1: Formato de Supervisión ──
+  const rows=[
+    ['SUPERVISIÓN DE CONTRATOS PRESTADORES DE SERVICIOS DE SALUD'],
+    [''],
+    ['Fecha de Informe', hoy, '', 'Periodo Evaluado', new Date().toLocaleDateString('es-CO',{month:'long',year:'numeric'})],
+    [''],
+    ['Información Básica del Prestador'],
+    ['NIT ó No. ID del Prestador:', p.nit||nit, '', 'Nombre del Prestador:', nombre, '', '', 'Regional:', p.regional||'—'],
+    ['Nombre Representante Legal:', p.representante_legal||'—', '', 'Teléfono:', p.telefono||p.telefonos||'—', '', '', 'Email:', p.email||p.correo||'—'],
+    [''],
+    ['Información del Contrato'],
+    ['No. De Contrato:', p.contrato||p.numero_contrato||'—', '', 'Modalidad Contrato:', p.modelo||'—', '', '', 'Fecha Firma Contrato:', p.fecha_inicio||p.vigencia||'—'],
+    ['Ciudad:', p.ciudad||'—', '', 'Departamento:', p.departamento||'—'],
+    [''],
+    ['VIGILANCIA TÉCNICA'],
+    ['Clasificación','Atributo','Descripción','Resultado','Cumple','No Cumple','No Aplica','Observaciones'],
+    ['Habilitación','Habilitación',
+      'El prestador se encuentra inscrito en REPS y servicios anexos están habilitados',
+      habTotal?`Numerador: ${habSi}  Denominador: ${habTotal}  Resultado: ${habPct}%`:'Sin datos',
+      habPct===100?'X':'', habPct!==null&&habPct<100?'X':'', habTotal===0?'X':'', ''],
+    ['Calidad','Quejas','El prestador cumple la meta esperada del indicador PQR',
+      totalPqr?`Total PQR período: ${totalPqr}`:'Sin datos App Script', '','','X',''],
+    ['Calidad','Oportunidad','El prestador cumple meta de oportunidad en servicios contratados','Sin datos App Script','','','X',''],
+    ['Calidad','Accesibilidad','El prestador cumple meta de accesibilidad en servicios evaluados','Sin datos App Script','','','X',''],
+    ['Calidad','Satisfacción','El prestador cumple meta de satisfacción global','Sin datos App Script','','','X',''],
+    ['Resultados en salud','Resultados en Salud','El prestador cumple metas de resultados en salud pactados','Sin datos App Script','','','X',''],
+    ['Gestión','Bases de ejecución','El prestador cumple con reporte oportuno de bases de ejecución','—','','','X',''],
+    ['Gestión','Reportes normativos','Cargue plataforma PISIS Resolución 256 de 2016','—','','','X',''],
+    ['Gestión','Reportes normativos','Cargue información oportunidad Resolución 1552','—','','','X',''],
+    ['Sanciones','Indicadores de Sanción','El prestador cumple metas de indicadores de sanción pactados',
+      glosPct?`Glosa: ${glosPct}% del valor radicado`:'Sin datos cuentas médicas',
+      glosPct!==null&&parseFloat(glosPct)<15?'X':'', glosPct!==null&&parseFloat(glosPct)>=15?'X':'', glosPct===null?'X':'', ''],
+    [''],
+    ['VIGILANCIA ADMINISTRATIVA Y JURÍDICA'],
+    ['Clasificación','Atributo','Descripción','Resultado','Cumple','No Cumple','No Aplica','Observaciones'],
+    ['Pagos Talento Humano','Nómina','Certifica pago salarios, prestaciones, aportes seguridad social','—','','','',''],
+    ['Pólizas','Pólizas','Mantiene vigentes garantías contractuales exigidas por EPS Sanitas','—','','','',''],
+    ['Sarlaft','Sarlaft','Empleados no reportados en listas vinculantes','—','','','',''],
+    [''],
+    ['VIGILANCIA FINANCIERA Y CONTABLE'],
+    ['Clasificación','Atributo','Descripción','Resultado','Cumple','No Cumple','No Aplica','Observaciones'],
+    ['Gestión','Gestión Cuentas','Indicador de radicación pactado contractualmente','—','','','X',''],
+    ['Gestión','Gestión Cuentas','Indicador de devoluciones pactado contractualmente','—','','','X',''],
+    ['Gestión','Gestión Cuentas',`Indicador de glosa pactado contractualmente`,
+      glosPct?`Resultado: ${glosPct}%`:'Sin datos',
+      glosPct!==null&&parseFloat(glosPct)<15?'X':'', glosPct!==null&&parseFloat(glosPct)>=15?'X':'', glosPct===null?'X':'', ''],
+    [''],
+    ['CONCLUSIONES GENERALES'],
+    ['Evaluación integral del desempeño del proveedor'],
+    [''],
+    ['¿El prestador cumple con el objeto contractual?', habPct===100?'Sí — Habilitación completa':'Pendiente evaluación integral'],
+    [''],
+    ['FIRMAS'],
+    ['Supervisor EPS Sanitas','','','','Apoyo de Supervisión'],
+    ['Nombre:','','','','Nombre:'],
+    ['Cargo:','','','','Cargo:'],
+    ['Correo:','','','','Correo:'],
+    ['','','','','Versión 3'],
+  ];
+
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:30},{wch:20},{wch:50},{wch:30},{wch:8},{wch:10},{wch:10},{wch:25}];
+  XLSX.utils.book_append_sheet(wb,ws,'Formato Supervisión');
+
+  // ── Hoja 2: Datos del prestador ──
+  const datosRows=[
+    ['Campo','Valor'],
+    ['NIT',p.nit||nit],
+    ['Nombre',nombre],
+    ['Regional',p.regional||'—'],
+    ['Ciudad',p.ciudad||'—'],
+    ['Departamento',p.departamento||'—'],
+    ['Contrato',p.contrato||'—'],
+    ['Modelo',p.modelo||'—'],
+    ['Email',p.email||p.correo||'—'],
+    ['Teléfono',p.telefono||p.telefonos||'—'],
+    ['Habilitación',habTotal?`${habSi}/${habTotal} servicios habilitados (${habPct}%)`:'Sin datos homologación'],
+    ['Glosa',glosPct?`${glosPct}% del valor radicado (${glosTotal.toLocaleString('es-CO')} / ${subTotal.toLocaleString('es-CO')})`:'Sin datos cuentas médicas'],
+    ['Total PQR período',totalPqr||'Sin datos PQRS'],
+    ['Facturación 2025',p.fact_2025?(p.fact_2025/1e6).toFixed(1)+' M':'—'],
+    ['Fecha generación',hoy],
+  ];
+  const ws2=XLSX.utils.aoa_to_sheet(datosRows);
+  ws2['!cols']=[{wch:25},{wch:50}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Datos Prestador');
+
+  XLSX.writeFile(wb,`Supervision_${nombre.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30)}_${hoy.replace(/\//g,'-')}.xlsx`);
+  toastMsg(`✓ Excel generado para ${nombre.substring(0,30)}`);
+};
+
+// Reporte gestores farmacéuticos
+window.generarReporteGestores=function(){
+  if(!window.XLSX){toastMsg('Librería XLSX no cargada');return;}
+  const XLSX=window.XLSX;
+  const med=window.MED_DATA_LOADED;
+  if(!med){toastMsg('Carga primero los datos de medicamentos');return;}
+  const rows=[
+    ['REPORTE GESTORES FARMACÉUTICOS — EPS SANITAS'],
+    ['Generado:', new Date().toLocaleDateString('es-CO')],
+    [''],
+    ['Gestor','Municipios PBS','Municipios No PBS','Regionales','% Integral','% Propio','Cobertura PBS %'],
+  ];
+  const maxM=264;
+  (med.por_gestor_pbs||[]).forEach(g=>{
+    const noPbs=(med.por_gestor_nopbs||[]).find(x=>x.nombre===g.nombre);
+    rows.push([g.nombre,g.munis_pbs,noPbs?.munis_nopbs||0,g.n_regionales,g.pct_integral+'%',g.pct_propio+'%',Math.round(g.munis_pbs/maxM*100)+'%']);
+  });
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:35},{wch:15},{wch:16},{wch:12},{wch:12},{wch:12},{wch:15}];
+  XLSX.utils.book_append_sheet(wb,ws,'Gestores');
+  XLSX.writeFile(wb,`Gestores_EPS_Sanitas_${new Date().toLocaleDateString('es-CO').replace(/\//g,'-')}.xlsx`);
+  toastMsg('✓ Reporte de gestores generado');
+};
+
+// Enganchar poblarSelectorReportes en carga de datos
+const _origAP3=window.aplicarPrestadores;
+if(typeof _origAP3==='function'){
+  window.aplicarPrestadores=function(){
+    _origAP3.apply(this,arguments);
+    poblarSelectorReportes();
+  };
+}
+document.addEventListener('DOMContentLoaded',function(){
+  const origNav=window.navigate;
+  if(typeof origNav==='function'){
+    window.navigate=function(scr){
+      origNav(scr);
+      if(scr==='reportes') setTimeout(poblarSelectorReportes,100);
     };
   }
 });
