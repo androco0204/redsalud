@@ -13230,119 +13230,6 @@ window.generarFormatoSupervision=function(){
   });
 };
 
-  // Cargar el template real desde base64 (preserva colores, bordes, merges)
-  const wb=XLSX.read(_FORMATO_TPL_B64,{type:'base64'});
-  const ws=wb.Sheets['Formato'];
-  if(!ws){toastMsg('Error cargando template');return;}
-
-  // Buscar prestador en datos reales
-  const prest=DATOS_CARGADOS.prestadores||[];
-  const normNit=nit.replace(/\./g,'').trim();
-  const p=prest.find(x=>String(x.nit||'').replace(/\./g,'').trim()===normNit)||{nit,nombre:nit};
-
-  const hoy=new Date().toLocaleDateString('es-CO');
-  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const periodo=meses[new Date().getMonth()]+' '+new Date().getFullYear();
-
-  // Helper para escribir celda preservando estilo existente
-  const sc=(addr,val)=>{
-    if(!ws[addr]) ws[addr]={t:'s',v:'',r:'',h:''};
-    ws[addr].v=val; ws[addr].w=String(val);
-    if(typeof val==='number'){ws[addr].t='n';}
-    else{ws[addr].t='s'; ws[addr].r=String(val);}
-  };
-
-  // ── Información Inicial ────────────────────────────────────────
-  sc('D4', hoy);          // Fecha de Informe (valor)
-  sc('H4', periodo);      // Periodo Evaluado
-
-  // ── Información Básica del Prestador ──────────────────────────
-  sc('B8', p.nit||nit);                           // NIT (celda de entrada)
-  sc('D8', p.nit||nit);                           // NIT valor
-  sc('H8', p.nombre||'');                         // Nombre del Prestador
-  sc('K8', p.nombre||'');                         // Nombre sede
-  sc('M8', p.regional||'');                       // Regional
-  sc('D10', p.representante_legal||'');           // Representante Legal
-  sc('F10', p.tipo_id||'CC');                     // Tipo ID
-  sc('G10', p.nit||nit);                          // No. Identificación
-  sc('J10', p.telefonos||p.telefono||'');         // Teléfono
-  sc('M10', p.email||p.correo||'');               // Email
-
-  // ── Información del Contrato ───────────────────────────────────
-  sc('B14', p.contrato||'');                      // No. Contrato (entrada VLOOKUP)
-  sc('C14', p.contrato||'');                      // No. Contrato valor
-  sc('D14', p.descripcion_plan||'REGIMEN CONTRIBUTIVO'); // Régimen
-  sc('G14', 'Mensual');                           // Periodicidad
-  sc('K14', p.fecha_inicio||'');                  // Fecha Firma
-  sc('B16', p.modelo||p.forma_contratacion||''); // Modalidad
-  sc('E16', '24');                                // Duración meses
-  sc('H16', 'Si');                                // Prórroga
-  sc('J16', 'Si');                                // Otrosí
-
-  // ── Objeto del Contrato ────────────────────────────────────────
-  sc('B20', p.especialidad||'Prestación de servicios de salud de acuerdo con contrato vigente');
-
-  // ── Vigilancia Técnica: Habilitación (fila 24) ─────────────────
-  const habRows=(DATOS_CARGADOS.homologacion_rows||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const normS=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const habSi=habRows.filter(r=>normS(r.resultado).includes('SI HABILITADO')).length;
-  const habTotal=habRows.length;
-  if(habTotal){
-    sc('J24',`Numerador: ${habSi}\nDenominador: ${habTotal}\nResultado: ${Math.round(habSi/habTotal*100)}%`);
-    sc('L24', habSi===habTotal?'X':'');
-    sc('M24', habSi<habTotal?'X':'');
-    sc('N24', '');
-    sc('O24', habTotal?`${habSi}/${habTotal} servicios habilitados`:'');
-  }
-
-  // ── Vigilancia Técnica: Quejas/PQR (fila 28) ──────────────────
-  const pqrsAll=window.PQRS_RED_DATA||[];
-  const pqrN=pqrsAll.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const totalPqr=pqrN.reduce((a,r)=>a+r.total,0);
-  if(totalPqr){
-    sc('J28',`Promedio 1T: ${totalPqr}\nPromedio 2T: XX\nDiferencia: XX`);
-    sc('L28', totalPqr<20?'X':'');
-    sc('M28', totalPqr>=20?'X':'');
-    sc('N28', '');
-  }
-
-  // ── Vigilancia Técnica: Sanciones/Glosa (fila 37) ─────────────
-  const cmRows=(DATOS_CARGADOS.cuentas_medicas||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const sub=cmRows.reduce((a,r)=>a+r.subtotal,0);
-  const glos=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
-  if(sub){
-    const pct=(glos/sub)*100;
-    sc('J37',`% Cumplimiento Indicadores:\n${pct.toFixed(1)}%`);
-    sc('L37', pct<15?'X':'');
-    sc('M37', pct>=15?'X':'');
-    sc('N37', '');
-    sc('O37',`Glosa ${pct.toFixed(1)}% del radicado`);
-    // Financiera - Glosa (fila 58)
-    sc('J58',`Resultado: ${pct.toFixed(1)}%`);
-    sc('L58', pct<15?'X':'');
-    sc('M58', pct>=15?'X':'');
-    sc('N58', '');
-  }
-
-  // ── Vigilancia Administrativa (filas 45-48): marcar No Aplica por defecto
-  ['45','46','47','48'].forEach(r=>{ sc('N'+r,'X'); });
-
-  // ── Vigilancia Financiera: Radicación/Devoluciones (filas 56-57)
-  sc('N56','X'); sc('N57','X'); // No aplica si no hay dato
-
-  // ── Conclusiones (fila 64) ────────────────────────────────────
-  const cumpleObj=habTotal&&habSi===habTotal&&(!sub||glos/sub<0.15)?'Si':'Requiere evaluacion integral';
-  sc('N64', cumpleObj);
-
-  // ── Firmas: fecha en pie ───────────────────────────────────────
-  sc('B73', `Version 3  |  Generado: ${hoy}`);
-
-  // Guardar
-  const nombreFile=String(p.nombre||nit).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9\s]/g,'').trim().replace(/\s+/g,'_').substring(0,30);
-  XLSX.writeFile(wb,`Supervision_${nombreFile}_${hoy.replace(/\//g,'-')}.xlsx`);
-  toastMsg(`Formato Supervision generado para ${p.nombre||nit}`);
-};
-
 
 // Reporte gestores farmacéuticos
 window.generarReporteGestores=function(){
@@ -13374,7 +13261,7 @@ const _origAP3=window.aplicarPrestadores;
 if(typeof _origAP3==='function'){
   window.aplicarPrestadores=function(){
     _origAP3.apply(this,arguments);
-    poblarSelectorReportes();
+    window.poblarSelectorReportes&&window.poblarSelectorReportes();
   };
 }
 document.addEventListener('DOMContentLoaded',function(){
@@ -13382,7 +13269,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(typeof origNav==='function'){
     window.navigate=function(scr){
       origNav(scr);
-      if(scr==='reportes') setTimeout(poblarSelectorReportes,100);
+      if(scr==='reportes') setTimeout(function(){window.poblarSelectorReportes&&window.poblarSelectorReportes();},100);
     };
   }
 });
@@ -13810,7 +13697,7 @@ document.addEventListener('DOMContentLoaded',function(){
     window.navigate=function(scr){
       origNav(scr);
       if(scr==='alertas') setTimeout(generarAlertasCompletas,120);
-      if(scr==='reportes'){ setTimeout(poblarSelectorReportes,100); setTimeout(poblarSelectorGestores,100); }
+      if(scr==='reportes'){ setTimeout(window.poblarSelectorReportes,100); setTimeout(window.poblarSelectorGestores,100); }
     };
   }
   // Fallback si los datos ya cargaron antes de este script
@@ -13943,7 +13830,7 @@ window.generarInformeTecnicoGestor=function(){
   <div class="kpi"><div class="kpi-val">—</div><div class="kpi-lbl">% Vencidas</div></div>
   <div class="kpi"><div class="kpi-val">—</div><div class="kpi-lbl">Posición en ranking</div></div>
 </div>
-${totalPqr?`<p>Se registraron <strong>${totalPqr}</strong> PQR para ${gesN} en el período.</p>`:'<div class="nota">Datos PQRS cargados en el tablero. Conectar Apps Script PQRS para detalle por municipio.</div>'}
+${totalPqr?"<p>Se registraron <strong>"+totalPqr+"</strong> PQR para "+gesN+" en el período.</p>":"<div class='nota'>Datos PQRS cargados en el tablero. Conectar Apps Script PQRS para detalle por municipio.</div>"}
 
 <h4>1.3.4 TUTELAS</h4>
 <div class="kpi-grid">
