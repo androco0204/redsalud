@@ -440,7 +440,10 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .notif-toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--green);color:var(--green);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;z-index:600;display:none;}
 
 /* HALLAZGO */
-.hallazgo-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;transition:border-color .2s;}
+.hallazgo-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:0;transition:border-color .2s;}
+.hallazgo-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:5px;}
+.hallazgo-title{font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px;line-height:1.3;}
+.hallazgo-meta{font-size:9.5px;color:var(--text2);}
 .hallazgo-card:hover{border-color:var(--border2);}
 .hallazgo-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
 .hallazgo-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
@@ -12534,7 +12537,7 @@ function renderHallazgos(){
     return;
   }
   const notifs=getNotificaciones();
-  body.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">` + lista.map(h=>{
+  body.innerHTML=`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">` + lista.map(h=>{
     const color=h.nivel==='critico'?'var(--red)':'var(--amber)';
     const bc=h.nivel==='critico'?'bg-r':'bg-a';
     const hist=notifs.filter(n=>n.nit===h.nit);
@@ -12542,16 +12545,15 @@ function renderHallazgos(){
     const nitSafe=(h.nit||'').replace(/'/g,"\'");
     const nomSafe=h.nombre.replace(/'/g,"\'");
     const titSafe=h.titulo.replace(/'/g,"\'");
-    return `<div class="hallazgo-card" style="border-left:3px solid ${color}">
-      <div class="hallazgo-head">
-        <div style="flex:1;min-width:0"><div class="hallazgo-title">${h.titulo}</div>
-        <div class="hallazgo-meta">${h.meta}${h.nit?' · NIT '+h.nit:''}${h.regional?' · '+h.regional:''}</div></div>
-        <div class="hallazgo-btns">${h.estado==='pendiente'?`<div class="h-btn notify" onclick="notificarHallazgo('${nitSafe}','${nomSafe}','${titSafe}')">✉ Notificar</div>`:'<span style="font-size:11px;color:var(--green)">✓ Notificado</span>'}</div>
+    return `<div class="hallazgo-card" style="border-left:3px solid ${color};padding:10px 12px">
+      <div style="margin-bottom:5px"><div class="hallazgo-title" style="font-size:11px;line-height:1.3;margin-bottom:2px">${h.titulo}</div>
+      <div class="hallazgo-meta" style="font-size:9.5px">${h.nit||""}${h.regional?" · "+h.regional:""}</div></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+        <span class="badge ${bc}" style="font-size:9px"><span class="bd"></span>${h.nivel==="critico"?"Crítico":"Medio"}</span>
+        ${(h.tipos||[]).map(t=>`<span class="badge ${bc}" style="font-size:9px">${t}</span>`).join("")}
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span class="badge ${bc}"><span class="bd"></span>${h.nivel==='critico'?'Crítico':'Medio'}</span>
-        ${(h.tipos||[]).map(t=>`<span class="badge ${bc}">${t}</span>`).join('')}
-      </div>${histHtml}</div>`;
+      ${h.estado==="pendiente"?`<div class="h-btn notify" style="font-size:9.5px;padding:3px 7px;width:100%;text-align:center;box-sizing:border-box" onclick="notificarHallazgo('${nitSafe}','${nomSafe}','${titSafe}')">✉ Notificar</div>`:"<span style='font-size:9.5px;color:var(--green)'>✓ Notificado</span>"}
+      ${histHtml}</div>`;
   }).join('') + '</div>';
 }
 
