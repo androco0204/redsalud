@@ -1494,20 +1494,17 @@ document.addEventListener('DOMContentLoaded',function(){
           <div class="rep-icon" style="background:var(--rdim)">📋</div>
           <div style="flex:1">
             <div style="font-size:13px;font-weight:500">Formato de Supervisión Contractual — Prestador</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:2px">Formato oficial EPS Sanitas V3 · Excel con formato completo</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Formato oficial EPS Sanitas V3 · Excel con formato completo · Requiere <code>python server.py</code></div>
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <select id="rep-prest-selector" style="flex:1;min-width:220px;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
             <option value="">— Selecciona un prestador —</option>
           </select>
-          <button class="btn pri" onclick="exportarDatosPrestador()" style="font-size:12px;padding:7px 14px;white-space:nowrap">⬇ Exportar datos JSON</button>
-          <button class="btn" onclick="descargarScriptPython()" style="font-size:12px;padding:7px 14px;white-space:nowrap" title="Descargar script Python para generar el Excel con formato">🐍 Script .py</button>
+          <button class="btn pri" onclick="generarFormatoSupervision()" style="font-size:12px;padding:7px 18px;white-space:nowrap">⬇ Generar Excel</button>
         </div>
         <div id="rep-prest-info" style="display:none;padding:8px 12px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text2)"></div>
-        <div style="padding:8px 12px;background:var(--bdim);border-radius:8px;font-size:11px;color:var(--blue)">
-          📌 <strong>Cómo usar:</strong> 1) Selecciona el prestador → 2) "Exportar datos JSON" → 3) pon el JSON y el <em>supervision.py</em> en la misma carpeta que el template Excel → 4) ejecuta <code>python supervision.py</code>
-        </div>
+        <div id="rep-server-status" style="display:none;padding:8px 12px;background:var(--adim);border-radius:8px;font-size:11px;color:var(--amber)"></div>
       </div>
 
       <!-- Reporte 2: Informe Técnico Gestores -->
@@ -5003,11 +5000,11 @@ async function cargarDesdeDrive() {
 
   // ── Cargar CM en background para tener Glosa en el ranking ────────
   setTimeout(()=>{
-    if(typeof cargarCMSiVacio==='function' && !(DATOS_CARGADOS.cuentas_medicas?.length)){
+    if(window.cargarCMSiVacio && !(DATOS_CARGADOS.cuentas_medicas?.length)){
       console.log('[INIT] Iniciando carga de Cuentas Médicas en background...');
-      cargarCMSiVacio();
+      window.cargarCMSiVacio();
     }
-  }, 2000);
+  }, 3000);
 
   datosListos = resultados.length > 0;
   cargandoDesdeDrive = false;
@@ -11894,19 +11891,12 @@ window.calcularRanking = function(){
         const nitsPqr  = new Set((window.PQRS_RED_DATA||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
         const nitsGlos = new Set((DATOS_CARGADOS.cuentas_medicas||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
 
-        // ── Diagnóstico glosa ──────────────────────────────────────
-        console.log(`[RANK-DIAG] nitsHab: ${nitsHab.size}, nitsPqr: ${nitsPqr.size}, nitsGlos: ${nitsGlos.size}`);
-        console.log('[RANK-DIAG] Muestra NITs cuentas_medicas (primeros 5):', [...nitsGlos].slice(0,5));
-        console.log('[RANK-DIAG] Muestra NITs homologacion (primeros 5):', [...nitsHab].slice(0,5));
-        const cmIntersect = [...nitsGlos].filter(n=>nitsHab.has(n));
-        console.log(`[RANK-DIAG] NITs cuentas_medicas que COINCIDEN con homologación: ${cmIntersect.length} de ${nitsGlos.size}`);
-        if(cmIntersect.length===0 && nitsGlos.size>0){
-          console.warn('[RANK-DIAG] ⚠ NINGÚN NIT de cuentas_medicas coincide con homologación. Posible mismatch de formato.');
-          // Mostrar el NIT crudo (antes de normalizar) para diagnóstico
-          const rawNits=(DATOS_CARGADOS.cuentas_medicas||[]).slice(0,3).map(r=>r.nit);
-          console.warn('[RANK-DIAG] NITs crudos en cuentas_medicas:', rawNits);
-          const rawHab=(DATOS_CARGADOS.homologacion_rows||[]).slice(0,3).map(r=>r.nit);
-          console.warn('[RANK-DIAG] NITs crudos en homologación:', rawHab);
+        // Si CM vacío, dispara carga y recalcula cuando termine
+        if(nitsGlos.size===0 && window.cargarCMSiVacio && !window._cmCargando){
+          window._cmCargando=true;
+          console.log('[RANK] CM vacío, disparando carga...');
+          window.cargarCMSiVacio().finally(()=>{ window._cmCargando=false; });
+          // No abortar — continúa con hab y pqr, CM disparará recálculo al cargar
         }
         // ──────────────────────────────────────────────────────────
 
@@ -13331,14 +13321,24 @@ window.generarFormatoSupervision=function(){
     pqr:{total:totalPqr}
   };
 
-  // Intentar servidor local primero (python server.py)
+  // Mostrar info del prestador seleccionado
+  const infoEl=document.getElementById('rep-prest-info');
+  if(infoEl){
+    infoEl.style.display='block';
+    infoEl.textContent=`${p.nombre||nit} · NIT ${p.nit||nit} · ${p.regional||'—'} · Contrato: ${p.contrato||'—'}`;
+  }
+
+  // Llamar servidor local — genera Excel con formato completo
+  const statusEl=document.getElementById('rep-server-status');
+  if(statusEl) statusEl.style.display='none';
   toastMsg('Generando Excel con formato...');
+
   fetch('http://localhost:8080/generar-supervision',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(datos)
   }).then(r=>{
-    if(!r.ok) throw new Error('Error del servidor');
+    if(!r.ok) throw new Error('Servidor respondió: '+r.status);
     return r.blob();
   }).then(blob=>{
     const url=URL.createObjectURL(blob);
@@ -13347,10 +13347,13 @@ window.generarFormatoSupervision=function(){
     a.href=url; a.download=`Supervision_${nf}_${new Date().toLocaleDateString('es-CO').replace(/\//g,'-')}.xlsx`;
     a.click(); URL.revokeObjectURL(url);
     toastMsg('✓ Excel con formato completo generado');
+    if(statusEl) statusEl.style.display='none';
   }).catch(()=>{
-    // Sin servidor local: exportar JSON para usar con supervision.py
-    toastMsg('Servidor local no activo — exportando datos para generar offline');
-    setTimeout(()=>exportarDatosPrestador(),500);
+    if(statusEl){
+      statusEl.style.display='block';
+      statusEl.innerHTML='⚠ Servidor no activo · Para generar el Excel con formato completo ejecuta: <code style="background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px">python server.py</code> en la carpeta del proyecto y recarga.';
+    }
+    toastMsg('Servidor no activo — ejecuta python server.py');
   });
 };
 
