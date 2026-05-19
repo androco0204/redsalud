@@ -11874,6 +11874,23 @@ window.calcularRanking = function(){
         const nitsHab  = new Set((DATOS_CARGADOS.homologacion_rows||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
         const nitsPqr  = new Set((window.PQRS_RED_DATA||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
         const nitsGlos = new Set((DATOS_CARGADOS.cuentas_medicas||[]).map(r=>String(r.nit||'').replace(/\./g,'').trim()).filter(Boolean));
+
+        // ── Diagnóstico glosa ──────────────────────────────────────
+        console.log(`[RANK-DIAG] nitsHab: ${nitsHab.size}, nitsPqr: ${nitsPqr.size}, nitsGlos: ${nitsGlos.size}`);
+        console.log('[RANK-DIAG] Muestra NITs cuentas_medicas (primeros 5):', [...nitsGlos].slice(0,5));
+        console.log('[RANK-DIAG] Muestra NITs homologacion (primeros 5):', [...nitsHab].slice(0,5));
+        const cmIntersect = [...nitsGlos].filter(n=>nitsHab.has(n));
+        console.log(`[RANK-DIAG] NITs cuentas_medicas que COINCIDEN con homologación: ${cmIntersect.length} de ${nitsGlos.size}`);
+        if(cmIntersect.length===0 && nitsGlos.size>0){
+          console.warn('[RANK-DIAG] ⚠ NINGÚN NIT de cuentas_medicas coincide con homologación. Posible mismatch de formato.');
+          // Mostrar el NIT crudo (antes de normalizar) para diagnóstico
+          const rawNits=(DATOS_CARGADOS.cuentas_medicas||[]).slice(0,3).map(r=>r.nit);
+          console.warn('[RANK-DIAG] NITs crudos en cuentas_medicas:', rawNits);
+          const rawHab=(DATOS_CARGADOS.homologacion_rows||[]).slice(0,3).map(r=>r.nit);
+          console.warn('[RANK-DIAG] NITs crudos en homologación:', rawHab);
+        }
+        // ──────────────────────────────────────────────────────────
+
         const todosNits = new Set([...nitsHab,...nitsPqr,...nitsGlos]);
 
         // Obtener nombres desde cualquier fuente disponible
