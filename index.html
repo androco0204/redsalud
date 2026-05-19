@@ -1848,22 +1848,57 @@ document.addEventListener('DOMContentLoaded',function(){
 
           <!-- Panel Prestadores -->
           <div id="rank-panel-prest">
-            <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Los pesos deben sumar <b>100%</b>. Impactan el score compuesto de cada prestador en el ranking.</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Los pesos deben sumar <b>100%</b>. Activa/desactiva dimensiones según disponibilidad de datos.</div>
             <div class="admin-param-grid">
               <div class="admin-param-card">
-                <div class="admin-param-label">Habilitación de servicios (%)</div>
-                <div class="admin-param-desc">% servicios SI HABILITADO sobre total evaluados en homologación</div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div class="admin-param-label">Habilitación de servicios</div>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--text2)">
+                    <input type="checkbox" id="p-rp-en-hab" checked onchange="rankSumaRed()"> Activa
+                  </label>
+                </div>
+                <div class="admin-param-desc">% servicios SI HABILITADO · Fuente: Homologación REPS</div>
                 <div class="admin-param-row"><span class="admin-param-default">Default: 40</span><input class="admin-input" id="p-rp-w-hab" value="40" type="number" min="0" max="100" oninput="marcarCambio(this,40);rankSumaRed()"></div>
               </div>
               <div class="admin-param-card">
-                <div class="admin-param-label">Disminución PQR trimestral (%)</div>
-                <div class="admin-param-desc">Cumplimiento de meta ≥10% disminución de quejas vs trimestre anterior</div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div class="admin-param-label">Disminución PQR trimestral</div>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--text2)">
+                    <input type="checkbox" id="p-rp-en-pqr" checked onchange="rankSumaRed()"> Activa
+                  </label>
+                </div>
+                <div class="admin-param-desc">≥10% disminución vs trimestre anterior · Fuente: PQRS tablero</div>
                 <div class="admin-param-row"><span class="admin-param-default">Default: 35</span><input class="admin-input" id="p-rp-w-pqr" value="35" type="number" min="0" max="100" oninput="marcarCambio(this,35);rankSumaRed()"></div>
               </div>
               <div class="admin-param-card">
-                <div class="admin-param-label">Gestión de glosa (%)</div>
-                <div class="admin-param-desc">Glosa real sobre total radicado en cuentas médicas. Meta &lt;15%</div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div class="admin-param-label">Gestión de glosa</div>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--text2)">
+                    <input type="checkbox" id="p-rp-en-glos" checked onchange="rankSumaRed()"> Activa
+                  </label>
+                </div>
+                <div class="admin-param-desc">Glosa real sobre radicado · Meta &lt;15% · Fuente: Cuentas médicas</div>
                 <div class="admin-param-row"><span class="admin-param-default">Default: 25</span><input class="admin-input" id="p-rp-w-glos" value="25" type="number" min="0" max="100" oninput="marcarCambio(this,25);rankSumaRed()"></div>
+              </div>
+              <div class="admin-param-card">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div class="admin-param-label">Oportunidad</div>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--text2)">
+                    <input type="checkbox" id="p-rp-en-opor" onchange="rankSumaRed()"> Activa
+                  </label>
+                </div>
+                <div class="admin-param-desc">% cumplimiento meta oportunidad · Fuente: App Script oportunidad (pendiente conexión)</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 0</span><input class="admin-input" id="p-rp-w-opor" value="0" type="number" min="0" max="100" oninput="marcarCambio(this,0);rankSumaRed()"></div>
+              </div>
+              <div class="admin-param-card">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div class="admin-param-label">Accesibilidad</div>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--text2)">
+                    <input type="checkbox" id="p-rp-en-acc" onchange="rankSumaRed()"> Activa
+                  </label>
+                </div>
+                <div class="admin-param-desc">% cumplimiento meta accesibilidad · Fuente: App Script accesibilidad (pendiente conexión)</div>
+                <div class="admin-param-row"><span class="admin-param-default">Default: 0</span><input class="admin-input" id="p-rp-w-acc" value="0" type="number" min="0" max="100" oninput="marcarCambio(this,0);rankSumaRed()"></div>
               </div>
             </div>
             <div id="rp-suma-aviso" style="margin-top:10px;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:500;background:var(--gdim);color:var(--green)">✓ Los pesos suman 100%</div>
@@ -4811,7 +4846,7 @@ let cargandoDesdeDrive = false;
 // ── Llamada al Apps Script como proxy ──────────────────────────────────
 async function fetchViaAppsScript(sheetId, hoja) {
   const url = `${APPS_SCRIPT_URL}?id=${sheetId}&hoja=${encodeURIComponent(hoja)}`;
-  const resp = await fetch(url);
+  const resp = await fetch(url, {redirect:'follow',headers:{'Accept':'application/json'}});
   if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
   const data = await resp.json();
   if(!Array.isArray(data)) throw new Error('Respuesta inesperada del servidor');
@@ -6533,7 +6568,11 @@ async function cargarRequerimientos() {
   if(el) { el.textContent='⏳ Cargando...'; el.style.color='var(--blue)'; }
   try {
     const url = REQS_SCRIPT + '?hoja=' + encodeURIComponent('BASE GESTIÓN');
-    const resp = await fetch(url);
+    // Google Apps Script requiere seguir redirecciones para evitar CORS
+    const resp = await fetch(url, {
+      redirect: 'follow',
+      headers: { 'Accept': 'application/json' }
+    });
     if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     if(!Array.isArray(data)||data.length<2) throw new Error('Sin datos');
@@ -6597,8 +6636,12 @@ async function cargarRequerimientos() {
     poblarFiltrosReq();
     aplicarFiltrosReq();
   } catch(e) {
-    if(el) { el.textContent=`⚠ Error: ${e.message}`; el.style.color='var(--red)'; }
+    const msg = e.message.includes('Failed to fetch') || e.message.includes('CORS')
+      ? '⚠ Error CORS — El Apps Script debe permitir acceso externo. Ver README.'
+      : `⚠ Error: ${e.message}`;
+    if(el) { el.textContent=msg; el.style.color='var(--amber)'; }
     console.error('Requerimientos:', e);
+    console.warn('CORS FIX: Verificar que el Apps Script de Requerimientos esté desplegado como "Cualquier persona, incluso anónimos" y retorne ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON)');
   }
 }
 
@@ -7195,7 +7238,7 @@ async function cargarPqrs(){
   const el=document.getElementById('pqrs-estado-carga');
   if(el){el.textContent='⏳ Cargando...';el.style.color='var(--blue)';}
   try{
-    const resp=await fetch(PQRS_SCRIPT);
+    const resp=await fetch(PQRS_SCRIPT,{redirect:'follow',headers:{'Accept':'application/json'}});
     if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
     const data=await resp.json();
     if(!Array.isArray(data)||data.length<2)throw new Error('Sin datos');
@@ -7466,7 +7509,7 @@ async function cargarTutelas(){
   const el=document.getElementById('tut-estado-carga');
   if(el){el.textContent='⏳ Cargando...';el.style.color='var(--blue)';}
   try{
-    const resp=await fetch(TUTELAS_SCRIPT+'?hoja=Consolidado Tutelas 2026');
+    const resp=await fetch(TUTELAS_SCRIPT+'?hoja=Consolidado Tutelas 2026',{redirect:'follow',headers:{'Accept':'application/json'}});
     if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
     const data=await resp.json();
     if(!Array.isArray(data)||data.length<2)throw new Error('Sin datos');
@@ -7668,12 +7711,14 @@ function guardarSeccion(seccion) {
   const secciones = {
     'semaforos':       ['p-sem-verde','p-sem-ambar'],
     'alertas':         ['p-mora-ambar','p-mora-critica','p-ejec-ambar','p-mrc-desv','p-hab-vence','p-pqrs-min','p-notif-dias','p-tutela-horas'],
-    'scores':          ['p-rp-w-hab','p-rp-w-pqr','p-rp-w-glos','p-gf-w-ans','p-gf-w-pqr','p-gf-w-sat','p-rank-verde','p-rank-ambar'],
+    'scores':          ['p-rp-w-hab','p-rp-w-pqr','p-rp-w-glos','p-rp-w-opor','p-rp-w-acc','p-rp-en-hab','p-rp-en-pqr','p-rp-en-glos','p-rp-en-opor','p-rp-en-acc','p-gf-w-ans','p-gf-w-pqr','p-gf-w-sat','p-rank-verde','p-rank-ambar'],
     'sanciones-admin': ['pa-capita-op','pa-capita-rs','pa-mrc','pa-pgp','pa-techo','pa-val-min'],
   };
   const ids = secciones[seccion] || [];
   if(seccion==='scores') {
-    const sumaRed  = ['p-rp-w-hab','p-rp-w-pqr','p-rp-w-glos'].reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
+    const sumaRed  = ['p-rp-w-hab','p-rp-w-pqr','p-rp-w-glos','p-rp-w-opor','p-rp-w-acc']
+      .filter((_,i)=>document.getElementById(['p-rp-en-hab','p-rp-en-pqr','p-rp-en-glos','p-rp-en-opor','p-rp-en-acc'][i])?.checked!==false)
+      .reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
     const sumaGest = ['p-gf-w-ans','p-gf-w-pqr','p-gf-w-sat'].reduce((a,id)=>a+(parseFloat(document.getElementById(id)?.value)||0),0);
     if(Math.round(sumaRed)!==100){ alert('Los pesos de Red de Prestadores deben sumar 100% (actual: '+Math.round(sumaRed)+'%)'); return; }
     if(Math.round(sumaGest)!==100){ alert('Los pesos de Gestores Farmacéuticos deben sumar 100% (actual: '+Math.round(sumaGest)+'%)'); return; }
@@ -8713,7 +8758,7 @@ function parsearCuentasMedicas(raw) {
   let data = Array.isArray(raw) ? raw : (raw && (raw.data||raw.values||raw.rows)) ? (raw.data||raw.values||raw.rows) : null;
   if(!data || !Array.isArray(data) || data.length < 2) return [];
   if(!data[0] || !Array.isArray(data[0])) return [];
-  const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/_/g,' ');
   const hdr = data[0].map(h => norm(h));
   const fi = (...kws) => { for(const kw of kws){ const i=hdr.findIndex(h=>h.includes(norm(kw))); if(i>=0)return i; } return -1; };
   // fiOrIdx: igual que fi() con fallback a posición conocida si el nombre no matchea
@@ -8737,8 +8782,8 @@ function parsearCuentasMedicas(raw) {
     tipo_contrato:    fi('TIPO CONTRATO','TIPO DE CONTRATO','TIPO'),
     validacion:       fi('VALIDACION','VALIDACON','ESTADO VALIDACION','ESTADO VAL','ESTADO'),
     subtotal:         fi('SUBTOTAL','SUB TOTAL','VALOR SUBTOTAL','TOTAL RADICADO','TOTAL FACTURADO','VR TOTAL','VLR TOTAL','VALOR TOTAL','VALOR NETO','TOTAL'),
-    glosado:          fiOrIdx(6,'VALOR GLOSADO','V GLOSADO','VR GLOSADO','VLR GLOSADO','GLOSADO','VALOR GLOSA'),
-    glosa_real:       fiOrIdx(7,'GLOSA REAL','VALOR GLOSA REAL','GLOSA REAL VALOR','VR GLOSA REAL','VLR GLOSA REAL','GLOSA NETA','VR GLOSA','GLOSA'),
+    glosado:          fiOrIdx(6,'VALOR GLOSADO','V GLOSADO','VR GLOSADO','VLR GLOSADO','GLOSADO'),
+    glosa_real:       fiOrIdx(7,'GLOSA_REAL','GLOSA REAL','VALOR GLOSA REAL','GLOSA REAL VALOR','VR GLOSA REAL','VLR GLOSA REAL','GLOSA NETA'),
     devoluciones:     fi('DEVOLUCIONES','DEVOLUCION','DEV'),
   };
   // Si NIT no encontrado por nombre, buscar columna con valores que parezcan NITs (7-10 dígitos)
@@ -11591,7 +11636,15 @@ function getRankCfg(){
 }
 
 function wRed(){
-  return { hab: gP('p-rp-w-hab',40)/100, pqr: gP('p-rp-w-pqr',35)/100, glos: gP('p-rp-w-glos',25)/100 };
+  const en=(id)=>document.getElementById(id)?.checked!==false;
+  const gW=(id,def)=>(parseFloat(document.getElementById(id)?.value)||def)/100;
+  return {
+    hab:  {w:gW('p-rp-w-hab',40),  on:en('p-rp-en-hab')},
+    pqr:  {w:gW('p-rp-w-pqr',35),  on:en('p-rp-en-pqr')},
+    glos: {w:gW('p-rp-w-glos',25), on:en('p-rp-en-glos')},
+    opor: {w:gW('p-rp-w-opor',0),  on:en('p-rp-en-opor')},
+    acc:  {w:gW('p-rp-w-acc',0),   on:en('p-rp-en-acc')},
+  };
 }
 function wGest(){
   return { ans: gP('p-gf-w-ans',45)/100, pqr: gP('p-gf-w-pqr',30)/100, sat: gP('p-gf-w-sat',15)/100, cob: gP('p-gf-w-cob',20)/100 };
@@ -11699,15 +11752,48 @@ function scoreSatisfaccion(gestor){
   return Math.min(100,Math.max(0,Math.round(avg)));
 }
 
+// Oportunidad: % de casos "OPORTUNO" en DATOS_REQS por NIT
+// Cuando se conecte el App Script específico, esta función usará esos datos
+function scoreOportunidad(nit){
+  // Fuente 1: DATOS_REQS filtrado por NIT (columna N° IDENTIFICACIÓN si existe)
+  if(window.DATOS_REQS?.length && window.COL_REQ){
+    const normNit=String(nit||'').replace(/\./g,'').trim();
+    // Buscar columna de NIT en requerimientos
+    const idxId = 11; // N° IDENTIFICACIÓN suele estar en col 11
+    const rows=DATOS_REQS.filter(r=>String(r[idxId]||'').replace(/\./g,'').trim()===normNit);
+    if(rows.length>0){
+      const idxOpor=COL_REQ.oportunidad??8;
+      const oport=rows.filter(r=>String(r[idxOpor]||'').toUpperCase().includes('OPORTUN')).length;
+      return Math.round(oport/rows.length*100);
+    }
+  }
+  // Sin datos → null (no penaliza)
+  return null;
+}
+
+// Accesibilidad: % resolución de fallas de acceso por NIT del prestador
+function scoreAccesibilidad(nit){
+  // DATOS_FALLAS está a nivel de gestor — cuando se conecte un App Script
+  // con datos por prestador/NIT, esta función los usará
+  // Por ahora retorna null para no penalizar sin datos
+  return null;
+}
+
 // ── Compute score compuesto ────────────────────────────────────────
 function computeScorePrestador(nit, nombre){
   const w = wRed();
-  const sH = scoreHabilitacion(nit);
-  const sP = scorePqrRed(nit);
-  const sG = scoreGlosa(nit);
-  const dims = [{id:'hab',lbl:'Habilitación',score:sH,peso:w.hab},
-                {id:'pqr',lbl:'PQR trimestral',score:sP,peso:w.pqr},
-                {id:'glos',lbl:'Gestión glosa',score:sG,peso:w.glos}];
+  const scores = {
+    hab:  scoreHabilitacion(nit),
+    pqr:  scorePqrRed(nit),
+    glos: scoreGlosa(nit),
+    opor: scoreOportunidad(nit),
+    acc:  scoreAccesibilidad(nit),
+  };
+  const labels = {hab:'Habilitación', pqr:'PQR trimestral', glos:'Gestión glosa', opor:'Oportunidad', acc:'Accesibilidad'};
+  const dims = Object.entries(w)
+    .filter(([id,d])=>d.on)
+    .map(([id,d])=>({id,lbl:labels[id],score:scores[id],peso:d.w}));
+
   const disponibles = dims.filter(d=>d.score!==null);
   if(!disponibles.length) return null;
   const pesoTotal = disponibles.reduce((a,d)=>a+d.peso,0);
@@ -11925,7 +12011,11 @@ function renderTablaRanking(data){
     <th style="width:36px">#</th>
     ${isPrest?'<th>NIT</th>':''}
     <th>${isPrest?'Nombre prestador':'Gestor farmacéutico'}</th>
-    ${isPrest?'<th style="text-align:center">Habilitación</th><th style="text-align:center">PQR trim.</th><th style="text-align:center">Glosa</th>':'<th style="text-align:center">ANS</th><th style="text-align:center">PQR</th><th style="text-align:center">Satisfacción</th>'}
+    ${isPrest?(() => {
+      const w=wRed();
+      const lbls={hab:'Habilitación',pqr:'PQR trim.',glos:'Glosa',opor:'Oportunidad',acc:'Accesibilidad'};
+      return Object.entries(w).filter(([,d])=>d.on).map(([id])=>`<th style="text-align:center">${lbls[id]}</th>`).join('');
+    })():'<th style="text-align:center">ANS</th><th style="text-align:center">PQR</th><th style="text-align:center">Satisfacción</th>'}
     <th style="text-align:center">Score</th>
     <th style="text-align:center">Semáforo</th>
   </tr>`;
@@ -11948,8 +12038,10 @@ function renderTablaRanking(data){
       <td style="color:var(--text2);font-size:12px;font-weight:600">${i+1}</td>
       ${isPrest?`<td style="font-family:'DM Mono',monospace;font-size:11px">${r.nit||'—'}</td>`:''}
       <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nombre}</td>
-      ${isPrest?`<td style="text-align:center">${badge(getD('hab'),t)}</td><td style="text-align:center">${badge(getD('pqr'),t)}</td><td style="text-align:center">${badge(getD('glos'),t)}</td>`
-               :`<td style="text-align:center">${badge(getD('ans'),t)}</td><td style="text-align:center">${badge(getD('pqr'),t)}</td><td style="text-align:center">${badge(getD('sat'),t)}</td>`}
+      ${isPrest?(() => {
+        const w=wRed();
+        return Object.entries(w).filter(([,dim])=>dim.on).map(([id])=>`<td style="text-align:center">${badge(getD(id),t)}</td>`).join('');
+      })():`<td style="text-align:center">${badge(getD('ans'),t)}</td><td style="text-align:center">${badge(getD('pqr'),t)}</td><td style="text-align:center">${badge(getD('sat'),t)}</td>`}
       <td style="text-align:center"><span style="font-size:15px;font-weight:700;color:${sem.color}">${fmtScore(r.score)}</span></td>
       <td style="text-align:center">${sem.ico} <span style="font-size:10px;color:${sem.color}">${sem.label}</span></td>
     </tr>`;
