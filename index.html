@@ -9072,6 +9072,11 @@ function parsearCuentasMedicas(raw) {
       DATOS_CARGADOS.cuentas_medicas = parsearCuentasMedicas(data);
       window.renderizarCuentasMedicas();
       setCMStatus(`✓ ${(DATOS_CARGADOS.cuentas_medicas||[]).length.toLocaleString('es-CO')} registros cargados`,'var(--green)');
+      // Recalcular ranking si ya tiene datos de habilitación (añade dimensión Glosa)
+      if(typeof calcularRanking==='function' && (DATOS_CARGADOS.homologacion_rows||[]).length>0){
+        console.log('[CuentasMédicas] Recalculando ranking con datos de glosa...');
+        setTimeout(calcularRanking, 300);
+      }
     } catch(e){
       const esMsgCORS = e.message.includes('CORS') || e.message.includes('ERR_FAILED') || e.message.includes('HTTP');
       const msgExtra = esMsgCORS
@@ -11199,6 +11204,11 @@ document.addEventListener('DOMContentLoaded', function(){
       window._pqrsRedCargado = true;
       if(el){ el.textContent = `✓ ${PQRS_RED_DATA.length.toLocaleString('es-CO')} registros cargados`; el.style.color='var(--green)';}
       renderPqrsRed();
+      // Recalcular ranking si hay datos de habilitación (añade dimensión PQR)
+      if(typeof calcularRanking==='function' && (DATOS_CARGADOS.homologacion_rows||[]).length>0){
+        console.log('[PQRS] Recalculando ranking con datos de PQR...');
+        setTimeout(calcularRanking, 300);
+      }
     } catch(e) {
       if(el){ el.textContent = `⚠ Error: ${e.message}`; el.style.color='var(--red)';}
       console.error('[PQRS Red]', e);
