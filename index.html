@@ -779,7 +779,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
   <div class="kpi-strip cols-4">
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--green)" id="kpi-resumen-prestadores">—</div><div class="kpi-delta up" id="kpi-resumen-prestadores-delta">Cargando...</div></div>
-    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">100%</div><div class="kpi-delta up" id="kpi-resumen-cobertura-delta">Basado en vigentes</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">—</div><div class="kpi-delta neu" id="kpi-resumen-cobertura-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas sin soporte</div><div class="kpi-value" style="color:var(--amber)" id="kpi-sin-soporte">—</div><div class="kpi-delta warn" id="kpi-sin-soporte-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">—</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">Pendiente fuente RUR</div></div>
   </div>
@@ -5001,6 +5001,14 @@ async function cargarDesdeDrive() {
   generarAlertasHabilitacion(getPrestadoresFiltrados());
   actualizarGraficasResumen();
 
+  // ── Cargar CM en background para tener Glosa en el ranking ────────
+  setTimeout(()=>{
+    if(typeof cargarCMSiVacio==='function' && !(DATOS_CARGADOS.cuentas_medicas?.length)){
+      console.log('[INIT] Iniciando carga de Cuentas Médicas en background...');
+      cargarCMSiVacio();
+    }
+  }, 2000);
+
   datosListos = resultados.length > 0;
   cargandoDesdeDrive = false;
 
@@ -5888,8 +5896,8 @@ function aplicarPrestadores() {
   const soloVigentes = prest.filter(p => (p.estado||'').toUpperCase().includes('VIGENTE'));
   actualizarKPI('kpi-resumen-prestadores', fmtN(soloVigentes.length));
   actualizarKPI('kpi-resumen-prestadores-delta', `${regionales.length} regionales · ${departamentos.length} deptos`);
-  actualizarKPI('kpi-resumen-cobertura', '100%');
-  actualizarKPI('kpi-resumen-cobertura-delta', `${fmtN(soloVigentes.length)} contratos vigentes`);
+  actualizarKPI('kpi-resumen-cobertura', '⏳');
+  actualizarKPI('kpi-resumen-cobertura-delta', 'Calculando...');
   const sinSoporte = prest.filter(p => (p.observacion||'').toUpperCase().includes('SIN SOPORTE')).length;
   const pctSinSop = soloVigentes.length > 0 ? Math.round(sinSoporte/(soloVigentes.length+100)*100) : 0;
   actualizarKPI('kpi-sin-soporte', sinSoporte);
@@ -9058,6 +9066,7 @@ function parsearCuentasMedicas(raw) {
 
   // ── Carga lazy de CM si el fetch inicial falló ─────────────────
   async function cargarCMSiVacio(){
+    window.cargarCMSiVacio = cargarCMSiVacio; // exponer a window
     if(DATOS_CARGADOS.cuentas_medicas && DATOS_CARGADOS.cuentas_medicas.length>0){
       window.renderizarCuentasMedicas();
       return;
