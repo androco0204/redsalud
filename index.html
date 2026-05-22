@@ -684,6 +684,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="nav-item nav-sub" data-screen="red-satisfaccion">😊 Satisfacción</div>
       <div class="nav-item nav-sub" data-screen="red-nota-tecnica">📊 Nota técnica</div>
       <div class="nav-item nav-sub" data-screen="red-cuentas-medicas">💰 Cuentas médicas</div>
+      <div class="nav-item nav-sub" data-screen="extramural">🏠 Atención extramural</div>
     </div>
     <div class="nav-item nav-parent" data-screen="gestores" onclick="toggleSubmenu('sub-gestores')">
       <svg viewBox="0 0 14 14" fill="none"><circle cx="5" cy="4" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 12c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" stroke-width="1.2"/><path d="M10 5l1.5 1.5L14 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -2768,6 +2769,7 @@ const titles = {
   constructor:['Constructor de baterías por regional','Selección de especialidades · generación de anexo Excel'],
   sanciones:['Sanciones contractuales','Cálculo · validación · aplicación · histórico por período'],
   admin:['Administración del sistema','Parámetros · usuarios · log de auditoría — Solo Administrador'],
+  extramural:['Atención extramural','PHD · PAD · UCC domiciliario · Indicadores de seguimiento contractual'],
 };
 
 
@@ -9109,12 +9111,90 @@ function parsearCuentasMedicas(raw) {
       window.navigate=function(scr){
         origNav(scr);
         if(scr==='red-cuentas-medicas') setTimeout(cargarCMSiVacio, 80);
+      if(scr==='extramural') setTimeout(()=>cargarExtramural(), 80);
       };
     }
   });
 })();
 </script>
 
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     ATENCIÓN EXTRAMURAL · PHD / PAD / UCC DOMICILIARIO
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-extramural">
+
+  <!-- KPIs resumen -->
+  <div class="kpi-strip cols-4" style="margin-bottom:18px">
+    <div class="kpi"><div class="kpi-label">Prestadores PHD</div><div class="kpi-value" id="ext-kpi-phd">—</div><div class="kpi-delta" id="ext-kpi-phd-sub">Hospitalización domiciliaria</div></div>
+    <div class="kpi"><div class="kpi-label">Prestadores PAD</div><div class="kpi-value" id="ext-kpi-pad">—</div><div class="kpi-delta" id="ext-kpi-pad-sub">Atención domiciliaria</div></div>
+    <div class="kpi"><div class="kpi-label">Prestadores UCC</div><div class="kpi-value" id="ext-kpi-ucc">—</div><div class="kpi-delta" id="ext-kpi-ucc-sub">Cuidado crónico domiciliario</div></div>
+    <div class="kpi"><div class="kpi-label">Alertas críticas</div><div class="kpi-value" style="color:var(--red)" id="ext-kpi-alertas">—</div><div class="kpi-delta" id="ext-kpi-alertas-sub">Indicadores fuera de meta</div></div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card" style="margin-bottom:10px;padding:12px 18px">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <select id="ext-f-regional" onchange="renderExtramural()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg2);color:var(--text);outline:none">
+        <option value="">Todas las regionales</option>
+        <option>REGIONAL BOGOTA</option>
+        <option>REGIONAL MEDELLIN</option>
+        <option>REGIONAL CALI</option>
+        <option>REGIONAL BARRANQUILLA</option>
+        <option>REGIONAL BUCARAMANGA</option>
+        <option>REGIONAL CENTRO ORIENTE</option>
+      </select>
+      <input id="ext-f-prestador" placeholder="🔍 Prestador o NIT..." oninput="renderExtramural()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg2);color:var(--text);outline:none;min-width:200px">
+      <div id="ext-status" style="font-size:11px;color:var(--text2);margin-left:auto"></div>
+      <button class="btn" onclick="cargarExtramural(true)" style="font-size:11px">↺ Actualizar</button>
+    </div>
+  </div>
+
+  <!-- Tabs PHD / PAD / UCC -->
+  <div class="card">
+    <div class="tabs" style="border-bottom:1px solid var(--border)">
+      <div class="tab active" id="ext-tab-phd" onclick="switchExtTab('phd',this)">🏥 PHD — Hospitalización Domiciliaria</div>
+      <div class="tab" id="ext-tab-pad" onclick="switchExtTab('pad',this)">🏠 PAD — Atención Domiciliaria</div>
+      <div class="tab" id="ext-tab-ucc" onclick="switchExtTab('ucc',this)">🩺 UCC — Cuidado Crónico</div>
+    </div>
+
+    <!-- Panel PHD -->
+    <div id="ext-panel-phd" class="card-body" style="padding:16px">
+      <div id="ext-tabla-phd"><div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">⏳ Conecta el Apps Script de PHD para ver los datos</div></div>
+    </div>
+
+    <!-- Panel PAD -->
+    <div id="ext-panel-pad" class="card-body" style="display:none;padding:16px">
+      <div id="ext-tabla-pad"><div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">⏳ Conecta el Apps Script de PAD para ver los datos</div></div>
+    </div>
+
+    <!-- Panel UCC -->
+    <div id="ext-panel-ucc" class="card-body" style="display:none;padding:16px">
+      <div id="ext-tabla-ucc"><div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">⏳ Conecta el Apps Script de UCC para ver los datos</div></div>
+    </div>
+  </div>
+
+  <!-- Info Apps Script -->
+  <div class="card" style="margin-top:10px;padding:16px 18px;font-size:12px;color:var(--text2)">
+    <div style="font-weight:500;color:var(--text);margin-bottom:8px">📡 Fuentes de datos — Apps Script único para los 3 programas</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px">
+      <div style="padding:10px;background:var(--bg3);border-radius:8px">
+        <div style="font-weight:500;font-size:11px;margin-bottom:4px">🏥 PHD</div>
+        <div style="font-size:10px">Informe censo diario PHD<br>Estancia · Oportunidad · Reingresos · Evitables</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:8px">
+        <div style="font-weight:500;font-size:11px;margin-bottom:4px">🏠 PAD</div>
+        <div style="font-size:10px">Informe censo PAD<br>Pacientes activos · % nuevos (informativo)</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:8px">
+        <div style="font-weight:500;font-size:11px;margin-bottom:4px">🩺 UCC</div>
+        <div style="font-size:10px">Informe censo UCC domiciliario<br>Oportunidad · IAAS · Úlceras · Mortalidad</div>
+      </div>
+    </div>
+    <div>URL Apps Script: <code id="ext-script-url" style="background:var(--bg3);padding:2px 8px;border-radius:4px;font-size:10px">No configurado — ajusta EXTRAMURAL_SCRIPT en el código</code></div>
+  </div>
+
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════════
      GESTORES FARMACÉUTICOS · RESUMEN EJECUTIVO
@@ -13857,6 +13937,169 @@ window.poblarSelectorGestores=function(){
   if(sel.options.length>1) return;
   const gestores=['AUDIFARMA','DISFARMA','CRUZ VERDE','DISCOLMETS','PHARMASAN','INSUMEDIC','MEDISFARMA','COHAN','GENHOSPI','MACROMED','INPHAPRO','HUMSALUD','ETICOS SERRANO','GLOBAL','COLSUBSIDIO','CAFAM','MYTSALUD'];
   gestores.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});
+};
+
+// ════════════════════════════════════════════════════════════════════
+// ATENCIÓN EXTRAMURAL — PHD / PAD / UCC
+// ════════════════════════════════════════════════════════════════════
+
+// URL del Apps Script único para los 3 programas
+// Formato esperado de llamada: ?programa=PHD|PAD|UCC|todos
+// Formato esperado de respuesta: { phd: [...], pad: [...], ucc: [...] }
+// Cada item: { nit, nombre, regional, indicador, resultado, meta, unidad, cumple, fuente, programa }
+const EXTRAMURAL_SCRIPT = ''; // ← Pega aquí la URL del Apps Script cuando esté desplegado
+
+// Indicadores que se calculan desde los censos (los que requieren Base de Indicios quedan fuera)
+const EXT_INDICADORES = {
+  phd: [
+    {id:'phd_estancia',    lbl:'Promedio días estancia',          meta:'≤5 días',  unidad:'días',  tendencia:'negativa'},
+    {id:'phd_oportunidad', lbl:'Oportunidad valoración',          meta:'<4h',      unidad:'horas', tendencia:'negativa'},
+    {id:'phd_reingresos',  lbl:'Reingresos a IPS',                meta:'≤2%',      unidad:'%',     tendencia:'negativa'},
+    {id:'phd_evitables',   lbl:'Hospitalizaciones evitables',     meta:'≥70%',     unidad:'%',     tendencia:'positiva'},
+  ],
+  pad: [
+    {id:'pad_pacientes',   lbl:'Total pacientes activos',         meta:'Informativo', unidad:'pac.', tendencia:'neutral'},
+    {id:'pad_nuevos',      lbl:'% Ingresos nuevos en el mes',     meta:'Informativo', unidad:'%',    tendencia:'neutral'},
+  ],
+  ucc: [
+    {id:'ucc_oportunidad', lbl:'Oportunidad valoración ingreso',  meta:'<48h',     unidad:'horas', tendencia:'negativa'},
+    {id:'ucc_iaas',        lbl:'Eventos adversos (IAAS)',         meta:'≤2%',      unidad:'%',     tendencia:'negativa'},
+    {id:'ucc_ulceras',     lbl:'Tasa úlceras por presión',        meta:'≤1',       unidad:'x1000', tendencia:'negativa'},
+    {id:'ucc_mortalidad',  lbl:'Tasa mortalidad',                 meta:'≤10',      unidad:'x1000', tendencia:'negativa'},
+  ],
+};
+
+let EXT_DATA = {phd:[], pad:[], ucc:[], loaded:false};
+let _EXT_TAB = 'phd';
+
+window.cargarExtramural = async function(force=false){
+  const status=document.getElementById('ext-status');
+  if(EXT_DATA.loaded && !force) { renderExtramural(); return; }
+  if(!EXTRAMURAL_SCRIPT){
+    if(status) status.textContent='⚠ Apps Script no configurado — edita EXTRAMURAL_SCRIPT en el código';
+    renderExtramural();
+    return;
+  }
+  if(status) status.textContent='⏳ Cargando...';
+  try{
+    const resp=await fetch(EXTRAMURAL_SCRIPT+'?programa=todos',{redirect:'follow',headers:{'Accept':'application/json'}});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+    EXT_DATA.phd = data.phd||[];
+    EXT_DATA.pad = data.pad||[];
+    EXT_DATA.ucc = data.ucc||[];
+    EXT_DATA.loaded = true;
+    if(status) status.textContent=`✓ Datos cargados — PHD: ${EXT_DATA.phd.length} · PAD: ${EXT_DATA.pad.length} · UCC: ${EXT_DATA.ucc.length}`;
+  } catch(e){
+    if(status) status.textContent=`⚠ Error al cargar: ${e.message}`;
+    console.error('[Extramural]', e);
+  }
+  renderExtramural();
+};
+
+window.switchExtTab = function(tab, el){
+  _EXT_TAB = tab;
+  document.querySelectorAll('#ext-panel-phd,#ext-panel-pad,#ext-panel-ucc').forEach(p=>p.style.display='none');
+  document.querySelectorAll('#ext-tab-phd,#ext-tab-pad,#ext-tab-ucc').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ext-panel-'+tab).style.display='block';
+  if(el) el.classList.add('active');
+  renderExtramural();
+};
+
+window.renderExtramural = function(){
+  const regional = (document.getElementById('ext-f-regional')?.value||'').toLowerCase();
+  const buscar   = (document.getElementById('ext-f-prestador')?.value||'').toLowerCase();
+  const norm = s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  ['phd','pad','ucc'].forEach(prog=>{
+    const rows = EXT_DATA[prog].filter(r=>{
+      if(regional && norm(r.regional||'')!==norm(regional)) return false;
+      if(buscar && !norm(r.nombre||'').includes(norm(buscar)) && !String(r.nit||'').includes(buscar)) return false;
+      return true;
+    });
+
+    const kpiEl=document.getElementById('ext-kpi-'+prog);
+    const kpiSub=document.getElementById('ext-kpi-'+prog+'-sub');
+    const nits=new Set(rows.map(r=>r.nit));
+    if(kpiEl) kpiEl.textContent=EXT_DATA.loaded?nits.size:'—';
+    if(kpiSub) kpiSub.textContent=EXT_DATA.loaded?`${nits.size} prestadores activos`:'Pendiente conexión';
+
+    const contenedor=document.getElementById('ext-tabla-'+prog);
+    if(!contenedor) return;
+
+    if(!EXT_DATA.loaded){
+      contenedor.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">
+        ⏳ Conecta el Apps Script para ver los datos de ${prog.toUpperCase()}<br>
+        <small style="margin-top:6px;display:block">Edita <code>EXTRAMURAL_SCRIPT</code> en el código con la URL del script desplegado</small>
+      </div>`;
+      return;
+    }
+
+    if(rows.length===0){
+      contenedor.innerHTML='<div style="text-align:center;padding:30px;color:var(--text2);font-size:12px">Sin datos para los filtros aplicados</div>';
+      return;
+    }
+
+    // Agrupar por NIT/prestador
+    const porNit={};
+    rows.forEach(r=>{
+      const k=String(r.nit||r.nombre||'');
+      if(!porNit[k]) porNit[k]={nit:r.nit,nombre:r.nombre,regional:r.regional,indicadores:{}};
+      porNit[k].indicadores[r.id_indicador||r.indicador]=r;
+    });
+
+    const inds = EXT_INDICADORES[prog];
+    let html=`<div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="background:var(--bg3)">
+        <th style="text-align:left;padding:8px 10px;font-weight:500">Prestador</th>
+        <th style="text-align:left;padding:8px 6px;font-weight:500">Regional</th>
+        ${inds.map(i=>`<th style="text-align:center;padding:8px 4px;font-weight:500;min-width:80px" title="${i.lbl}">${i.lbl.substring(0,20)}...<br><small style="font-weight:400;color:var(--text2)">${i.meta}</small></th>`).join('')}
+        <th style="text-align:center;padding:8px 6px;font-weight:500">Cumplimiento</th>
+      </tr></thead><tbody>`;
+
+    Object.values(porNit).forEach((p,idx)=>{
+      const cumpleTotal=inds.filter(i=>p.indicadores[i.id]?.cumple===true).length;
+      const conDato=inds.filter(i=>p.indicadores[i.id]?.resultado!==undefined).length;
+      const pct=conDato?Math.round(cumpleTotal/conDato*100):null;
+      const semColor=pct===null?'var(--text2)':pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+      html+=`<tr style="border-top:1px solid var(--border);${idx%2?'background:var(--bg3)':''}">
+        <td style="padding:8px 10px;font-weight:500">${p.nombre||p.nit}<br><small style="color:var(--text2);font-weight:400">${p.nit}</small></td>
+        <td style="padding:8px 6px;font-size:10px;color:var(--text2)">${p.regional||'—'}</td>
+        ${inds.map(i=>{
+          const d=p.indicadores[i.id];
+          if(!d) return `<td style="text-align:center;padding:8px 4px;color:var(--text2)">—</td>`;
+          const c=d.cumple;
+          const color=c===true?'var(--green)':c===false?'var(--red)':'var(--text2)';
+          const icon=c===true?'✓':c===false?'✗':'—';
+          return `<td style="text-align:center;padding:8px 4px">
+            <span style="color:${color};font-weight:500">${d.resultado}${d.unidad?' '+d.unidad:''}</span>
+            <br><small style="color:${color}">${icon}</small>
+          </td>`;
+        }).join('')}
+        <td style="text-align:center;padding:8px 6px">
+          <span style="color:${semColor};font-weight:600;font-size:13px">${pct!==null?pct+'%':'—'}</span>
+          ${conDato?`<br><small style="color:var(--text2)">${cumpleTotal}/${conDato}</small>`:''}
+        </td>
+      </tr>`;
+    });
+    html+='</tbody></table></div>';
+    contenedor.innerHTML=html;
+  });
+
+  // KPI alertas
+  let alertas=0;
+  ['phd','pad','ucc'].forEach(prog=>{
+    EXT_DATA[prog].forEach(r=>{ if(r.cumple===false) alertas++; });
+  });
+  const alEl=document.getElementById('ext-kpi-alertas');
+  const alSub=document.getElementById('ext-kpi-alertas-sub');
+  if(alEl) alEl.textContent=EXT_DATA.loaded?alertas:'—';
+  if(alSub) alSub.textContent=EXT_DATA.loaded?`${alertas} indicadores fuera de meta`:'Pendiente conexión';
+
+  // Mostrar URL configurada
+  const urlEl=document.getElementById('ext-script-url');
+  if(urlEl) urlEl.textContent=EXTRAMURAL_SCRIPT||'No configurado — edita EXTRAMURAL_SCRIPT en el código';
 };
 
 // ── Generar Informe Tecnico Gestor Farmaceutico ───────────────────
