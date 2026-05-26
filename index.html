@@ -464,7 +464,7 @@ body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;fon
 .nav-sub.active{color:#0099D1 !important;background:rgba(0,153,209,0.18) !important;}
 /* Habilitación table */
 .hab-table{width:100%;border-collapse:collapse;font-size:11.5px;}
-.hab-table th{background:var(--brand-mid);color:#fff;padding:7px 10px;text-align:left;font-weight:600;font-size:11px;position:sticky;top:0;z-index:2;}
+.hab-table th{background:var(--brand-mid);color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:10.5px;position:sticky;top:0;z-index:2;white-space:nowrap;}
 .hab-table td{padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
 .hab-table tr:hover td{background:var(--bg3);cursor:pointer;}
 .badge-si{background:#D1EFF9;color:#003D53;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
@@ -10733,31 +10733,31 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="card">
       <div class="card-head"><div><div class="card-title">Semáforo de validación</div><div class="card-sub">Por N° de servicios evaluados según estado</div></div></div>
       <div class="card-body" style="padding:16px 20px">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-          <div style="background:#D1EFF9;border-radius:10px;padding:10px;text-align:center">
-            <div style="font-size:10px;color:#003D53;font-weight:600;margin-bottom:2px">✅ CUMPLE</div>
-            <div style="font-size:22px;font-weight:700;color:#003D53" id="hab-sem-cumple">—</div>
-            <div style="font-size:9.5px;color:#4A7A95" id="hab-sem-cumple-pct">— %</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
+          <div style="background:#D1EFF9;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:10px;color:#003D53;font-weight:600;margin-bottom:4px">✅ CUMPLE</div>
+            <div style="font-size:22px;font-weight:700;color:#003D53;line-height:1.1" id="hab-sem-cumple">—</div>
+            <div style="font-size:9.5px;color:#4A7A95;margin-top:2px" id="hab-sem-cumple-pct">— %</div>
           </div>
-          <div style="background:#E8F4D9;border-radius:10px;padding:10px;text-align:center">
-            <div style="font-size:10px;color:#3D6817;font-weight:600;margin-bottom:2px">🔗 INTERDEP.</div>
-            <div style="font-size:22px;font-weight:700;color:#3D6817" id="hab-sem-interdep">—</div>
-            <div style="font-size:9.5px;color:#5A8F2A" id="hab-sem-interdep-pct">— %</div>
+          <div style="background:#E8F4D9;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:10px;color:#3D6817;font-weight:600;margin-bottom:4px">🔗 INTERDEP.</div>
+            <div style="font-size:22px;font-weight:700;color:#3D6817;line-height:1.1" id="hab-sem-interdep">—</div>
+            <div style="font-size:9.5px;color:#5A8F2A;margin-top:2px" id="hab-sem-interdep-pct">— %</div>
           </div>
-          <div style="background:#FDECEA;border-radius:10px;padding:10px;text-align:center">
-            <div style="font-size:10px;color:#B50303;font-weight:600;margin-bottom:2px">❌ NO CUMPLE</div>
-            <div style="font-size:22px;font-weight:700;color:#B50303" id="hab-sem-nocumple">—</div>
-            <div style="font-size:9.5px;color:#B50303" id="hab-sem-nocumple-pct">— %</div>
+          <div style="background:#FDECEA;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:10px;color:#B50303;font-weight:600;margin-bottom:4px">❌ NO CUMPLE</div>
+            <div style="font-size:22px;font-weight:700;color:#B50303;line-height:1.1" id="hab-sem-nocumple">—</div>
+            <div style="font-size:9.5px;color:#B50303;margin-top:2px" id="hab-sem-nocumple-pct">— %</div>
           </div>
-          <div style="background:#FFF4DC;border-radius:10px;padding:10px;text-align:center">
-            <div style="font-size:10px;color:#8B6314;font-weight:600;margin-bottom:2px">ℹ️ NO APLICA</div>
-            <div style="font-size:22px;font-weight:700;color:#8B6314" id="hab-sem-noaplica">—</div>
-            <div style="font-size:9.5px;color:#A68240" id="hab-sem-noaplica-pct">— %</div>
+          <div style="background:#FFF4DC;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:10px;color:#8B6314;font-weight:600;margin-bottom:4px">ℹ️ NO APLICA</div>
+            <div style="font-size:22px;font-weight:700;color:#8B6314;line-height:1.1" id="hab-sem-noaplica">—</div>
+            <div style="font-size:9.5px;color:#A68240;margin-top:2px" id="hab-sem-noaplica-pct">— %</div>
           </div>
-          <div style="background:#EEE;border-radius:10px;padding:10px;text-align:center;grid-column:span 2">
-            <div style="font-size:10px;color:#666;font-weight:600;margin-bottom:2px">⬜ VACÍO / SIN DATO</div>
-            <div style="font-size:22px;font-weight:700;color:#666" id="hab-sem-vacio">—</div>
-            <div style="font-size:9.5px;color:#888" id="hab-sem-vacio-pct">— %</div>
+          <div style="background:#EEE;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:10px;color:#555;font-weight:600;margin-bottom:4px">⬜ VACÍO</div>
+            <div style="font-size:22px;font-weight:700;color:#555;line-height:1.1" id="hab-sem-vacio">—</div>
+            <div style="font-size:9.5px;color:#888;margin-top:2px" id="hab-sem-vacio-pct">— %</div>
           </div>
         </div>
         <canvas id="hab-chart-semaforo" height="80"></canvas>
@@ -10767,32 +10767,32 @@ document.addEventListener('DOMContentLoaded', function(){
 
   <!-- Filtros + Tabla -->
   <div class="card">
-    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+    <div class="card-head" style="flex-wrap:wrap;gap:10px">
       <div><div class="card-title">Detalle por prestador</div><div class="card-sub">Regional · Departamento · Municipio · Sucursal · Interdependencia · CUPS</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <input id="hab-buscar" placeholder="🔍 Buscar prestador o CUPS..." oninput="habFiltrar()"
-          style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;width:220px;background:var(--bg3);color:var(--text);outline:none">
-        <select id="hab-filtro-regional" onchange="habFiltrar()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
-          <option value="">Todas las regionales</option>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <input id="hab-buscar" placeholder="🔍 Prestador / CUPS / NIT" oninput="habFiltrar()"
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;width:170px;background:var(--bg3);color:var(--text);outline:none">
+        <select id="hab-filtro-regional" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:135px">
+          <option value="">Regionales</option>
         </select>
-        <select id="hab-filtro-resultado" onchange="habFiltrar()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
-          <option value="">Todos los resultados</option>
-          <option value="SI HABILITADO">✅ Si habilitado</option>
+        <select id="hab-filtro-resultado" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:155px">
+          <option value="">Resultado</option>
+          <option value="SI HABILITADO">✅ Habilitado</option>
           <option value="NO HABILITADO">❌ No habilitado</option>
-          <option value="CONTRATO EN PROCESO DE EXCLUSION">⚠️ En proceso exclusión</option>
-          <option value="CONTRATO EXCLUIDO">🚫 Contrato excluido</option>
-          <option value="NO REQUIERE HABILITACION">ℹ️ No requiere habilitación</option>
+          <option value="CONTRATO EN PROCESO DE EXCLUSION">⚠️ En exclusión</option>
+          <option value="CONTRATO EXCLUIDO">🚫 Excluido</option>
+          <option value="NO REQUIERE HABILITACION">ℹ️ No requiere</option>
         </select>
-        <select id="hab-filtro-semaforo" onchange="habFiltrar()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
-          <option value="">Semáforo: todos</option>
+        <select id="hab-filtro-semaforo" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:155px">
+          <option value="">Semáforo</option>
           <option value="__CUMPLE_SOLO">✅ Cumple</option>
-          <option value="INTERDEP">🔗 Cumple interdependencia</option>
+          <option value="INTERDEP">🔗 Interdependencia</option>
           <option value="NO CUMPLE">❌ No cumple</option>
           <option value="NO APLICA">ℹ️ No aplica</option>
           <option value="__VACIO">⬜ Vacío</option>
         </select>
-        <select id="hab-filtro-interdep" onchange="habFiltrar()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
-          <option value="">Interdep.: todas</option>
+        <select id="hab-filtro-interdep" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:135px" title="Filtra por valor de la columna Interdependencia">
+          <option value="">Interdep.</option>
         </select>
         <span style="font-size:11px;color:var(--text2)" id="hab-count-label">— registros</span>
       </div>
@@ -10806,7 +10806,7 @@ document.addEventListener('DOMContentLoaded', function(){
             <th>Municipio</th>
             <th>Razón social</th>
             <th>Sucursal</th>
-            <th>Interdep.</th>
+            <th>Interdependencia</th>
             <th>Fecha inicio</th>
             <th>CUPS</th>
             <th>Semáforo</th>
@@ -10930,11 +10930,17 @@ document.addEventListener('DOMContentLoaded', function(){
     selReg.innerHTML = '<option value="">Todas las regionales</option>' +
       regionales.map(r=>`<option value="${r}">${r}</option>`).join('');
 
-    // Poblar select interdependencia
-    const interdeps = [...new Set(HAB_DATA.map(r=>String(r.interdep||'').trim()).filter(Boolean))].sort();
+    // Poblar select interdependencia con conteos para mayor claridad
+    const interdepCount = {};
+    HAB_DATA.forEach(r=>{
+      const v = String(r.interdep||'').trim() || '(vacío)';
+      interdepCount[v] = (interdepCount[v]||0) + 1;
+    });
+    const interdepEntries = Object.entries(interdepCount)
+      .sort((a,b)=>b[1]-a[1]); // ordenar de mayor a menor
     const selInt = document.getElementById('hab-filtro-interdep');
-    if(selInt) selInt.innerHTML = '<option value="">Interdep.: todas</option>' +
-      interdeps.map(i=>`<option value="${i}">${i}</option>`).join('');
+    if(selInt) selInt.innerHTML = '<option value="">Interdep. (todas)</option>' +
+      interdepEntries.map(([v,c])=>`<option value="${v}">${v} (${c.toLocaleString('es-CO')})</option>`).join('');
 
     // Gráficas
     dibujarGraficaResultado(byRes, total);
@@ -10982,14 +10988,22 @@ document.addEventListener('DOMContentLoaded', function(){
       ctx.fillStyle = color;
       ctx.beginPath(); ctx.roundRect(labelW, y+3, bw, barH-6, 4); ctx.fill();
 
-      // Value
-      const vx = labelW + barZone + 8;
-      ctx.fillStyle = '#003D53';
+      // Valor dentro de la barra si cabe, sino justo al final
+      const valTxt = v.toLocaleString('es-CO');
       ctx.font = 'bold 11px Figtree, sans-serif';
-      ctx.fillText(v.toLocaleString('es-CO'), vx, y+14);
+      const valW2 = ctx.measureText(valTxt).width;
+      if(bw >= valW2 + 14){
+        ctx.fillStyle = '#fff';
+        ctx.fillText(valTxt, labelW + bw - valW2 - 6, y+18);
+      } else {
+        ctx.fillStyle = color;
+        ctx.fillText(valTxt, labelW + bw + 4, y+18);
+      }
+      // % a la derecha
+      const vx = labelW + barZone + 8;
       ctx.fillStyle = '#4A7A95';
       ctx.font = '10px Figtree, sans-serif';
-      ctx.fillText('(' + ((v/total)*100).toFixed(1) + '%)', vx, y+27);
+      ctx.fillText('(' + ((v/total)*100).toFixed(1) + '%)', vx, y+18);
     });
 
     // Leyenda
@@ -11005,39 +11019,58 @@ document.addEventListener('DOMContentLoaded', function(){
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const W = canvas.parentElement?.offsetWidth - 40 || 400;
-    const H = 80;
+    const H = 100;
     canvas.width = W * dpr; canvas.height = H * dpr;
     canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
     ctx.scale(dpr, dpr);
     ctx.clearRect(0,0,W,H);
 
     const total = d.cumple + d.interdep + d.noCumple + d.noAplica + d.vacio || 1;
-    // Barra apilada horizontal: cumple→interdep→nocumple→noaplica→vacio
     const data = [
       {v:d.cumple,   c:'#0099D1', l:'Cumple'},
       {v:d.interdep, c:'#5A8F2A', l:'Interdep.'},
       {v:d.noCumple, c:'#B50303', l:'No cumple'},
       {v:d.noAplica, c:'#D4A24A', l:'No aplica'},
       {v:d.vacio,    c:'#999',    l:'Vacío'},
-    ];
-    const barY = 18, barH = 30;
+    ].filter(s=>s.v>0);
+
+    const barY = 18, barH = 32;
     let x = 0;
+    // Pintar segmentos
+    const segs = [];
     data.forEach(s=>{
       const w = (s.v/total) * W;
       ctx.fillStyle = s.c;
       ctx.fillRect(x, barY, w, barH);
-      if(w > 38){
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 11px Figtree';
-        ctx.textAlign = 'center';
-        ctx.fillText(s.v.toLocaleString('es-CO'), x + w/2, barY + barH/2 + 4);
-      }
+      segs.push({...s, x, w});
       x += w;
     });
+    // Valores: dentro del segmento si cabe, fuera (con línea guía) si no
+    ctx.font = 'bold 11px Figtree';
+    ctx.textAlign = 'center';
+    segs.forEach(s=>{
+      const txt = s.v.toLocaleString('es-CO');
+      const txtW = ctx.measureText(txt).width;
+      if(s.w >= txtW + 8){
+        // Dentro del segmento
+        ctx.fillStyle = '#fff';
+        ctx.fillText(txt, s.x + s.w/2, barY + barH/2 + 4);
+      } else {
+        // Fuera del segmento, abajo con conector
+        const cx = s.x + s.w/2;
+        ctx.strokeStyle = s.c; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx, barY + barH);
+        ctx.lineTo(cx, barY + barH + 8);
+        ctx.stroke();
+        ctx.fillStyle = s.c;
+        ctx.fillText(txt, cx, barY + barH + 20);
+      }
+    });
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#212121';
+    ctx.fillStyle = '#666';
     ctx.font = '9.5px Figtree';
-    ctx.fillText('100% = '+total.toLocaleString('es-CO')+' servicios', 0, 12);
+    ctx.fillText('Total = '+total.toLocaleString('es-CO')+' servicios', 0, 12);
   }
 
   let _habFiltrarTO = null;
@@ -11059,7 +11092,11 @@ document.addEventListener('DOMContentLoaded', function(){
       if(buscar && !texto.includes(buscar)) return false;
       if(filtReg && r.regional !== filtReg) return false;
       if(filtRes && !norm(r.resultado).includes(filtRes)) return false;
-      if(filtInt && String(r.interdep||'').trim() !== filtInt) return false;
+      if(filtInt){
+        const valInt = String(r.interdep||'').trim();
+        if(filtInt==='(vacío)'){ if(valInt!=='') return false; }
+        else { if(valInt !== filtInt) return false; }
+      }
       // Semáforo: 5 valores discretos
       if(filtSem){
         const s = norm(r.semaforo);
