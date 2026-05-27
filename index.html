@@ -14464,9 +14464,14 @@ function icPoblarFiltros(){
   const regs = [...new Set(IC_FILAS.map(f=>f.regional).filter(Boolean))].sort();
   const mods = [...new Set(IC_FILAS.map(f=>f.modalidad).filter(Boolean))].sort();
   const atrs = [...new Set(IC_FILAS.map(f=>f.atributo).filter(Boolean))].sort();
+  console.log('[IC] icPoblarFiltros — IC_FILAS.length:', IC_FILAS.length);
+  console.log('[IC] Valores únicos para dropdowns:', { regs, mods, atrs });
   const set = (id, items, label) => {
-    const el = document.getElementById(id); if(!el) return;
-    el.innerHTML = `<option value="">${label}</option>` + items.map(v=>`<option value="${v}">${v}</option>`).join('');
+    const el = document.getElementById(id);
+    if(!el){ console.warn('[IC] Element NOT FOUND:', id); return; }
+    const html = `<option value="">${label}</option>` + items.map(v=>`<option value="${v}">${v}</option>`).join('');
+    el.innerHTML = html;
+    console.log(`[IC] ${id} → ${items.length} options seteadas. Primeras 3:`, items.slice(0,3));
   };
   set('ic-f-regional', regs, 'Regionales');
   set('ic-f-modalidad', mods, 'Modalidad de contrato');
