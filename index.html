@@ -14392,6 +14392,26 @@ function icCalcularFilas(){
     if(normS(r.resultado).includes('SI HABILITADO')) homPorNit[nit].habilitados++;
   });
 
+  // Diagnóstico de la matriz V3 cargada
+  const conMod = IC_MATRIZ.filter(i => Object.keys(i.modalidades||{}).length > 0).length;
+  const sinMod = IC_MATRIZ.length - conMod;
+  console.log(`[IC] Matriz: ${IC_MATRIZ.length} indicadores (${sinMod} sin modalidad asignada — aplican a todos, ${conMod} con modalidad — filtran por contrato)`);
+
+  // Helper de match flexible entre modalidad del prestador y modalidad del indicador
+  // El indicador puede tener nombres específicos: "EVENTO HOSPITALARIO", "CAPITA MEDICA"
+  // El prestador tiene nombre genérico: "EVENTO", "CAPITACION"
+  const matchModalidad = (prestadorMod, indicadorMod) => {
+    const p = normS(prestadorMod);
+    const i = normS(indicadorMod);
+    if(!p || !i) return false;
+    if(p === i) return true;                              // match exacto
+    if(i.startsWith(p + ' ') || i.startsWith(p+',')) return true; // indicador empieza con prestador + espacio
+    // Manejar abreviación: CAPITACION → CAPITA
+    if(p.startsWith('CAPITAC') && i.startsWith('CAPITA')) return true;
+    if(p.startsWith('CAPITA') && i.startsWith('CAPITAC')) return true;
+    return false;
+  };
+
   const filas = [];
 
   // Por cada prestador, por cada indicador aplicable, calcular
@@ -14401,14 +14421,14 @@ function icCalcularFilas(){
       // Si modalidades tiene entries, verificar match; si no tiene, aplica a todos.
       const mods = ind.modalidades || {};
       const tieneModalidades = Object.keys(mods).length > 0;
+      let modKey = null;
       if(tieneModalidades){
-        const modNorm = normS(p.modalidad);
-        const aplica = Object.keys(mods).some(m => normS(m) === modNorm);
-        if(!aplica) return;
+        modKey = Object.keys(mods).find(m => matchModalidad(p.modalidad, m));
+        if(!modKey) return;
       }
 
       // Sanción específica para esta modalidad (si está marcada)
-      const sancionMod = mods[p.modalidad] || ind.sancion || null;
+      const sancionMod = (modKey && mods[modKey]) || ind.sancion || null;
 
       // Calcular numerador/denominador según el indicador
       const calc = icCalcularIndicador(ind, p, homPorNit[p.nit]);
