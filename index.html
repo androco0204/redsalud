@@ -5691,6 +5691,8 @@ function procesarPrestadores(wb, estadoEl, infoEl) {
     'DESCRIPCION CIUDAD': 'ciudad',
     'DEPARTAMENTO': 'departamento',
     'REGIONAL PARAMETRIZADA': 'regional',
+    'REGIONAL SUPERVISION': 'regional',
+    'REGIONAL': 'regional',
     'ESPECIALIDAD': 'especialidad',
     'Habilitación  de Sedes en REPS': 'habilitacion_reps',
     'Nivel complejidad': 'nivel_complejidad',
@@ -14118,7 +14120,7 @@ window.poblarSelectorGestores=function(){
 // Formato esperado de llamada: ?programa=PHD|PAD|UCC|todos
 // Formato esperado de respuesta: { phd: [...], pad: [...], ucc: [...] }
 // Cada item: { nit, nombre, regional, indicador, resultado, meta, unidad, cumple, fuente, programa }
-const EXTRAMURAL_SCRIPT = ''; // ← Pega aquí la URL del Apps Script cuando esté desplegado
+const EXTRAMURAL_SCRIPT = 'https://script.google.com/macros/s/AKfycbwGFfc5ea5233EFRG24Pdfc3SNOnwJj2pYArU2NXR25NEQvlTnd2NKgdXvPwJDZ5_9k/exec'; // ← Pega aquí la URL del Apps Script cuando esté desplegado
 
 // Indicadores que se calculan desde los censos (los que requieren Base de Indicios quedan fuera)
 const EXT_INDICADORES = {
@@ -14501,31 +14503,49 @@ function icRender(){
     const resTxt   = f.resultado===null ? '—' : (f.resultado + (f.unidad||''));
     const metaTxt  = f.meta!=null ? (parseFloat(f.meta)<=1 ? (parseFloat(f.meta)*100)+'%' : f.meta+(f.unidad||'')) : '—';
     const sancion  = f.sancion || '—';
-    return `<tr onclick="icDrilldown('${f.nit}','${(f.indicador||'').replace(/'/g,'')}')">
-      <td>${f.nit}</td>
-      <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${f.nombre}">${f.nombre||'—'}</td>
-      <td>${f.regional||'—'}</td>
-      <td style="font-size:10.5px">${f.modalidad||'—'}</td>
-      <td>${f.atributo||'—'}</td>
-      <td style="font-size:10.5px" title="${f.formula||''}">${f.indicador||'—'}</td>
+    const esc = s => String(s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    return `<tr data-nit="${esc(f.nit)}" style="cursor:pointer">
+      <td>${esc(f.nit)}</td>
+      <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(f.nombre)}">${esc(f.nombre)||'—'}</td>
+      <td>${esc(f.regional)||'—'}</td>
+      <td style="font-size:10.5px">${esc(f.modalidad)||'—'}</td>
+      <td>${esc(f.atributo)||'—'}</td>
+      <td style="font-size:10.5px" title="${esc(f.formula)}">${esc(f.indicador)||'—'}</td>
       <td style="text-align:center">${f.num??'—'}</td>
       <td style="text-align:center">${f.den??'—'}</td>
       <td style="text-align:center;font-weight:600;color:${semColor}">${resTxt}</td>
       <td style="text-align:center">${metaTxt}</td>
       <td style="text-align:center;font-size:14px">${semIcon}</td>
-      <td style="text-align:center;font-size:10px">${sancion}</td>
-      <td style="font-size:10px;color:var(--text2)" title="${f.fuente_num||''}">${f.fuente_num||'—'}</td>
+      <td style="text-align:center;font-size:10px">${esc(sancion)}</td>
+      <td style="font-size:10px;color:var(--text2)" title="${esc(f.fuente_num)}">${esc(f.fuente_num)||'—'}</td>
     </tr>`;
   }).join('') + (filas.length > MAX ? `<tr><td colspan="13" style="text-align:center;padding:10px;color:var(--text2);font-size:11px">Mostrando primeras ${MAX} filas de ${filas.length.toLocaleString('es-CO')} — usa filtros para reducir</td></tr>` : '');
+
+  // Event delegation: un solo listener para toda la tabla (más seguro que onclick inline)
+  if(!tbody._icListenerAdded){
+    tbody.addEventListener('click', (e)=>{
+      const tr = e.target.closest('tr[data-nit]');
+      if(!tr) return;
+      const nit = tr.getAttribute('data-nit');
+      if(nit) icDrilldown(nit);
+    });
+    tbody._icListenerAdded = true;
+  }
 }
 
 // Clic en una fila → ir a la pantalla de Habilitación filtrada por NIT
-window.icDrilldown = function(nit, indicador){
-  navigate('homologacion');
+window.icDrilldown = function(nit){
+  if(!nit) return;
+  try {
+    navigate('homologacion');
+  } catch(e) { console.error('[IC] Error al navegar:', e); return; }
   setTimeout(()=>{
     const b = document.getElementById('hab-buscar');
-    if(b){ b.value = nit; habFiltrar && habFiltrar(); }
-  }, 200);
+    if(b){
+      b.value = nit;
+      if(typeof window.habFiltrar === 'function') window.habFiltrar();
+    }
+  }, 250);
 };
 
 // ── Generar Informe Tecnico Gestor Farmaceutico ───────────────────
