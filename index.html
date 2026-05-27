@@ -11163,8 +11163,11 @@ document.addEventListener('DOMContentLoaded', function(){
     const filtInt = document.getElementById('hab-filtro-interdep')?.value||'';
 
     HAB_FILTRADO = HAB_DATA.filter(r => {
-      const texto = `${r.razon_social} ${r.sucursal} ${r.cups} ${r.nit}`.toLowerCase();
-      if(buscar && !texto.includes(buscar)) return false;
+      // Búsqueda — normaliza NITs sin puntos para que matchee desde drill-down
+      const nitNorm = String(r.nit||'').replace(/\./g,'').trim();
+      const buscarNorm = buscar.replace(/\./g,'');
+      const texto = `${r.razon_social} ${r.sucursal} ${r.cups} ${r.nit} ${nitNorm}`.toLowerCase();
+      if(buscar && !texto.includes(buscarNorm)) return false;
       if(filtReg && r.regional !== filtReg) return false;
       if(filtRes && !norm(r.resultado).includes(filtRes)) return false;
       if(filtInt){
@@ -14346,6 +14349,18 @@ function icCalcularFilas(){
   const prest = DATOS_CARGADOS.prestadores || [];
   const hom   = DATOS_CARGADOS.homologacion_rows || [];
 
+  console.log(`[IC] Prestadores en memoria: ${prest.length}`);
+  console.log(`[IC] Homologación rows en memoria: ${hom.length}`);
+  if(prest.length > 0){
+    console.log('[IC] Muestra prestador #1:', {
+      nit: prest[0].nit,
+      nombre: prest[0].nombre,
+      regional: prest[0].regional,
+      modelo: prest[0].modelo,
+      forma_contratacion: prest[0].forma_contratacion,
+    });
+  }
+
   // Index de prestadores por NIT (consolidando duplicados, quedándonos con el primero)
   const porNit = {};
   prest.forEach(p=>{
@@ -14358,6 +14373,13 @@ function icCalcularFilas(){
       modalidad: String(p.modelo || p.forma_contratacion || '').trim() || '(sin modalidad)',
     };
   });
+
+  // Valores únicos de regionales y modalidades
+  const regUnicas = [...new Set(Object.values(porNit).map(p=>p.regional))].sort();
+  const modUnicas = [...new Set(Object.values(porNit).map(p=>p.modalidad))].sort();
+  console.log(`[IC] NITs únicos: ${Object.keys(porNit).length}`);
+  console.log(`[IC] Regionales únicas (${regUnicas.length}):`, regUnicas);
+  console.log(`[IC] Modalidades únicas (${modUnicas.length}):`, modUnicas);
 
   // Index de homologación por NIT
   const homPorNit = {};
