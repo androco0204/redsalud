@@ -685,6 +685,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="nav-item nav-sub" data-screen="red-nota-tecnica">📊 Nota técnica</div>
       <div class="nav-item nav-sub" data-screen="red-cuentas-medicas">💰 Cuentas médicas</div>
       <div class="nav-item nav-sub" data-screen="extramural">🏠 Atención extramural</div>
+      <div class="nav-item nav-sub" data-screen="indicadores-contractuales">📊 Indicadores contractuales</div>
     </div>
     <div class="nav-item nav-parent" data-screen="gestores" onclick="toggleSubmenu('sub-gestores')">
       <svg viewBox="0 0 14 14" fill="none"><circle cx="5" cy="4" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 12c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" stroke-width="1.2"/><path d="M10 5l1.5 1.5L14 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -2770,6 +2771,7 @@ const titles = {
   sanciones:['Sanciones contractuales','Cálculo · validación · aplicación · histórico por período'],
   admin:['Administración del sistema','Parámetros · usuarios · log de auditoría — Solo Administrador'],
   extramural:['Atención extramural','PHD · PAD · UCC domiciliario · Indicadores de seguimiento contractual'],
+  'indicadores-contractuales':['Indicadores contractuales','Evaluación por prestador según la matriz V3 — Numerador · Denominador · Resultado · Sanción'],
 };
 
 
@@ -9112,6 +9114,7 @@ function parsearCuentasMedicas(raw) {
         origNav(scr);
         if(scr==='red-cuentas-medicas') setTimeout(cargarCMSiVacio, 80);
       if(scr==='extramural') setTimeout(()=>cargarExtramural(), 80);
+      if(scr==='indicadores-contractuales') setTimeout(()=>cargarIndicadoresContractuales(), 80);
       };
     }
   });
@@ -9171,6 +9174,76 @@ function parsearCuentasMedicas(raw) {
     <!-- Panel UCC -->
     <div id="ext-panel-ucc" class="card-body" style="display:none;padding:16px">
       <div id="ext-tabla-ucc"><div style="text-align:center;padding:40px;color:var(--text2);font-size:12px">⏳ Conecta el Apps Script de UCC para ver los datos</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     INDICADORES CONTRACTUALES · Evaluación por prestador (Matriz V3)
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-indicadores-contractuales">
+
+  <!-- KPIs resumen -->
+  <div class="kpi-strip cols-4" style="margin-bottom:18px">
+    <div class="kpi"><div class="kpi-label">Prestadores evaluados</div><div class="kpi-value" id="ic-kpi-prestadores">—</div><div class="kpi-delta" id="ic-kpi-prestadores-sub">—</div></div>
+    <div class="kpi"><div class="kpi-label">Indicadores cargados</div><div class="kpi-value" id="ic-kpi-indicadores">—</div><div class="kpi-delta" id="ic-kpi-indicadores-sub">Desde matriz V3</div></div>
+    <div class="kpi"><div class="kpi-label">Cumplen meta</div><div class="kpi-value" style="color:var(--green)" id="ic-kpi-cumplen">—</div><div class="kpi-delta" id="ic-kpi-cumplen-sub">—</div></div>
+    <div class="kpi"><div class="kpi-label">No cumplen meta</div><div class="kpi-value" style="color:var(--red)" id="ic-kpi-nocumplen">—</div><div class="kpi-delta" id="ic-kpi-nocumplen-sub">—</div></div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card" style="margin-bottom:10px;padding:12px 18px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <input id="ic-buscar" placeholder="🔍 Prestador / NIT" oninput="icFiltrar()"
+        style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;width:180px;background:var(--bg2);color:var(--text);outline:none">
+      <select id="ic-f-regional" onchange="icFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg2);color:var(--text);outline:none;max-width:150px">
+        <option value="">Regionales</option>
+      </select>
+      <select id="ic-f-modalidad" onchange="icFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg2);color:var(--text);outline:none;max-width:200px">
+        <option value="">Modalidad de contrato</option>
+      </select>
+      <select id="ic-f-atributo" onchange="icFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg2);color:var(--text);outline:none;max-width:160px">
+        <option value="">Atributo</option>
+      </select>
+      <select id="ic-f-semaforo" onchange="icFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg2);color:var(--text);outline:none;max-width:140px">
+        <option value="">Semáforo</option>
+        <option value="cumple">✅ Cumple</option>
+        <option value="nocumple">❌ No cumple</option>
+        <option value="sindato">⚪ Sin dato</option>
+      </select>
+      <span style="font-size:11px;color:var(--text2)" id="ic-count-label">— filas</span>
+      <button class="btn" onclick="cargarIndicadoresContractuales(true)" style="font-size:11px;margin-left:auto">↺ Actualizar</button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card">
+    <div class="card-head">
+      <div><div class="card-title">Evaluación contractual por prestador</div><div class="card-sub">Una fila = un indicador aplicado a un prestador · Clic en la fila para detalle</div></div>
+      <div id="ic-status" style="font-size:11px;color:var(--text2)"></div>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto;max-height:560px;overflow-y:auto">
+      <table class="hab-table" id="ic-tabla">
+        <thead>
+          <tr>
+            <th style="min-width:120px">NIT</th>
+            <th style="min-width:200px">Prestador</th>
+            <th style="min-width:120px">Regional</th>
+            <th style="min-width:160px">Modalidad</th>
+            <th style="min-width:120px">Atributo</th>
+            <th style="min-width:240px">Indicador</th>
+            <th style="text-align:center;min-width:60px">Num</th>
+            <th style="text-align:center;min-width:60px">Den</th>
+            <th style="text-align:center;min-width:90px">Resultado</th>
+            <th style="text-align:center;min-width:80px">Meta</th>
+            <th style="text-align:center;min-width:70px">Semáforo</th>
+            <th style="text-align:center;min-width:110px">% Sanción</th>
+            <th style="min-width:180px">Fuente</th>
+          </tr>
+        </thead>
+        <tbody id="ic-tbody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -14199,6 +14272,260 @@ window.renderExtramural = function(){
   const alSub=document.getElementById('ext-kpi-alertas-sub');
   if(alEl) alEl.textContent=EXT_DATA.loaded?alertas:'—';
   if(alSub) alSub.textContent=EXT_DATA.loaded?`${alertas} indicadores fuera de meta`:'Pendiente conexión';
+};
+
+// ════════════════════════════════════════════════════════════════════
+// INDICADORES CONTRACTUALES — Matriz V3 aplicada por prestador
+// ════════════════════════════════════════════════════════════════════
+
+// URL del Apps Script que sirve la matriz V3 del consolidado
+// Espera: ?accion=matriz → JSON [{indicador, atributo, clasificacion, numerador,
+//   denominador, formula, unidad, meta, frecuencia, fuente_num, fuente_den,
+//   responsable, tendencia, sancion, modalidades:{nombre: %sancion}}]
+const IC_MATRIZ_SCRIPT = ''; // ← Pega aquí la URL del Apps Script de la matriz V3
+
+let IC_MATRIZ = [];           // Indicadores definidos en la matriz V3
+let IC_FILAS  = [];           // Resultado del cálculo (1 fila = 1 prestador × 1 indicador)
+let IC_LOADED = false;
+
+window.cargarIndicadoresContractuales = async function(force=false){
+  const status = document.getElementById('ic-status');
+  if(IC_LOADED && !force){ icRender(); return; }
+
+  // 1) Cargar matriz V3 si hay URL
+  if(IC_MATRIZ_SCRIPT){
+    if(status) status.textContent = '⏳ Cargando matriz V3...';
+    try{
+      const r = await fetch(IC_MATRIZ_SCRIPT + '?accion=matriz', {redirect:'follow', headers:{'Accept':'application/json'}});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      IC_MATRIZ = await r.json();
+    } catch(e){
+      if(status) status.textContent = '⚠ Matriz no cargada: '+e.message+' — usando solo Habilitación';
+      IC_MATRIZ = [];
+    }
+  }
+
+  // 2) Si la matriz no se cargó, usamos solo el indicador de Habilitación
+  //    con la definición fija que ya conocemos del consolidado V3
+  if(!IC_MATRIZ.length){
+    IC_MATRIZ = [{
+      n: 13,
+      indicador: 'Habilitación de servicios contratados',
+      clasificacion: 'Habilitación',
+      atributo: 'Habilitación',
+      responsable: 'Coordinador o Gestor Red Regionales',
+      tendencia: 'Positiva',
+      fuente_num: 'Consolidado Nacional de Anexos Tarifarios',
+      fuente_den: 'Consolidado Nacional de Anexos Tarifarios',
+      numerador: 'Número total de servicios contratados con habilitación vigente',
+      denominador: 'Número total de servicios contratados del prestador',
+      formula: 'Servicios con habilitación vigente / Total servicios contratados × 100',
+      unidad: '%',
+      meta: 100,
+      frecuencia: 'Trimestral',
+      sancion: null,
+      modalidades: {}
+    }];
+  }
+
+  // 3) Construir filas: por cada prestador con datos en homologación, calcular cada indicador
+  IC_FILAS = icCalcularFilas();
+  IC_LOADED = true;
+
+  if(status) status.textContent = `✓ ${IC_FILAS.length.toLocaleString('es-CO')} evaluaciones generadas`;
+
+  // 4) Poblar selects de filtros
+  icPoblarFiltros();
+  icRender();
+};
+
+// Calcula UNA fila por (prestador, indicador aplicable)
+function icCalcularFilas(){
+  const prest = DATOS_CARGADOS.prestadores || [];
+  const hom   = DATOS_CARGADOS.homologacion_rows || [];
+
+  // Index de prestadores por NIT (consolidando duplicados, quedándonos con el primero)
+  const porNit = {};
+  prest.forEach(p=>{
+    const nit = String(p.nit||'').replace(/\./g,'').trim();
+    if(!nit) return;
+    if(!porNit[nit]) porNit[nit] = {
+      nit,
+      nombre: p.nombre || '',
+      regional: p.regional || '',
+      modalidad: String(p.modelo || p.forma_contratacion || '').trim() || '(sin modalidad)',
+    };
+  });
+
+  // Index de homologación por NIT
+  const homPorNit = {};
+  const normS = s => String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  hom.forEach(r=>{
+    const nit = String(r.nit||'').replace(/\./g,'').trim();
+    if(!nit) return;
+    if(!homPorNit[nit]) homPorNit[nit] = { total:0, habilitados:0 };
+    homPorNit[nit].total++;
+    if(normS(r.resultado).includes('SI HABILITADO')) homPorNit[nit].habilitados++;
+  });
+
+  const filas = [];
+
+  // Por cada prestador, por cada indicador aplicable, calcular
+  Object.values(porNit).forEach(p=>{
+    IC_MATRIZ.forEach(ind=>{
+      // ¿Aplica este indicador a la modalidad del prestador?
+      // Si modalidades tiene entries, verificar match; si no tiene, aplica a todos.
+      const mods = ind.modalidades || {};
+      const tieneModalidades = Object.keys(mods).length > 0;
+      if(tieneModalidades){
+        const modNorm = normS(p.modalidad);
+        const aplica = Object.keys(mods).some(m => normS(m) === modNorm);
+        if(!aplica) return;
+      }
+
+      // Sanción específica para esta modalidad (si está marcada)
+      const sancionMod = mods[p.modalidad] || ind.sancion || null;
+
+      // Calcular numerador/denominador según el indicador
+      const calc = icCalcularIndicador(ind, p, homPorNit[p.nit]);
+
+      filas.push({
+        nit: p.nit,
+        nombre: p.nombre,
+        regional: p.regional,
+        modalidad: p.modalidad,
+        atributo: ind.atributo,
+        clasificacion: ind.clasificacion,
+        indicador: ind.indicador,
+        numerador_def: ind.numerador,
+        denominador_def: ind.denominador,
+        formula: ind.formula,
+        meta: ind.meta,
+        unidad: ind.unidad,
+        fuente_num: ind.fuente_num,
+        fuente_den: ind.fuente_den,
+        responsable: ind.responsable,
+        tendencia: ind.tendencia,
+        frecuencia: ind.frecuencia,
+        sancion: sancionMod,
+        ...calc, // num, den, resultado, cumple, sinDato
+      });
+    });
+  });
+
+  return filas;
+}
+
+// Cálculo específico por indicador — switch por nombre
+function icCalcularIndicador(ind, prestador, homData){
+  const nombre = String(ind.indicador||'').toLowerCase();
+
+  // ── Habilitación de servicios contratados ──────────────────────
+  if(nombre.includes('habilitación') && nombre.includes('servicios contratados')){
+    if(!homData) return { num:null, den:null, resultado:null, cumple:null, sinDato:true };
+    const num = homData.habilitados;
+    const den = homData.total;
+    if(!den) return { num:0, den:0, resultado:null, cumple:null, sinDato:true };
+    const resultado = +((num/den)*100).toFixed(1);
+    const meta = parseFloat(ind.meta) <= 1 ? (parseFloat(ind.meta)*100) : parseFloat(ind.meta);
+    const cumple = ind.tendencia === 'Positiva' ? resultado >= meta : resultado <= meta;
+    return { num, den, resultado, cumple, sinDato:false };
+  }
+
+  // ── Otros indicadores: pendientes de mapear su fuente ──────────
+  return { num:null, den:null, resultado:null, cumple:null, sinDato:true };
+}
+
+function icPoblarFiltros(){
+  const regs = [...new Set(IC_FILAS.map(f=>f.regional).filter(Boolean))].sort();
+  const mods = [...new Set(IC_FILAS.map(f=>f.modalidad).filter(Boolean))].sort();
+  const atrs = [...new Set(IC_FILAS.map(f=>f.atributo).filter(Boolean))].sort();
+  const set = (id, items, label) => {
+    const el = document.getElementById(id); if(!el) return;
+    el.innerHTML = `<option value="">${label}</option>` + items.map(v=>`<option value="${v}">${v}</option>`).join('');
+  };
+  set('ic-f-regional', regs, 'Regionales');
+  set('ic-f-modalidad', mods, 'Modalidad de contrato');
+  set('ic-f-atributo', atrs, 'Atributo');
+}
+
+let _icFiltrarTO = null;
+window.icFiltrar = function(){
+  if(_icFiltrarTO) clearTimeout(_icFiltrarTO);
+  _icFiltrarTO = setTimeout(icRender, 80);
+};
+
+function icRender(){
+  const q   = (document.getElementById('ic-buscar')?.value||'').toLowerCase();
+  const reg = document.getElementById('ic-f-regional')?.value||'';
+  const mod = document.getElementById('ic-f-modalidad')?.value||'';
+  const atr = document.getElementById('ic-f-atributo')?.value||'';
+  const sem = document.getElementById('ic-f-semaforo')?.value||'';
+
+  const filas = IC_FILAS.filter(f=>{
+    if(q && !(`${f.nit} ${f.nombre}`.toLowerCase().includes(q))) return false;
+    if(reg && f.regional !== reg) return false;
+    if(mod && f.modalidad !== mod) return false;
+    if(atr && f.atributo !== atr) return false;
+    if(sem){
+      if(sem==='cumple'   && f.cumple !== true) return false;
+      if(sem==='nocumple' && f.cumple !== false) return false;
+      if(sem==='sindato'  && !f.sinDato) return false;
+    }
+    return true;
+  });
+
+  // KPIs
+  const prestadoresUnicos = new Set(filas.map(f=>f.nit));
+  const indicadoresUnicos = new Set(filas.map(f=>f.indicador));
+  const cumplen   = filas.filter(f=>f.cumple===true).length;
+  const noCumplen = filas.filter(f=>f.cumple===false).length;
+  const sinDato   = filas.filter(f=>f.sinDato).length;
+
+  document.getElementById('ic-kpi-prestadores').textContent = prestadoresUnicos.size.toLocaleString('es-CO');
+  document.getElementById('ic-kpi-prestadores-sub').textContent = `${IC_FILAS.length.toLocaleString('es-CO')} evaluaciones totales`;
+  document.getElementById('ic-kpi-indicadores').textContent = indicadoresUnicos.size;
+  document.getElementById('ic-kpi-indicadores-sub').textContent = IC_MATRIZ.length === 1 ? 'Solo Habilitación (faltan otros)' : `${IC_MATRIZ.length} indicadores en la matriz`;
+  document.getElementById('ic-kpi-cumplen').textContent = cumplen.toLocaleString('es-CO');
+  document.getElementById('ic-kpi-cumplen-sub').textContent = filas.length ? `${((cumplen/filas.length)*100).toFixed(1)}% del total` : '—';
+  document.getElementById('ic-kpi-nocumplen').textContent = noCumplen.toLocaleString('es-CO');
+  document.getElementById('ic-kpi-nocumplen-sub').textContent = sinDato ? `${sinDato} sin dato` : '—';
+  document.getElementById('ic-count-label').textContent = `${filas.length.toLocaleString('es-CO')} filas`;
+
+  // Tabla
+  const tbody = document.getElementById('ic-tbody'); if(!tbody) return;
+  const MAX = 1000;
+  tbody.innerHTML = filas.slice(0,MAX).map(f=>{
+    const semColor = f.cumple===true?'var(--green)':f.cumple===false?'var(--red)':'var(--text2)';
+    const semIcon  = f.cumple===true?'✅':f.cumple===false?'❌':'⚪';
+    const resTxt   = f.resultado===null ? '—' : (f.resultado + (f.unidad||''));
+    const metaTxt  = f.meta!=null ? (parseFloat(f.meta)<=1 ? (parseFloat(f.meta)*100)+'%' : f.meta+(f.unidad||'')) : '—';
+    const sancion  = f.sancion || '—';
+    return `<tr onclick="icDrilldown('${f.nit}','${(f.indicador||'').replace(/'/g,'')}')">
+      <td>${f.nit}</td>
+      <td style="font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${f.nombre}">${f.nombre||'—'}</td>
+      <td>${f.regional||'—'}</td>
+      <td style="font-size:10.5px">${f.modalidad||'—'}</td>
+      <td>${f.atributo||'—'}</td>
+      <td style="font-size:10.5px" title="${f.formula||''}">${f.indicador||'—'}</td>
+      <td style="text-align:center">${f.num??'—'}</td>
+      <td style="text-align:center">${f.den??'—'}</td>
+      <td style="text-align:center;font-weight:600;color:${semColor}">${resTxt}</td>
+      <td style="text-align:center">${metaTxt}</td>
+      <td style="text-align:center;font-size:14px">${semIcon}</td>
+      <td style="text-align:center;font-size:10px">${sancion}</td>
+      <td style="font-size:10px;color:var(--text2)" title="${f.fuente_num||''}">${f.fuente_num||'—'}</td>
+    </tr>`;
+  }).join('') + (filas.length > MAX ? `<tr><td colspan="13" style="text-align:center;padding:10px;color:var(--text2);font-size:11px">Mostrando primeras ${MAX} filas de ${filas.length.toLocaleString('es-CO')} — usa filtros para reducir</td></tr>` : '');
+}
+
+// Clic en una fila → ir a la pantalla de Habilitación filtrada por NIT
+window.icDrilldown = function(nit, indicador){
+  navigate('homologacion');
+  setTimeout(()=>{
+    const b = document.getElementById('hab-buscar');
+    if(b){ b.value = nit; habFiltrar && habFiltrar(); }
+  }, 200);
 };
 
 // ── Generar Informe Tecnico Gestor Farmaceutico ───────────────────
