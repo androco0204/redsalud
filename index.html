@@ -676,6 +676,7 @@ document.addEventListener('DOMContentLoaded',function(){
       Red de prestadores <span class="nav-arrow" id="arrow-sub-red">▾</span>
     </div>
     <div class="nav-submenu" id="sub-red">
+      <div class="nav-item nav-sub" data-screen="indicadores-contractuales">📊 Indicadores contractuales</div>
       <div class="nav-item nav-sub" data-screen="red-habilitacion">✅ Habilitación</div>
       <div class="nav-item nav-sub" data-screen="red-oportunidad">⏱ Oportunidad</div>
       <div class="nav-item nav-sub" data-screen="red-accesibilidad">📍 Accesibilidad</div>
@@ -685,7 +686,6 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="nav-item nav-sub" data-screen="red-nota-tecnica">📊 Nota técnica</div>
       <div class="nav-item nav-sub" data-screen="red-cuentas-medicas">💰 Cuentas médicas</div>
       <div class="nav-item nav-sub" data-screen="extramural">🏠 Atención extramural</div>
-      <div class="nav-item nav-sub" data-screen="indicadores-contractuales">📊 Indicadores contractuales</div>
     </div>
     <div class="nav-item nav-parent" data-screen="gestores" onclick="toggleSubmenu('sub-gestores')">
       <svg viewBox="0 0 14 14" fill="none"><circle cx="5" cy="4" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 12c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" stroke-width="1.2"/><path d="M10 5l1.5 1.5L14 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -9208,12 +9208,13 @@ function parsearCuentasMedicas(raw) {
       <select id="ic-f-atributo" onchange="icFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg2);color:var(--text);outline:none;max-width:160px">
         <option value="">Atributo</option>
       </select>
-      <select id="ic-f-semaforo" onchange="icFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg2);color:var(--text);outline:none;max-width:140px">
-        <option value="">Semáforo</option>
-        <option value="cumple">✅ Cumple</option>
-        <option value="nocumple">❌ No cumple</option>
+      <select id="ic-f-semaforo" onchange="icFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg2);color:var(--text);outline:none;max-width:150px">
+        <option value="">Cumplimiento</option>
+        <option value="cumple">✅ Cumple meta</option>
+        <option value="nocumple">❌ No cumple meta</option>
         <option value="sindato">⚪ Sin dato</option>
       </select>
+      <button class="btn" onclick="icLimpiarFiltros()" style="font-size:11px">✕ Limpiar</button>
       <span style="font-size:11px;color:var(--text2)" id="ic-count-label">— filas</span>
       <button class="btn" onclick="cargarIndicadoresContractuales(true)" style="font-size:11px;margin-left:auto">↺ Actualizar</button>
     </div>
@@ -14504,6 +14505,25 @@ window.icFiltrar = function(){
   _icFiltrarTO = setTimeout(icRender, 80);
 };
 
+// Limpia todos los filtros y re-renderiza
+window.icLimpiarFiltros = function(){
+  ['ic-buscar','ic-f-regional','ic-f-modalidad','ic-f-atributo','ic-f-semaforo'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  icRender();
+};
+
+// Normaliza la unidad para mostrar: "Porcentaje" → "%", "Dias" → " días", etc.
+function icUnidad(u){
+  const n = String(u||'').toLowerCase().trim();
+  if(n.includes('porcentaje') || n === '%') return '%';
+  if(n.includes('hora')) return ' h';
+  if(n.includes('dia') || n.includes('día')) return ' días';
+  if(n.includes('x1000') || n.includes('1000')) return ' x1000';
+  if(n.includes('tasa')) return '';
+  return u ? ' '+u : '';
+}
+
 function icRender(){
   const q   = (document.getElementById('ic-buscar')?.value||'').toLowerCase();
   const reg = document.getElementById('ic-f-regional')?.value||'';
@@ -14547,8 +14567,9 @@ function icRender(){
   tbody.innerHTML = filas.slice(0,MAX).map(f=>{
     const semColor = f.cumple===true?'var(--green)':f.cumple===false?'var(--red)':'var(--text2)';
     const semIcon  = f.cumple===true?'✅':f.cumple===false?'❌':'⚪';
-    const resTxt   = f.resultado===null ? '—' : (f.resultado + (f.unidad||''));
-    const metaTxt  = f.meta!=null ? (parseFloat(f.meta)<=1 ? (parseFloat(f.meta)*100)+'%' : f.meta+(f.unidad||'')) : '—';
+    const u        = icUnidad(f.unidad);
+    const resTxt   = f.resultado===null ? '—' : (f.resultado + u);
+    const metaTxt  = f.meta!=null ? (parseFloat(f.meta)<=1 && u==='%' ? (parseFloat(f.meta)*100)+'%' : f.meta+u) : '—';
     const sancion  = f.sancion || '—';
     const esc = s => String(s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     return `<tr data-nit="${esc(f.nit)}" style="cursor:pointer">
