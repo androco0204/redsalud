@@ -779,11 +779,10 @@ document.addEventListener('DOMContentLoaded',function(){
     <div><span style="color:var(--amber);font-weight:600">Datos provisionales</span><span style="color:var(--text2)"> — Base de contratos vigentes en proceso de actualización. Los valores serán reemplazados al recibir la nueva base oficial.</span></div>
     <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
   </div>
-  <div class="kpi-strip cols-4">
+  <div class="kpi-strip cols-3">
     <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Contratos vigentes</div><div class="kpi-value" style="color:var(--green)" id="kpi-resumen-prestadores">—</div><div class="kpi-delta up" id="kpi-resumen-prestadores-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">Cobertura red</div><div class="kpi-value" style="color:var(--blue)" id="kpi-resumen-cobertura">—</div><div class="kpi-delta neu" id="kpi-resumen-cobertura-delta">Cargando...</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Alertas sin soporte</div><div class="kpi-value" style="color:var(--amber)" id="kpi-sin-soporte">—</div><div class="kpi-delta warn" id="kpi-sin-soporte-delta">Cargando...</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">Cartera vencida</div><div class="kpi-value" style="color:var(--red)" id="kpi-resumen-cartera">—</div><div class="kpi-delta dn" id="kpi-resumen-cartera-delta">Pendiente fuente RUR</div></div>
   </div>
   <div class="grid-2">
     <div class="card" style="margin-bottom:0">
@@ -14124,7 +14123,7 @@ window.poblarSelectorGestores=function(){
 // Formato esperado de llamada: ?programa=PHD|PAD|UCC|todos
 // Formato esperado de respuesta: { phd: [...], pad: [...], ucc: [...] }
 // Cada item: { nit, nombre, regional, indicador, resultado, meta, unidad, cumple, fuente, programa }
-const EXTRAMURAL_SCRIPT = 'https://script.google.com/macros/s/AKfycbwGFfc5ea5233EFRG24Pdfc3SNOnwJj2pYArU2NXR25NEQvlTnd2NKgdXvPwJDZ5_9k/exec'; // ← Pega aquí la URL del Apps Script cuando esté desplegado
+const EXTRAMURAL_SCRIPT = ''; // ← Pega aquí la URL del Apps Script cuando esté desplegado
 
 // Indicadores que se calculan desde los censos (los que requieren Base de Indicios quedan fuera)
 const EXT_INDICADORES = {
@@ -14288,7 +14287,7 @@ window.renderExtramural = function(){
 // Espera: ?accion=matriz → JSON [{indicador, atributo, clasificacion, numerador,
 //   denominador, formula, unidad, meta, frecuencia, fuente_num, fuente_den,
 //   responsable, tendencia, sancion, modalidades:{nombre: %sancion}}]
-const IC_MATRIZ_SCRIPT = 'https://script.google.com/macros/s/AKfycbwLEeTpt-ldKbR3me8D2z58fL-07ZWyCA6hDf4j4QKBqT6OaYmaw7bt8UOjcR5D7mk6/exec'; // ← Pega aquí la URL del Apps Script de la matriz V3
+const IC_MATRIZ_SCRIPT = ''; // ← Pega aquí la URL del Apps Script de la matriz V3
 
 let IC_MATRIZ = [];           // Indicadores definidos en la matriz V3
 let IC_FILAS  = [];           // Resultado del cálculo (1 fila = 1 prestador × 1 indicador)
@@ -14345,53 +14344,130 @@ window.cargarIndicadoresContractuales = async function(force=false){
   icRender();
 };
 
-// Calcula UNA fila por (prestador, indicador aplicable)
+// Calcula UNA fila por (prestador-modalidad, indicador aplicable)
 function icCalcularFilas(){
   const prest = DATOS_CARGADOS.prestadores || [];
   const hom   = DATOS_CARGADOS.homologacion_rows || [];
 
   console.log(`[IC] Prestadores en memoria: ${prest.length}`);
   console.log(`[IC] Homologación rows en memoria: ${hom.length}`);
-  if(prest.length > 0){
-    console.log('[IC] Muestra prestador #1:', {
-      nit: prest[0].nit,
-      nombre: prest[0].nombre,
-      regional: prest[0].regional,
-      modelo: prest[0].modelo,
-      forma_contratacion: prest[0].forma_contratacion,
-    });
-  }
 
-  // Index de prestadores por NIT (consolidando duplicados, quedándonos con el primero)
-  const porNit = {};
+  const normS = s => String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+
+  // ── 1) Index de prestadores por (NIT + modalidad) ────────────────
+  // Un prestador puede tener varios contratos con modalidades distintas
+  const porNitMod = {};                       // { "nit|MODALIDAD": {nit, nombre, regional, modalidad} }
+  const modPorNitSucursal = {};               // { "nit|sucursal": MODALIDAD } - para cruzar con homologación
   prest.forEach(p=>{
     const nit = String(p.nit||'').replace(/\./g,'').trim();
     if(!nit) return;
-    if(!porNit[nit]) porNit[nit] = {
-      nit,
+    const modalidad = String(p.modelo || p.forma_contratacion || '').trim() || '(sin modalidad)';
+    const sucursal  = normS(p.nombre_sucursal || p.sucursal || '');
+
+    const key = nit + '|' + modalidad;
+    if(!porNitMod[key]) porNitMod[key] = {
+      nit, modalidad,
       nombre: p.nombre || '',
       regional: p.regional || '',
-      modalidad: String(p.modelo || p.forma_contratacion || '').trim() || '(sin modalidad)',
     };
+    if(sucursal){
+      const skey = nit + '|' + sucursal;
+      if(!modPorNitSucursal[skey]) modPorNitSucursal[skey] = modalidad;
+    }
   });
 
-  // Valores únicos de regionales y modalidades
-  const regUnicas = [...new Set(Object.values(porNit).map(p=>p.regional))].sort();
-  const modUnicas = [...new Set(Object.values(porNit).map(p=>p.modalidad))].sort();
-  console.log(`[IC] NITs únicos: ${Object.keys(porNit).length}`);
-  console.log(`[IC] Regionales únicas (${regUnicas.length}):`, regUnicas);
-  console.log(`[IC] Modalidades únicas (${modUnicas.length}):`, modUnicas);
-
-  // Index de homologación por NIT
-  const homPorNit = {};
-  const normS = s => String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  // ── 2) Index de homologación por (NIT + modalidad) ───────────────
+  // Cada fila de homologación se etiqueta con su modalidad real cruzando
+  // por (NIT + sucursal) con la base de contratos. Si no hay match, queda
+  // sin modalidad y NO entra en ningún cálculo modal específico.
+  const homPorNitMod = {};                    // { "nit|MODALIDAD": {total, habilitados} }
+  let homConModalidad = 0, homSinModalidad = 0;
   hom.forEach(r=>{
     const nit = String(r.nit||'').replace(/\./g,'').trim();
     if(!nit) return;
-    if(!homPorNit[nit]) homPorNit[nit] = { total:0, habilitados:0 };
-    homPorNit[nit].total++;
-    if(normS(r.resultado).includes('SI HABILITADO')) homPorNit[nit].habilitados++;
+    const sucursal = normS(r.sucursal || '');
+    const skey = nit + '|' + sucursal;
+    const modalidad = modPorNitSucursal[skey];
+    if(!modalidad){ homSinModalidad++; return; }
+    homConModalidad++;
+    const k = nit + '|' + modalidad;
+    if(!homPorNitMod[k]) homPorNitMod[k] = { total:0, habilitados:0 };
+    homPorNitMod[k].total++;
+    if(normS(r.resultado).includes('SI HABILITADO')) homPorNitMod[k].habilitados++;
   });
+
+  console.log(`[IC] Homologación etiquetada por modalidad: ${homConModalidad} filas. Sin modalidad (no encontró match NIT+sucursal en contratos): ${homSinModalidad}`);
+
+  // Modalidades que efectivamente tienen datos en la base de homologación
+  const modsConDatos = [...new Set(Object.keys(homPorNitMod).map(k=>k.split('|')[1]))].sort();
+  console.log(`[IC] Modalidades con datos de homologación: ${modsConDatos.length}`, modsConDatos);
+
+  // Valores únicos de regionales y modalidades de prestadores
+  const regUnicas = [...new Set(Object.values(porNitMod).map(p=>p.regional))].sort();
+  const modUnicas = [...new Set(Object.values(porNitMod).map(p=>p.modalidad))].sort();
+  console.log(`[IC] Combinaciones (NIT, modalidad): ${Object.keys(porNitMod).length}`);
+  console.log(`[IC] Regionales únicas (${regUnicas.length}):`, regUnicas);
+  console.log(`[IC] Modalidades únicas (${modUnicas.length}):`, modUnicas);
+
+  // ── 3) Índices auxiliares para otros indicadores ───────────────
+  // PQRS por NIT — quejas del trimestre actual vs. anterior
+  const pqrsPorNitTrim = {};
+  const pqrs = window.PQRS_RED_DATA || [];
+  // Determinar trimestre actual y anterior con base en la fecha más reciente del dataset
+  let maxFecha = null;
+  pqrs.forEach(p=>{
+    const f = p.fechaAsig || p.fecha || p.fechaRecepcion || p.fechaCierre;
+    if(f instanceof Date && (!maxFecha || f > maxFecha)) maxFecha = f;
+  });
+  let trimActualInicio = null, trimAnteriorInicio = null, trimAnteriorFin = null;
+  if(maxFecha){
+    const y = maxFecha.getFullYear(), m = maxFecha.getMonth();
+    const trimIdx = Math.floor(m/3);  // 0..3
+    trimActualInicio = new Date(y, trimIdx*3, 1);
+    trimAnteriorInicio = trimIdx === 0 ? new Date(y-1, 9, 1) : new Date(y, (trimIdx-1)*3, 1);
+    trimAnteriorFin = trimActualInicio;
+  }
+  pqrs.forEach(p=>{
+    const nit = String(p.nit||'').replace(/\./g,'').trim();
+    if(!nit) return;
+    const f = p.fechaAsig || p.fecha || p.fechaRecepcion;
+    if(!(f instanceof Date)) return;
+    if(!pqrsPorNitTrim[nit]) pqrsPorNitTrim[nit] = { trimActual:0, trimAnterior:0 };
+    if(trimActualInicio && f >= trimActualInicio) pqrsPorNitTrim[nit].trimActual++;
+    else if(trimAnteriorInicio && f >= trimAnteriorInicio && f < trimAnteriorFin) pqrsPorNitTrim[nit].trimAnterior++;
+  });
+  console.log(`[IC] PQRS por NIT: ${Object.keys(pqrsPorNitTrim).length} prestadores con quejas. Trim. actual desde ${trimActualInicio?.toISOString()?.slice(0,10)}, anterior desde ${trimAnteriorInicio?.toISOString()?.slice(0,10)}`);
+
+  // Cuentas Médicas por NIT — subtotal radicado y glosa real
+  const cmPorNit = {};
+  const cm = DATOS_CARGADOS.cuentas_medicas || [];
+  cm.forEach(r=>{
+    const nit = String(r.nit||'').replace(/\./g,'').trim();
+    if(!nit) return;
+    if(!cmPorNit[nit]) cmPorNit[nit] = { subtotal:0, glosaReal:0, glosado:0, devoluciones:0 };
+    cmPorNit[nit].subtotal     += +r.subtotal     || 0;
+    cmPorNit[nit].glosaReal    += +r.glosa_real   || 0;
+    cmPorNit[nit].glosado      += +r.glosado      || 0;
+    cmPorNit[nit].devoluciones += +r.devoluciones || 0;
+  });
+  console.log(`[IC] CM por NIT: ${Object.keys(cmPorNit).length} prestadores con cuentas médicas`);
+
+  // Satisfacción por NIT — RESULTADO del indicador "Satisfacción Global"
+  const satisfaccionPorNit = {};
+  const sat = DATOS_CARGADOS.satisfaccion || [];
+  sat.forEach(r=>{
+    const nit = String(r.nit||'').replace(/\./g,'').trim();
+    if(!nit) return;
+    const indNombre = normS(r.nombre_indicador || r.indicador || r.nombre || '');
+    if(indNombre.includes('SATISFACCION GLOBAL') || indNombre.includes('SATISFACCION') && indNombre.includes('0256')){
+      const v = parseFloat(String(r.resultado || r.valor || '').replace(',','.'));
+      if(!isNaN(v)) satisfaccionPorNit[nit] = v;
+    }
+  });
+  console.log(`[IC] Satisfacción por NIT: ${Object.keys(satisfaccionPorNit).length} prestadores con resultado`);
+
+  // Índice global que se pasa a icCalcularIndicador
+  const idx = { homPorNitMod, pqrsPorNitTrim, cmPorNit, satisfaccionPorNit };
 
   // Diagnóstico de la matriz V3 cargada
   const conMod = IC_MATRIZ.filter(i => Object.keys(i.modalidades||{}).length > 0).length;
@@ -14415,8 +14491,8 @@ function icCalcularFilas(){
 
   const filas = [];
 
-  // Por cada prestador, por cada indicador aplicable, calcular
-  Object.values(porNit).forEach(p=>{
+  // Por cada (prestador, modalidad), por cada indicador aplicable, calcular
+  Object.values(porNitMod).forEach(p=>{
     IC_MATRIZ.forEach(ind=>{
       // ¿Aplica este indicador a la modalidad del prestador?
       // Si modalidades tiene entries, verificar match; si no tiene, aplica a todos.
@@ -14431,8 +14507,8 @@ function icCalcularFilas(){
       // Sanción específica para esta modalidad (si está marcada)
       const sancionMod = (modKey && mods[modKey]) || ind.sancion || null;
 
-      // Calcular numerador/denominador según el indicador
-      const calc = icCalcularIndicador(ind, p, homPorNit[p.nit]);
+      // Pasar al cálculo la modalidad y los índices auxiliares completos
+      const calc = icCalcularIndicador(ind, p, idx);
 
       filas.push({
         nit: p.nit,
@@ -14462,23 +14538,81 @@ function icCalcularFilas(){
 }
 
 // Cálculo específico por indicador — switch por nombre
-function icCalcularIndicador(ind, prestador, homData){
+// Recibe el indicador, el prestador (con su modalidad) y todos los índices auxiliares
+function icCalcularIndicador(ind, prestador, idx){
   const nombre = String(ind.indicador||'').toLowerCase();
+  const sinDato = () => ({ num:null, den:null, resultado:null, cumple:null, sinDato:true });
+
+  const evaluarCumple = (resultado, meta, tendencia) => {
+    if(resultado===null || meta===null) return null;
+    return tendencia === 'Positiva' ? resultado >= meta : resultado <= meta;
+  };
+  const parseMeta = m => {
+    if(m===null || m===undefined) return null;
+    const s = String(m).toLowerCase();
+    const num = parseFloat(String(m).replace(/[^0-9.,]/g,'').replace(',','.'));
+    if(isNaN(num)) return null;
+    // Si parece porcentaje (texto contiene 'porcentaje' o '%') y valor <=1 → multiplicar por 100
+    return num;
+  };
 
   // ── Habilitación de servicios contratados ──────────────────────
   if(nombre.includes('habilitación') && nombre.includes('servicios contratados')){
-    if(!homData) return { num:null, den:null, resultado:null, cumple:null, sinDato:true };
+    const homData = idx.homPorNitMod[prestador.nit + '|' + prestador.modalidad];
+    if(!homData) return sinDato();
     const num = homData.habilitados;
     const den = homData.total;
-    if(!den) return { num:0, den:0, resultado:null, cumple:null, sinDato:true };
+    if(!den) return sinDato();
     const resultado = +((num/den)*100).toFixed(1);
     const meta = parseFloat(ind.meta) <= 1 ? (parseFloat(ind.meta)*100) : parseFloat(ind.meta);
-    const cumple = ind.tendencia === 'Positiva' ? resultado >= meta : resultado <= meta;
+    const cumple = evaluarCumple(resultado, meta, ind.tendencia);
     return { num, den, resultado, cumple, sinDato:false };
   }
 
+  // ── % disminución PQR del prestador (trimestral) ────────────────
+  // Compara quejas del trimestre actual vs. trimestre anterior
+  if(nombre.includes('disminución') && nombre.includes('pqr')){
+    const pqr = idx.pqrsPorNitTrim[prestador.nit];
+    if(!pqr) return sinDato();
+    const actual   = pqr.trimActual   || 0;
+    const anterior = pqr.trimAnterior || 0;
+    if(!anterior) return sinDato();           // no hay base para comparar
+    const den = anterior;
+    const num = anterior - actual;
+    const resultado = +((num/den)*100).toFixed(1);  // % reducción (puede ser negativo si aumentó)
+    // Meta: "Reducción >10%" → cumple si resultado >= 10
+    const cumple = resultado >= 10;
+    return { num, den, resultado, cumple, sinDato:false };
+  }
+
+  // ── % valor glosado frente al valor radicado ────────────────────
+  if(nombre.includes('valor glosado') && nombre.includes('valor radicado')){
+    const cm = idx.cmPorNit[prestador.nit];
+    if(!cm || !cm.subtotal) return sinDato();
+    const num = cm.glosaReal;
+    const den = cm.subtotal;
+    const resultado = +((num/den)*100).toFixed(2);
+    // Meta: "Menor 15%" - tendencia negativa
+    const cumple = resultado < 15;
+    return { num: Math.round(num), den: Math.round(den), resultado, cumple, sinDato:false };
+  }
+
+  // ── Satisfacción Global (Resolución 0256 de 2016) ───────────────
+  if(nombre.includes('satisfacción global') || (nombre.includes('satisfacción') && nombre.includes('0256'))){
+    const sat = idx.satisfaccionPorNit[prestador.nit];
+    if(!sat) return sinDato();
+    // El sheet de SIGIRES ya trae el RESULTADO calculado en porcentaje (0-1 o 0-100)
+    let resultado = sat;
+    if(resultado <= 1) resultado = +(resultado*100).toFixed(1);
+    else resultado = +resultado.toFixed(1);
+    // Meta: 0.85 → 85%
+    const meta = 85;
+    const cumple = resultado >= meta;
+    return { num:null, den:null, resultado, cumple, sinDato:false };
+  }
+
   // ── Otros indicadores: pendientes de mapear su fuente ──────────
-  return { num:null, den:null, resultado:null, cumple:null, sinDato:true };
+  return sinDato();
 }
 
 function icPoblarFiltros(){
