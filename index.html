@@ -14287,7 +14287,7 @@ window.renderExtramural = function(){
 // Espera: ?accion=matriz → JSON [{indicador, atributo, clasificacion, numerador,
 //   denominador, formula, unidad, meta, frecuencia, fuente_num, fuente_den,
 //   responsable, tendencia, sancion, modalidades:{nombre: %sancion}}]
-const IC_MATRIZ_SCRIPT = 'https://script.google.com/macros/s/AKfycbwGFfc5ea5233EFRG24Pdfc3SNOnwJj2pYArU2NXR25NEQvlTnd2NKgdXvPwJDZ5_9k/exec'; // ← Pega aquí la URL del Apps Script de la matriz V3
+const IC_MATRIZ_SCRIPT = 'https://script.google.com/macros/s/AKfycbwLEeTpt-ldKbR3me8D2z58fL-07ZWyCA6hDf4j4QKBqT6OaYmaw7bt8UOjcR5D7mk6/exec'; // ← Pega aquí la URL del Apps Script de la matriz V3
 
 let IC_MATRIZ = [];           // Indicadores definidos en la matriz V3
 let IC_FILAS  = [];           // Resultado del cálculo (1 fila = 1 prestador × 1 indicador)
@@ -14296,6 +14296,17 @@ let IC_LOADED = false;
 window.cargarIndicadoresContractuales = async function(force=false){
   const status = document.getElementById('ic-status');
   if(IC_LOADED && !force){ icRender(); return; }
+
+  // 0) Asegurar que las fuentes auxiliares estén cargadas (PQRS, CM)
+  if(status) status.textContent = '⏳ Cargando fuentes auxiliares (PQRS, CM)...';
+  const preloads = [];
+  if(!window.PQRS_RED_DATA?.length && typeof window.cargarPqrsRed === 'function'){
+    preloads.push(window.cargarPqrsRed().catch(e=>console.warn('[IC] PQRS no cargó:', e.message)));
+  }
+  if(!DATOS_CARGADOS.cuentas_medicas?.length && typeof window.cargarCMSiVacio === 'function'){
+    preloads.push(window.cargarCMSiVacio().catch(e=>console.warn('[IC] CM no cargó:', e.message)));
+  }
+  if(preloads.length) await Promise.all(preloads);
 
   // 1) Cargar matriz V3 si hay URL
   if(IC_MATRIZ_SCRIPT){
@@ -14310,27 +14321,64 @@ window.cargarIndicadoresContractuales = async function(force=false){
     }
   }
 
-  // 2) Si la matriz no se cargó, usamos solo el indicador de Habilitación
-  //    con la definición fija que ya conocemos del consolidado V3
+  // 2) Si la matriz V3 no se cargó del Apps Script, usar los indicadores que ya tenemos conectados
+  //    con su definición tal cual está en el consolidado V3
   if(!IC_MATRIZ.length){
-    IC_MATRIZ = [{
-      n: 13,
-      indicador: 'Habilitación de servicios contratados',
-      clasificacion: 'Habilitación',
-      atributo: 'Habilitación',
-      responsable: 'Coordinador o Gestor Red Regionales',
-      tendencia: 'Positiva',
-      fuente_num: 'Consolidado Nacional de Anexos Tarifarios',
-      fuente_den: 'Consolidado Nacional de Anexos Tarifarios',
-      numerador: 'Número total de servicios contratados con habilitación vigente',
-      denominador: 'Número total de servicios contratados del prestador',
-      formula: 'Servicios con habilitación vigente / Total servicios contratados × 100',
-      unidad: '%',
-      meta: 100,
-      frecuencia: 'Trimestral',
-      sancion: null,
-      modalidades: {}
-    }];
+    console.log('[IC] Matriz V3 no configurada (IC_MATRIZ_SCRIPT vacío). Usando los 4 indicadores conectados.');
+    IC_MATRIZ = [
+      {
+        n: 13,
+        indicador: 'Habilitación de servicios contratados',
+        clasificacion: 'Habilitación', atributo: 'Habilitación',
+        responsable: 'Coordinador o Gestor Red Regionales',
+        tendencia: 'Positiva',
+        fuente_num: 'Consolidado Nacional de Anexos Tarifarios',
+        fuente_den: 'Consolidado Nacional de Anexos Tarifarios',
+        numerador: 'Número total de servicios contratados con habilitación vigente',
+        denominador: 'Número total de servicios contratados del prestador',
+        formula: 'Servicios con habilitación vigente / Total servicios contratados × 100',
+        unidad: '%', meta: 100, frecuencia: 'Trimestral', sancion: null, modalidades: {}
+      },
+      {
+        indicador: 'Porcentaje de disminución PQR del prestador',
+        clasificacion: 'Calidad en la atención', atributo: 'Quejas',
+        responsable: 'Coordinador Red Regional',
+        tendencia: 'Positiva',
+        fuente_num: 'Base oficial PQRS EPS Sanitas',
+        fuente_den: 'Base oficial PQRS EPS Sanitas',
+        numerador: 'Diferencia entre quejas del trimestre anterior y el actual',
+        denominador: 'Total de quejas del trimestre anterior',
+        formula: '(Quejas trim. anterior − Quejas trim. actual) / Quejas trim. anterior × 100',
+        unidad: '%', meta: 10, frecuencia: 'Trimestral',
+        sancion: 'Reducción ≥10%', modalidades: {}
+      },
+      {
+        indicador: 'Porcentaje del valor glosado frente al valor radicado',
+        clasificacion: 'Gestión', atributo: 'Gestión Facturación',
+        responsable: 'Coordinador Red Regional',
+        tendencia: 'Negativa',
+        fuente_num: 'Base de datos cuentas médicas',
+        fuente_den: 'Base de datos cuentas médicas',
+        numerador: 'Valor glosado real del periodo',
+        denominador: 'Valor radicado del periodo (subtotal)',
+        formula: 'Valor glosado / Valor radicado × 100',
+        unidad: '%', meta: 15, frecuencia: 'Mensual',
+        sancion: 'Menor 15%', modalidades: {}
+      },
+      {
+        indicador: 'Satisfacción Global (Resolución 0256 de 2016)',
+        clasificacion: 'Calidad en la atención', atributo: 'Satisfacción',
+        responsable: 'Coordinador Red Regional',
+        tendencia: 'Positiva',
+        fuente_num: 'Reporte del prestador en SIGIRES',
+        fuente_den: 'Reporte del prestador en SIGIRES',
+        numerador: 'Usuarios que respondieron "muy buena" o "buena"',
+        denominador: 'Total usuarios encuestados',
+        formula: 'Usuarios satisfechos / Total encuestados × 100',
+        unidad: '%', meta: 85, frecuencia: 'Mensual',
+        sancion: null, modalidades: {}
+      }
+    ];
   }
 
   // 3) Construir filas: por cada prestador con datos en homologación, calcular cada indicador
@@ -14354,53 +14402,42 @@ function icCalcularFilas(){
 
   const normS = s => String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 
+  // ── Modalidades que actualmente están cubiertas por cada fuente ──
+  // CUANDO LA BASE DE HOMOLOGACIÓN INCLUYA OTRAS MODALIDADES, AGRÉGALAS AQUÍ
+  const HOMOLOGACION_MODALIDADES_CUBIERTAS = ['EVENTO']; // hoy solo EVENTO está en la BD
+  const modalidadCubiertaHom = (modalidad) => {
+    const m = normS(modalidad);
+    return HOMOLOGACION_MODALIDADES_CUBIERTAS.some(cubierta => m.startsWith(normS(cubierta)));
+  };
+
   // ── 1) Index de prestadores por (NIT + modalidad) ────────────────
   // Un prestador puede tener varios contratos con modalidades distintas
-  const porNitMod = {};                       // { "nit|MODALIDAD": {nit, nombre, regional, modalidad} }
-  const modPorNitSucursal = {};               // { "nit|sucursal": MODALIDAD } - para cruzar con homologación
+  const porNitMod = {};
   prest.forEach(p=>{
     const nit = String(p.nit||'').replace(/\./g,'').trim();
     if(!nit) return;
     const modalidad = String(p.modelo || p.forma_contratacion || '').trim() || '(sin modalidad)';
-    const sucursal  = normS(p.nombre_sucursal || p.sucursal || '');
-
     const key = nit + '|' + modalidad;
     if(!porNitMod[key]) porNitMod[key] = {
       nit, modalidad,
       nombre: p.nombre || '',
       regional: p.regional || '',
     };
-    if(sucursal){
-      const skey = nit + '|' + sucursal;
-      if(!modPorNitSucursal[skey]) modPorNitSucursal[skey] = modalidad;
-    }
   });
 
-  // ── 2) Index de homologación por (NIT + modalidad) ───────────────
-  // Cada fila de homologación se etiqueta con su modalidad real cruzando
-  // por (NIT + sucursal) con la base de contratos. Si no hay match, queda
-  // sin modalidad y NO entra en ningún cálculo modal específico.
-  const homPorNitMod = {};                    // { "nit|MODALIDAD": {total, habilitados} }
-  let homConModalidad = 0, homSinModalidad = 0;
+  // ── 2) Index de homologación POR NIT (sin filtrar por sucursal) ──
+  // La modalidad de cada fila se asume EVENTO ya que es la única cubierta hoy.
+  // Cuando otras modalidades se agreguen a la BD, hay que ampliar la lista de arriba.
+  const homPorNit = {};
   hom.forEach(r=>{
     const nit = String(r.nit||'').replace(/\./g,'').trim();
     if(!nit) return;
-    const sucursal = normS(r.sucursal || '');
-    const skey = nit + '|' + sucursal;
-    const modalidad = modPorNitSucursal[skey];
-    if(!modalidad){ homSinModalidad++; return; }
-    homConModalidad++;
-    const k = nit + '|' + modalidad;
-    if(!homPorNitMod[k]) homPorNitMod[k] = { total:0, habilitados:0 };
-    homPorNitMod[k].total++;
-    if(normS(r.resultado).includes('SI HABILITADO')) homPorNitMod[k].habilitados++;
+    if(!homPorNit[nit]) homPorNit[nit] = { total:0, habilitados:0 };
+    homPorNit[nit].total++;
+    if(normS(r.resultado).includes('SI HABILITADO')) homPorNit[nit].habilitados++;
   });
-
-  console.log(`[IC] Homologación etiquetada por modalidad: ${homConModalidad} filas. Sin modalidad (no encontró match NIT+sucursal en contratos): ${homSinModalidad}`);
-
-  // Modalidades que efectivamente tienen datos en la base de homologación
-  const modsConDatos = [...new Set(Object.keys(homPorNitMod).map(k=>k.split('|')[1]))].sort();
-  console.log(`[IC] Modalidades con datos de homologación: ${modsConDatos.length}`, modsConDatos);
+  console.log(`[IC] Homologación por NIT: ${Object.keys(homPorNit).length} prestadores`);
+  console.log(`[IC] Modalidades cubiertas hoy por homologación:`, HOMOLOGACION_MODALIDADES_CUBIERTAS);
 
   // Valores únicos de regionales y modalidades de prestadores
   const regUnicas = [...new Set(Object.values(porNitMod).map(p=>p.regional))].sort();
@@ -14452,22 +14489,22 @@ function icCalcularFilas(){
   });
   console.log(`[IC] CM por NIT: ${Object.keys(cmPorNit).length} prestadores con cuentas médicas`);
 
-  // Satisfacción por NIT — RESULTADO del indicador "Satisfacción Global"
+  // Satisfacción por NIT — tomar el resultado por prestador
+  // El sheet SIGIRES ya trae el resultado pre-calculado en porcentaje
   const satisfaccionPorNit = {};
   const sat = DATOS_CARGADOS.satisfaccion || [];
   sat.forEach(r=>{
     const nit = String(r.nit||'').replace(/\./g,'').trim();
     if(!nit) return;
-    const indNombre = normS(r.nombre_indicador || r.indicador || r.nombre || '');
-    if(indNombre.includes('SATISFACCION GLOBAL') || indNombre.includes('SATISFACCION') && indNombre.includes('0256')){
-      const v = parseFloat(String(r.resultado || r.valor || '').replace(',','.'));
-      if(!isNaN(v)) satisfaccionPorNit[nit] = v;
-    }
+    const v = parseFloat(String(r.resultado).replace(',','.'));
+    if(isNaN(v)) return;
+    // Si hay varios registros por NIT, nos quedamos con el primero válido
+    if(!(nit in satisfaccionPorNit)) satisfaccionPorNit[nit] = v;
   });
   console.log(`[IC] Satisfacción por NIT: ${Object.keys(satisfaccionPorNit).length} prestadores con resultado`);
 
   // Índice global que se pasa a icCalcularIndicador
-  const idx = { homPorNitMod, pqrsPorNitTrim, cmPorNit, satisfaccionPorNit };
+  const idx = { homPorNit, modalidadCubiertaHom, pqrsPorNitTrim, cmPorNit, satisfaccionPorNit };
 
   // Diagnóstico de la matriz V3 cargada
   const conMod = IC_MATRIZ.filter(i => Object.keys(i.modalidades||{}).length > 0).length;
@@ -14558,7 +14595,9 @@ function icCalcularIndicador(ind, prestador, idx){
 
   // ── Habilitación de servicios contratados ──────────────────────
   if(nombre.includes('habilitación') && nombre.includes('servicios contratados')){
-    const homData = idx.homPorNitMod[prestador.nit + '|' + prestador.modalidad];
+    // Solo calcula si la modalidad del prestador está cubierta hoy por la BD de homologación
+    if(!idx.modalidadCubiertaHom(prestador.modalidad)) return sinDato();
+    const homData = idx.homPorNit[prestador.nit];
     if(!homData) return sinDato();
     const num = homData.habilitados;
     const den = homData.total;
