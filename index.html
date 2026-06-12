@@ -6495,7 +6495,7 @@ const DISP_SCRIPT = 'https://script.google.com/macros/s/AKfycbxOQ-8O4szM5tG2xXfr
 // ── Accesibilidad & Oportunidad (Cliente Incógnito) ── desplegar AcOp_Script.gs
 const ACOP_SCRIPT = 'https://script.google.com/macros/s/AKfycbxsvmG-i8sEiH9RGF9N9Eo_w2s88mKHBGKuCMVQxA0xi_Fh9CoUf__5D_X8nE-nt0mxig/exec';
 // ── Resolución 1552 ── desplegar Res1552_Script.gs
-const RES1552_SCRIPT = 'PENDIENTE_DEPLOY';
+const RES1552_SCRIPT = 'https://script.google.com/macros/s/AKfycbylc8smQaGdrPolJBu34JaE0jTbxqGQMN8pYFCJ-sHagSvj7WSxDhO7RVd-Clvh4KMl/exec';
 
 let DATOS_REQS   = [];
 let DATOS_FALLAS = [];
@@ -10233,10 +10233,68 @@ document.addEventListener('DOMContentLoaded', function(){
 
   <!-- ── TAB: RESOLUCIÓN 1552 ───────────────────────────────── -->
   <div id="op-panel-1552" style="display:none">
-    <div class="card"><div class="card-body" style="padding:30px;text-align:center;color:var(--text2)">
-      📋 La conexión de la Resolución 1552 se configura en una fase posterior.<br>
-      <span style="font-size:12px">Fuente disponible: Reporte_1552 (349K filas, 1185 prestadores con NIT).</span>
-    </div></div>
+    <!-- Filtros (8) -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+      <select id="r15-fil-anio" onchange="r15Recargar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:100px"><option value="">Año</option></select>
+      <select id="r15-fil-mes" onchange="r15Recargar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:120px"><option value="">Mes</option></select>
+      <select id="r15-fil-regional" onchange="r15Aplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:130px"><option value="">Regional</option></select>
+      <select id="r15-fil-depto" onchange="r15Aplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:140px"><option value="">Departamento</option></select>
+      <select id="r15-fil-municipio" onchange="r15Aplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:140px"><option value="">Municipio</option></select>
+      <select id="r15-fil-prestador" onchange="r15Aplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:180px"><option value="">NIT / Prestador</option></select>
+      <select id="r15-fil-espec" onchange="r15Aplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:160px"><option value="">Especialidad</option></select>
+      <select id="r15-fil-regimen" onchange="r15Aplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:120px"><option value="">Régimen</option></select>
+      <button onclick="r15Limpiar()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+      <span id="r15-count" style="font-size:11px;color:var(--text2)"></span>
+    </div>
+
+    <!-- KPIs 1552 -->
+    <div class="kpi-strip cols-4" style="margin-bottom:16px">
+      <div class="kpi" style="--kc:var(--blue)">
+        <div class="kpi-label">Prom. OP1 ponderado</div>
+        <div class="kpi-value" style="color:var(--blue)" id="r15-kpi-op1">—</div>
+        <div class="kpi-delta neu">Días promedio Oportunidad 1</div>
+      </div>
+      <div class="kpi" style="--kc:var(--purple)">
+        <div class="kpi-label">Prom. OP2 ponderado</div>
+        <div class="kpi-value" style="color:var(--purple)" id="r15-kpi-op2">—</div>
+        <div class="kpi-delta neu">Días promedio Oportunidad 2</div>
+      </div>
+      <div class="kpi" style="--kc:var(--green)">
+        <div class="kpi-label">% Cumple OP1</div>
+        <div class="kpi-value" style="color:var(--green)" id="r15-kpi-pct">—</div>
+        <div class="kpi-delta up">Prestadores con OP1 ≤ Meta</div>
+      </div>
+      <div class="kpi" style="--kc:var(--teal)">
+        <div class="kpi-label">Consultas evaluadas</div>
+        <div class="kpi-value" style="color:var(--teal)" id="r15-kpi-cons">—</div>
+        <div class="kpi-delta neu">Total consultas</div>
+      </div>
+    </div>
+
+    <!-- Tabla por prestador -->
+    <div class="card">
+      <div class="card-head"><div>
+        <div class="card-title">Oportunidad por prestador (Res. 1552)</div>
+        <div class="card-sub">OP1/OP2 promedio ponderado por consultas vs. meta</div>
+      </div></div>
+      <div style="overflow-x:auto;max-height:480px;overflow-y:auto">
+        <table class="table" id="r15-tabla">
+          <thead><tr>
+            <th>NIT</th>
+            <th>Prestador</th>
+            <th>Regional</th>
+            <th>Especialidad</th>
+            <th style="text-align:center">OP1</th>
+            <th style="text-align:center">OP2</th>
+            <th style="text-align:center">Meta</th>
+            <th style="text-align:center">Consultas</th>
+            <th style="text-align:center">Cumple</th>
+          </tr></thead>
+          <tbody><tr><td colspan="9" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="r15-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
   </div>
 </div>
 
@@ -10362,6 +10420,7 @@ window.switchOpTab = function(tab){
     ci.style.display='none'; r1552.style.display='';
     t15.style.color='var(--blue)'; t15.style.borderBottomColor='var(--blue)';
     tCi.style.color='var(--text2)'; tCi.style.borderBottomColor='transparent';
+    if(!R15_LOADED) cargar1552();
   }
 };
 
@@ -10577,6 +10636,152 @@ function renderGestion(f){
         <td style="text-align:center">${total>0?((n/total)*100).toFixed(1):'0'}%</td>
       </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text2);padding:20px">Sin datos</td></tr>';
   }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RESOLUCIÓN 1552 — Oportunidad por prestador
+// ══════════════════════════════════════════════════════════════════
+let R15_GRUPOS = null;
+let R15_LOADED = false;
+let R15_ANIOS  = [];
+let R15_MESES  = [];
+
+async function cargar1552(){
+  if(!RES1552_SCRIPT || RES1552_SCRIPT==='PENDIENTE_DEPLOY'){
+    setText('r15-status','⚠ Apps Script 1552 no configurado');
+    return;
+  }
+  const anio = document.getElementById('r15-fil-anio')?.value||'';
+  const mes  = document.getElementById('r15-fil-mes')?.value||'';
+  setText('r15-status','⏳ Cargando datos 1552...');
+  try{
+    const url = RES1552_SCRIPT + '?anio='+encodeURIComponent(anio)+'&mes='+encodeURIComponent(mes);
+    const d = await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
+    if(!d.ok) throw new Error(d.error||'Respuesta inválida');
+    R15_GRUPOS = d.grupos||[];
+    R15_LOADED = true;
+    console.log('[1552] Grupos:', R15_GRUPOS.length, '· años:', d.anios?.length, '· filtro:', anio||'(todos)', mes||'');
+    // Poblar año/mes solo la primera vez
+    if(R15_ANIOS.length===0 && d.anios){ R15_ANIOS=d.anios; R15_MESES=d.meses||[]; poblarAnioMes1552(); }
+    poblarFiltros1552();
+    r15Aplicar();
+  } catch(e){
+    console.error('[1552] Error:', e);
+    setText('r15-status','⚠ Error al cargar: '+e.message);
+  }
+}
+
+// Cuando cambia año o mes, hay que recargar del servidor (filtro en servidor)
+window.r15Recargar = function(){ R15_LOADED=false; cargar1552(); };
+
+function poblarAnioMes1552(){
+  const MESES_ORDEN = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const selA = document.getElementById('r15-fil-anio');
+  if(selA) selA.innerHTML = '<option value="">Año</option>'+R15_ANIOS.sort().map(a=>`<option value="${a}">${a}</option>`).join('');
+  const selM = document.getElementById('r15-fil-mes');
+  const mesesOrd = MESES_ORDEN.filter(m=>R15_MESES.includes(m));
+  if(selM) selM.innerHTML = '<option value="">Mes</option>'+mesesOrd.map(m=>`<option value="${m}">${m.charAt(0)+m.slice(1).toLowerCase()}</option>`).join('');
+}
+
+function poblarFiltros1552(){
+  if(!R15_GRUPOS) return;
+  const uniq = key => [...new Set(R15_GRUPOS.map(r=>String(r[key]||'').trim()).filter(Boolean))].sort();
+  const fill = (id,items,label) => {
+    const el=document.getElementById(id); if(!el) return;
+    const val = el.value;
+    el.innerHTML = `<option value="">${label}</option>`+items.map(v=>`<option value="${v}">${v}</option>`).join('');
+    if(items.includes(val)) el.value = val; // preservar selección
+  };
+  fill('r15-fil-regional', uniq('regional'), 'Regional');
+  fill('r15-fil-depto', uniq('departamento'), 'Departamento');
+  fill('r15-fil-municipio', uniq('municipio'), 'Municipio');
+  fill('r15-fil-espec', uniq('especialidad'), 'Especialidad');
+  fill('r15-fil-regimen', uniq('regimen'), 'Régimen');
+  // Prestador: nit + nombre
+  const pMap={}; R15_GRUPOS.forEach(r=>{const n=String(r.nit||'').trim(); if(n&&!pMap[n])pMap[n]=r.prestador||n;});
+  const sel=document.getElementById('r15-fil-prestador');
+  if(sel){ const val=sel.value;
+    sel.innerHTML='<option value="">NIT / Prestador</option>'+Object.entries(pMap).sort((a,b)=>a[1].localeCompare(b[1])).map(([n,nm])=>`<option value="${n}">${n} · ${nm.slice(0,32)}</option>`).join('');
+    if(pMap[val]) sel.value=val;
+  }
+}
+
+let _r15TO=null;
+window.r15Aplicar = function(){ if(_r15TO)clearTimeout(_r15TO); _r15TO=setTimeout(_r15Run,60); };
+window.r15Limpiar = function(){
+  ['r15-fil-regional','r15-fil-depto','r15-fil-municipio','r15-fil-prestador','r15-fil-espec','r15-fil-regimen'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  _r15Run();
+};
+
+function _r15Run(){
+  if(!R15_GRUPOS) return;
+  const f = {
+    regional:  document.getElementById('r15-fil-regional')?.value||'',
+    depto:     document.getElementById('r15-fil-depto')?.value||'',
+    municipio: document.getElementById('r15-fil-municipio')?.value||'',
+    nit:       document.getElementById('r15-fil-prestador')?.value||'',
+    espec:     document.getElementById('r15-fil-espec')?.value||'',
+    regimen:   document.getElementById('r15-fil-regimen')?.value||'',
+  };
+  const filas = R15_GRUPOS.filter(r=>{
+    if(f.regional && String(r.regional).trim()!==f.regional) return false;
+    if(f.depto && String(r.departamento).trim()!==f.depto) return false;
+    if(f.municipio && String(r.municipio).trim()!==f.municipio) return false;
+    if(f.nit && String(r.nit).trim()!==f.nit) return false;
+    if(f.espec && String(r.especialidad).trim()!==f.espec) return false;
+    if(f.regimen && String(r.regimen).trim()!==f.regimen) return false;
+    return true;
+  });
+
+  // Agrupar por prestador (NIT) — promedio ponderado de OP1/OP2
+  const porNit = {};
+  let op1wG=0, op2wG=0, nG=0, consG=0, cumplen=0, totalPrest=0;
+  filas.forEach(r=>{
+    const nit=String(r.nit||'').trim(); if(!nit) return;
+    if(!porNit[nit]) porNit[nit]={nit,prestador:r.prestador||nit,regional:r.regional||'',especialidad:r.especialidad||'',op1w:0,op2w:0,n:0,cons:0,meta:0};
+    const p=porNit[nit];
+    p.op1w += (+r.op1_sum_w||0);
+    p.op2w += (+r.op2_sum_w||0);
+    p.n    += (+r.op1_n||0);
+    p.cons += (+r.consultas||0);
+    if((+r.meta_max||0) > p.meta) p.meta = (+r.meta_max||0);
+    op1wG += (+r.op1_sum_w||0); op2wG += (+r.op2_sum_w||0); nG += (+r.op1_n||0); consG += (+r.consultas||0);
+  });
+  const arr = Object.values(porNit).map(p=>({
+    ...p,
+    op1: p.n>0 ? p.op1w/p.n : null,
+    op2: p.n>0 ? p.op2w/p.n : null,
+  })).filter(p=>p.op1!==null);
+
+  arr.forEach(p=>{ totalPrest++; if(p.meta>0 && p.op1<=p.meta) cumplen++; });
+  arr.sort((a,b)=>b.op1-a.op1);
+
+  setText('r15-kpi-op1', nG>0 ? (op1wG/nG).toFixed(1)+' días' : '—');
+  setText('r15-kpi-op2', nG>0 ? (op2wG/nG).toFixed(1)+' días' : '—');
+  setText('r15-kpi-pct', totalPrest>0 ? ((cumplen/totalPrest)*100).toFixed(1)+' %' : '—');
+  setText('r15-kpi-cons', fmtN(consG));
+  setText('r15-count', `${arr.length} prestadores`);
+
+  const tbody=document.querySelector('#r15-tabla tbody');
+  if(tbody){
+    tbody.innerHTML = arr.slice(0,500).map(p=>{
+      const cumple = p.meta>0 && p.op1<=p.meta;
+      const c = cumple?'var(--green)':'var(--red)';
+      const ic = cumple?'🟢':'🔴';
+      return `<tr>
+        <td>${p.nit}</td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(p.prestador||'').replace(/"/g,'')}">${p.prestador||'—'}</td>
+        <td>${p.regional||'—'}</td>
+        <td style="font-size:11px">${p.especialidad||'—'}</td>
+        <td style="text-align:center;font-weight:600;color:${c}">${p.op1.toFixed(1)}</td>
+        <td style="text-align:center">${p.op2!==null?p.op2.toFixed(1):'—'}</td>
+        <td style="text-align:center">${p.meta>0?p.meta:'—'}</td>
+        <td style="text-align:center">${fmtN(p.cons)}</td>
+        <td style="text-align:center;font-size:14px">${ic}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:20px">Sin datos para estos filtros</td></tr>';
+  }
+  setText('r15-status','Cumplimiento: OP1 ≤ Meta 🟢 · OP1 > Meta 🔴');
 }
 
 // ── Navigate trigger ─────────────────────────────────────────────
