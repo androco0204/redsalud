@@ -6493,7 +6493,7 @@ const RIESGOS_RED_SCRIPT = 'https://script.google.com/macros/s/AKfycby9_VbVsvRp9
 // ── Dispensación Gestores Farmacéuticos ── desplegar DispensacionScript.gs y reemplazar
 const DISP_SCRIPT = 'https://script.google.com/macros/s/AKfycbxOQ-8O4szM5tG2xXfr4LMuwXMtGbW1w_vDtm0xg-tXIiR8vCAQS9O10VA3EnmzFtynRw/exec';
 // ── Accesibilidad & Oportunidad (Cliente Incógnito) ── desplegar AcOp_Script.gs
-const ACOP_SCRIPT = 'PENDIENTE_DEPLOY';
+const ACOP_SCRIPT = 'https://script.google.com/macros/s/AKfycbxsvmG-i8sEiH9RGF9N9Eo_w2s88mKHBGKuCMVQxA0xi_Fh9CoUf__5D_X8nE-nt0mxig/exec';
 // ── Resolución 1552 ── desplegar Res1552_Script.gs
 const RES1552_SCRIPT = 'PENDIENTE_DEPLOY';
 
@@ -10168,7 +10168,7 @@ document.addEventListener('DOMContentLoaded', function(){
   <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
     <button id="op-tab-ci" onclick="switchOpTab('ci')"
       style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-2px;transition:all .2s">
-      👤 Cliente Incógnito
+      👤 Cliente Incógnito / Bukeala
     </button>
     <button id="op-tab-1552" onclick="switchOpTab('1552')"
       style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s">
@@ -10176,166 +10176,67 @@ document.addEventListener('DOMContentLoaded', function(){
     </button>
   </div>
 
-  <!-- ── TAB: CLIENTE INCÓGNITO ──────────────────────────────── -->
+  <!-- ── TAB: CLIENTE INCÓGNITO (Oportunidad) ──────────────────────── -->
   <div id="op-panel-ci">
     <!-- Filtros -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
-      <select id="op-ci-fil-regional" onchange="aplicarFiltrosOpCI()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
-        <option value="">Todas las regionales</option>
-      </select>
-      <select id="op-ci-fil-espec" onchange="aplicarFiltrosOpCI()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:180px">
-        <option value="">Todas las especialidades</option>
-      </select>
-      <select id="op-ci-fil-mes" onchange="aplicarFiltrosOpCI()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
-        <option value="">Todos los meses</option>
-      </select>
-      <button onclick="resetFiltrosOpCI()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+      <select id="op-fil-empresa" onchange="opAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:170px"><option value="">Empresa afiliación</option></select>
+      <select id="op-fil-regional" onchange="opAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:140px"><option value="">Regional</option></select>
+      <select id="op-fil-ciudad" onchange="opAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:150px"><option value="">Ciudad</option></select>
+      <select id="op-fil-prestador" onchange="opAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:200px"><option value="">Cód. prestador BH</option></select>
+      <select id="op-fil-espec" onchange="opAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:170px"><option value="">Especialidad</option></select>
+      <button onclick="opLimpiar()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+      <span id="op-count" style="font-size:11px;color:var(--text2)"></span>
     </div>
 
-    <!-- KPIs CI -->
+    <!-- KPIs Oportunidad -->
     <div class="kpi-strip cols-3" style="margin-bottom:16px">
       <div class="kpi" style="--kc:var(--blue)">
         <div class="kpi-label">Oportunidad promedio</div>
-        <div class="kpi-value" style="color:var(--blue)" id="op-ci-kpi-prom">—</div>
-        <div class="kpi-delta neu">Días promedio (meta: ≤ 15 días)</div>
+        <div class="kpi-value" style="color:var(--blue)" id="op-kpi-prom">—</div>
+        <div class="kpi-delta neu">Días promedio (meta ≤ 5 días)</div>
       </div>
       <div class="kpi" style="--kc:var(--teal)">
-        <div class="kpi-label">Registros evaluados</div>
-        <div class="kpi-value" style="color:var(--teal)" id="op-ci-kpi-n">—</div>
-        <div class="kpi-delta neu">Total con fecha disponibilidad</div>
+        <div class="kpi-label">Prestadores evaluados</div>
+        <div class="kpi-value" style="color:var(--teal)" id="op-kpi-prest">—</div>
+        <div class="kpi-delta neu">Con mediciones de oportunidad</div>
       </div>
-
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <!-- Por regional -->
-      <div class="card">
-        <div class="card-head"><div>
-          <div class="card-title">Oportunidad por Regional</div>
-          <div class="card-sub">Días promedio de espera</div>
-        </div></div>
-        <div id="op-ci-chart-regional" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:320px;overflow-y:auto"></div>
-      </div>
-      <!-- Tendencia mensual -->
-      <div class="card">
-        <div class="card-head"><div>
-          <div class="card-title">Tendencia mensual</div>
-          <div class="card-sub">Días promedio por mes</div>
-        </div></div>
-        <div id="op-ci-chart-mes" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:320px;overflow-y:auto"></div>
+      <div class="kpi" style="--kc:var(--green)">
+        <div class="kpi-label">Mediciones</div>
+        <div class="kpi-value" style="color:var(--green)" id="op-kpi-n">—</div>
+        <div class="kpi-delta neu">Registros evaluados</div>
       </div>
     </div>
 
-    <!-- Top especialidades -->
+    <!-- Tabla por prestador -->
     <div class="card">
       <div class="card-head"><div>
-        <div class="card-title">Oportunidad por Especialidad</div>
-        <div class="card-sub">Días promedio vs. meta 15 días · Top 20</div>
+        <div class="card-title">Oportunidad por prestador</div>
+        <div class="card-sub">Días promedio de oportunidad · agrupado por código BH</div>
       </div></div>
-      <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
-        <table class="table" id="op-ci-tabla-espec">
+      <div style="overflow-x:auto;max-height:480px;overflow-y:auto">
+        <table class="table" id="op-tabla">
           <thead><tr>
-            <th>Especialidad</th>
+            <th>Cód. prestador BH</th>
+            <th>Prestador</th>
+            <th>Regional</th>
             <th style="text-align:center">Días prom.</th>
-            <th style="text-align:center">Registros</th>
+            <th style="text-align:center">Mediciones</th>
             <th style="text-align:center">Semáforo</th>
           </tr></thead>
-          <tbody><tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+          <tbody><tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
-    <div id="op-ci-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
+    <div id="op-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
   </div>
 
   <!-- ── TAB: RESOLUCIÓN 1552 ───────────────────────────────── -->
   <div id="op-panel-1552" style="display:none">
-    <!-- Filtros -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
-      <select id="op-1552-fil-regional" onchange="aplicarFiltros1552()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
-        <option value="">Todas las regionales</option>
-      </select>
-      <select id="op-1552-fil-espec" onchange="aplicarFiltros1552()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:200px">
-        <option value="">Todas las especialidades</option>
-      </select>
-      <select id="op-1552-fil-mes" onchange="aplicarFiltros1552()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
-        <option value="">Todos los períodos</option>
-      </select>
-      <button onclick="resetFiltros1552()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
-    </div>
-
-    <!-- KPIs 1552 -->
-    <div class="kpi-strip cols-4" style="margin-bottom:16px">
-      <div class="kpi" style="--kc:var(--blue)">
-        <div class="kpi-label">Prom. OP1 global</div>
-        <div class="kpi-value" style="color:var(--blue)" id="op-1552-kpi-op1">—</div>
-        <div class="kpi-delta neu">Días promedio Oportunidad 1</div>
-      </div>
-      <div class="kpi" style="--kc:var(--purple)">
-        <div class="kpi-label">Prom. OP2 global</div>
-        <div class="kpi-value" style="color:var(--purple)" id="op-1552-kpi-op2">—</div>
-        <div class="kpi-delta neu">Días promedio Oportunidad 2</div>
-      </div>
-      <div class="kpi" style="--kc:var(--green)">
-        <div class="kpi-label">% Cumple OP1</div>
-        <div class="kpi-value" style="color:var(--green)" id="op-1552-kpi-pct">—</div>
-        <div class="kpi-delta up">Tiempo promedio ≤ Meta</div>
-      </div>
-      <div class="kpi" style="--kc:var(--red)">
-        <div class="kpi-label">No cumplen OP1</div>
-        <div class="kpi-value" style="color:var(--red)" id="op-1552-kpi-no">—</div>
-        <div class="kpi-delta dn">Consultas fuera de meta</div>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <!-- Por regional -->
-      <div class="card">
-        <div class="card-head"><div>
-          <div class="card-title">OP1 por Regional</div>
-          <div class="card-sub">Días promedio y % cumplimiento</div>
-        </div></div>
-        <div style="overflow-x:auto">
-          <table class="table" id="op-1552-tabla-regional">
-            <thead><tr>
-              <th>Regional</th>
-              <th style="text-align:center">Prom OP1</th>
-              <th style="text-align:center">Consultas</th>
-              <th style="text-align:center">% Cumple</th>
-            </tr></thead>
-            <tbody><tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-      <!-- Tendencia mensual -->
-      <div class="card">
-        <div class="card-head"><div>
-          <div class="card-title">Tendencia OP1 mensual</div>
-          <div class="card-sub">Días promedio por mes</div>
-        </div></div>
-        <div id="op-1552-chart-mes" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:280px;overflow-y:auto"></div>
-      </div>
-    </div>
-
-    <!-- Top especialidades 1552 -->
-    <div class="card">
-      <div class="card-head"><div>
-        <div class="card-title">OP1 por Especialidad (Res. 1552)</div>
-        <div class="card-sub">Tiempo promedio vs meta · % cumplimiento</div>
-      </div></div>
-      <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
-        <table class="table" id="op-1552-tabla-espec">
-          <thead><tr>
-            <th>Especialidad</th>
-            <th style="text-align:center">Prom OP1</th>
-            <th style="text-align:center">Meta</th>
-            <th style="text-align:center">Consultas</th>
-            <th style="text-align:center">% Cumple</th>
-          </tr></thead>
-          <tbody><tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-    <div id="op-1552-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
+    <div class="card"><div class="card-body" style="padding:30px;text-align:center;color:var(--text2)">
+      📋 La conexión de la Resolución 1552 se configura en una fase posterior.<br>
+      <span style="font-size:12px">Fuente disponible: Reporte_1552 (349K filas, 1185 prestadores con NIT).</span>
+    </div></div>
   </div>
 </div>
 
@@ -10344,22 +10245,14 @@ document.addEventListener('DOMContentLoaded', function(){
 ════════════════════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-red-accesibilidad">
   <!-- Filtros -->
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
-    <select id="acc-fil-regional" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
-      <option value="">Todas las regionales</option>
-    </select>
-    <select id="acc-fil-espec" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;min-width:180px">
-      <option value="">Todas las especialidades</option>
-    </select>
-    <div id="acc-año-wrap" style="display:none">
-      <select id="acc-fil-año" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
-        <option value="">Todos los años</option>
-      </select>
-    </div>
-    <select id="acc-fil-mes" onchange="aplicarFiltrosAcc()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
-      <option value="">Todos los meses</option>
-    </select>
-    <button onclick="resetFiltrosAcc()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <select id="acc-fil-empresa" onchange="accAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:170px"><option value="">Empresa afiliación</option></select>
+    <select id="acc-fil-regional" onchange="accAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:140px"><option value="">Regional</option></select>
+    <select id="acc-fil-ciudad" onchange="accAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:150px"><option value="">Ciudad</option></select>
+    <select id="acc-fil-prestador" onchange="accAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:200px"><option value="">Cód. prestador BH</option></select>
+    <select id="acc-fil-espec" onchange="accAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:170px"><option value="">Especialidad</option></select>
+    <button onclick="accLimpiar()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+    <span id="acc-count" style="font-size:11px;color:var(--text2)"></span>
   </div>
 
   <!-- KPIs Accesibilidad -->
@@ -10367,62 +10260,62 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="kpi" style="--kc:var(--green)">
       <div class="kpi-label">Accesibilidad global</div>
       <div class="kpi-value" style="color:var(--green)" id="acc-kpi-global">—</div>
-      <div class="kpi-delta up">Llamadas con contacto efectivo / Total</div>
+      <div class="kpi-delta up">Σ Disponibilidad / Σ Intentos</div>
     </div>
     <div class="kpi" style="--kc:var(--blue)">
-      <div class="kpi-label">Contactos efectivos</div>
+      <div class="kpi-label">Disponibilidad lograda</div>
       <div class="kpi-value" style="color:var(--blue)" id="acc-kpi-num">—</div>
-      <div class="kpi-delta neu">Numerador</div>
+      <div class="kpi-delta neu">Σ Conteo Disp</div>
     </div>
     <div class="kpi" style="--kc:var(--teal)">
-      <div class="kpi-label">Total llamadas</div>
+      <div class="kpi-label">Total intentos</div>
       <div class="kpi-value" style="color:var(--teal)" id="acc-kpi-den">—</div>
-      <div class="kpi-delta neu">Denominador</div>
+      <div class="kpi-delta neu">Σ Conteo Intentos</div>
     </div>
   </div>
 
-
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-    <!-- Por regional -->
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Tabla por prestador -->
     <div class="card">
       <div class="card-head"><div>
-        <div class="card-title">Accesibilidad por Regional</div>
-        <div class="card-sub">% accesibilidad · meta ≥ 80%</div>
+        <div class="card-title">Accesibilidad por prestador</div>
+        <div class="card-sub">Σ Disp / Σ Intentos · agrupado por código BH</div>
       </div></div>
-      <div id="acc-chart-regional" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:280px;overflow-y:auto"></div>
+      <div style="overflow-x:auto;max-height:440px;overflow-y:auto">
+        <table class="table" id="acc-tabla">
+          <thead><tr>
+            <th>Cód. prestador BH</th>
+            <th>Prestador</th>
+            <th style="text-align:center">% Acc.</th>
+            <th style="text-align:center">Disp</th>
+            <th style="text-align:center">Intentos</th>
+            <th style="text-align:center">Sem.</th>
+          </tr></thead>
+          <tbody><tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+        </table>
+      </div>
     </div>
-    <!-- Tendencia mensual -->
+    <!-- Tipificación por GESTION -->
     <div class="card">
       <div class="card-head"><div>
-        <div class="card-title">Tendencia mensual</div>
-        <div class="card-sub">% Accesibilidad por mes</div>
+        <div class="card-title">Tipificación por gestión</div>
+        <div class="card-sub">Distribución de intentos por resultado de la llamada</div>
       </div></div>
-      <div id="acc-chart-mes" style="display:flex;flex-direction:column;gap:6px;padding:8px 0;max-height:280px;overflow-y:auto"></div>
-    </div>
-  </div>
-
-  <!-- Top especialidades accesibilidad -->
-  <div class="card">
-    <div class="card-head"><div>
-      <div class="card-title">Accesibilidad por Especialidad</div>
-      <div class="card-sub">% contacto efectivo · Top 20 por volumen</div>
-    </div></div>
-    <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
-      <table class="table" id="acc-tabla-espec">
-        <thead><tr>
-          <th>Especialidad</th>
-          <th style="text-align:center">% Acc.</th>
-          <th style="text-align:center">Contactos</th>
-          <th style="text-align:center">Total llamadas</th>
-          <th style="text-align:center">Semáforo</th>
-        </tr></thead>
-        <tbody><tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
-      </table>
+      <div style="overflow-y:auto;max-height:440px">
+        <table class="table" id="acc-tabla-gestion">
+          <thead><tr>
+            <th>Gestión</th>
+            <th style="text-align:center">Intentos</th>
+            <th style="text-align:center">%</th>
+          </tr></thead>
+          <tbody><tr><td colspan="3" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
   <div id="acc-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
 </div>
+
 
 
 <script>
@@ -10432,334 +10325,258 @@ document.addEventListener('DOMContentLoaded', function(){
 (function(){
 'use strict';
 
-let ACOP_DATA = null;
-let RES1552_DATA = null;
+let ACOP_METRICAS = null;   // filas agregadas (métricas)
+let ACOP_GESTION  = null;   // filas agregadas (gestión)
+let ACOP_LOADED   = false;
 
 const fmtN   = v => isNaN(v)||v===null ? '—' : Number(v).toLocaleString('es-CO');
 const fmtPct = v => isNaN(v)||v===null ? '—' : v.toFixed(1)+' %';
-const fmtD   = v => isNaN(v)||v===null ? '—' : v.toFixed(1)+' días';
-const semAcc = p => p>=90?'var(--green)':p>=80?'var(--amber)':'var(--red)';
-const semOp  = d => d<=10?'var(--green)':d<=15?'var(--amber)':'var(--red)';
-const sem1552= p => p>=85?'var(--green)':p>=70?'var(--amber)':'var(--red)';
-const setText= (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+const fmtD   = v => isNaN(v)||v===null ? '—' : v.toFixed(1);
+const setText = (id,t)=>{ const e=document.getElementById(id); if(e) e.textContent=t; };
 
-// ── Tabs de Oportunidad ──────────────────────────────────────────
-window.switchOpTab = function(tab) {
-  const panelCI   = document.getElementById('op-panel-ci');
-  const panel1552 = document.getElementById('op-panel-1552');
-  const tabCI     = document.getElementById('op-tab-ci');
-  const tab1552   = document.getElementById('op-tab-1552');
-  if(!panelCI) return;
+// Semáforo de oportunidad (días). Meta ≤ 5 verde, 6-12 amarillo, >12 rojo
+function semOportunidad(dias){
+  if(dias===null||isNaN(dias)) return {ic:'⚪',c:'var(--text2)'};
+  if(dias <= 5)  return {ic:'🟢',c:'var(--green)'};
+  if(dias <= 12) return {ic:'🟡',c:'var(--amber)'};
+  return {ic:'🔴',c:'var(--red)'};
+}
+// Semáforo de accesibilidad (%). Meta ≥ 80 verde, 60-80 amarillo, <60 rojo
+function semAccesibilidad(pct){
+  if(pct===null||isNaN(pct)) return {ic:'⚪',c:'var(--text2)'};
+  if(pct >= 80) return {ic:'🟢',c:'var(--green)'};
+  if(pct >= 60) return {ic:'🟡',c:'var(--amber)'};
+  return {ic:'🔴',c:'var(--red)'};
+}
+
+window.switchOpTab = function(tab){
+  const ci = document.getElementById('op-panel-ci');
+  const r1552 = document.getElementById('op-panel-1552');
+  const tCi = document.getElementById('op-tab-ci');
+  const t15 = document.getElementById('op-tab-1552');
   if(tab==='ci'){
-    panelCI.style.display=''; panel1552.style.display='none';
-    tabCI.style.color='var(--blue)'; tabCI.style.borderBottomColor='var(--blue)';
-    tab1552.style.color='var(--text2)'; tab1552.style.borderBottomColor='transparent';
-    if(ACOP_DATA) renderOpCI(ACOP_DATA);
-    else cargarACOP();
+    ci.style.display=''; r1552.style.display='none';
+    tCi.style.color='var(--blue)'; tCi.style.borderBottomColor='var(--blue)';
+    t15.style.color='var(--text2)'; t15.style.borderBottomColor='transparent';
   } else {
-    panelCI.style.display='none'; panel1552.style.display='';
-    tab1552.style.color='var(--blue)'; tab1552.style.borderBottomColor='var(--blue)';
-    tabCI.style.color='var(--text2)'; tabCI.style.borderBottomColor='transparent';
-    if(RES1552_DATA) render1552(RES1552_DATA);
-    else cargarRes1552();
+    ci.style.display='none'; r1552.style.display='';
+    t15.style.color='var(--blue)'; t15.style.borderBottomColor='var(--blue)';
+    tCi.style.color='var(--text2)'; tCi.style.borderBottomColor='transparent';
   }
 };
 
-
-
-// ── Carga ACOP_SCRIPT ────────────────────────────────────────────
+// ── Carga del Apps Script ACOP (métricas + gestión) ───────────────
 async function cargarACOP(){
-  if(ACOP_SCRIPT==='PENDIENTE_DEPLOY'){ renderAcopDemo(); return; }
-  try {
-    const d = await fetchScript(ACOP_SCRIPT);
-    if(d.error) throw new Error(d.error);
-    ACOP_DATA = d;
-    renderOpCI(d); renderAcc(d);
-    poblarFiltrosACOP(d);
+  if(ACOP_LOADED) return;
+  if(!ACOP_SCRIPT || ACOP_SCRIPT==='PENDIENTE_DEPLOY'){
+    setText('op-status','⚠ Apps Script ACOP no configurado');
+    setText('acc-status','⚠ Apps Script ACOP no configurado');
+    return;
+  }
+  setText('op-status','⏳ Cargando datos de oportunidad...');
+  setText('acc-status','⏳ Cargando datos de accesibilidad...');
+  try{
+    // Dos llamadas separadas (más livianas que traer todo junto)
+    const [mRes, gRes] = await Promise.all([
+      fetch(ACOP_SCRIPT+'?accion=metricas',{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json()),
+      fetch(ACOP_SCRIPT+'?accion=gestion',{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json()),
+    ]);
+    ACOP_METRICAS = mRes.metricas || [];
+    ACOP_GESTION  = gRes.gestion  || [];
+    ACOP_LOADED = true;
+    console.log('[ACOP] Métricas:', ACOP_METRICAS.length, 'grupos · Gestión:', ACOP_GESTION.length, 'grupos');
+    poblarFiltrosACOP();
+    opAplicar();
+    accAplicar();
   } catch(e){
-    setText('op-ci-status','✗ Error ACOP: '+e.message);
-    setText('acc-status','✗ Error ACOP: '+e.message);
+    console.error('[ACOP] Error:', e);
+    setText('op-status','⚠ Error al cargar: '+e.message);
+    setText('acc-status','⚠ Error al cargar: '+e.message);
   }
 }
 
-// ── Carga RES1552_SCRIPT ─────────────────────────────────────────
-async function cargarRes1552(){
-  if(RES1552_SCRIPT==='PENDIENTE_DEPLOY'){ renderRes1552Demo(); return; }
-  try {
-    const d = await fetchScript(RES1552_SCRIPT);
-    if(d.error) throw new Error(d.error);
-    RES1552_DATA = d;
-    render1552(d);
-    poblarFiltros1552(d);
-  } catch(e){
-    setText('op-1552-status','✗ Error Res.1552: '+e.message);
-  }
+// ── Poblar los filtros (compartidos por ambas pantallas) ──────────
+function poblarFiltrosACOP(){
+  const uniq = (arr,key) => [...new Set(arr.map(r=>String(r[key]||'').trim()).filter(Boolean))].sort();
+  const empresas = uniq(ACOP_METRICAS,'empresa');
+  const regs     = uniq(ACOP_METRICAS,'regional');
+  const ciudades = uniq(ACOP_METRICAS,'ciudad');
+  const especs   = uniq(ACOP_METRICAS,'especialidad');
+  // Prestadores: cod + nombre
+  const prestMap = {};
+  ACOP_METRICAS.forEach(r=>{ const c=String(r.cod||'').trim(); if(c && !prestMap[c]) prestMap[c]=r.prestador||c; });
+  const prests = Object.entries(prestMap).sort((a,b)=>a[1].localeCompare(b[1]));
+
+  const fill = (id,items,label,isPrest)=>{
+    const el=document.getElementById(id); if(!el) return;
+    if(isPrest){
+      el.innerHTML = `<option value="">${label}</option>`+items.map(([c,n])=>`<option value="${c}">${n.slice(0,40)}</option>`).join('');
+    } else {
+      el.innerHTML = `<option value="">${label}</option>`+items.map(v=>`<option value="${v}">${v}</option>`).join('');
+    }
+  };
+  // Oportunidad
+  fill('op-fil-empresa',empresas,'Empresa afiliación');
+  fill('op-fil-regional',regs,'Regional');
+  fill('op-fil-ciudad',ciudades,'Ciudad');
+  fill('op-fil-prestador',prests,'Cód. prestador BH',true);
+  fill('op-fil-espec',especs,'Especialidad');
+  // Accesibilidad
+  fill('acc-fil-empresa',empresas,'Empresa afiliación');
+  fill('acc-fil-regional',regs,'Regional');
+  fill('acc-fil-ciudad',ciudades,'Ciudad');
+  fill('acc-fil-prestador',prests,'Cód. prestador BH',true);
+  fill('acc-fil-espec',especs,'Especialidad');
 }
 
-// ── Render Oportunidad CI ────────────────────────────────────────
-function renderOpCI(d){
-  const r=d.resumen||{};
-  setText('op-ci-kpi-prom', fmtD(r.oport_total));
-  setText('op-ci-kpi-n',    fmtN(r.op_registros));
-  setText('op-ci-kpi-fecha', d.generado?d.generado.slice(0,10):'—');
-  renderOpCIRegional(d.por_regional||[]);
-  renderOpCIMes(d.por_mes||[]);
-  renderOpCIEspec(d.por_especialidad||[]);
-  setText('op-ci-status',`✓ ${fmtN(r.op_registros)} registros evaluados`);
+function leerFiltros(prefijo){
+  return {
+    empresa:   document.getElementById(prefijo+'-fil-empresa')?.value||'',
+    regional:  document.getElementById(prefijo+'-fil-regional')?.value||'',
+    ciudad:    document.getElementById(prefijo+'-fil-ciudad')?.value||'',
+    cod:       document.getElementById(prefijo+'-fil-prestador')?.value||'',
+    especialidad: document.getElementById(prefijo+'-fil-espec')?.value||'',
+  };
+}
+function pasaFiltro(r,f){
+  if(f.empresa && String(r.empresa).trim()!==f.empresa) return false;
+  if(f.regional && String(r.regional).trim()!==f.regional) return false;
+  if(f.ciudad && String(r.ciudad).trim()!==f.ciudad) return false;
+  if(f.cod && String(r.cod).trim()!==f.cod) return false;
+  if(f.especialidad && String(r.especialidad).trim()!==f.especialidad) return false;
+  return true;
 }
 
-function renderOpCIRegional(arr){
-  const div=document.getElementById('op-ci-chart-regional'); if(!div) return;
-  const max=Math.max(...arr.map(x=>x.oport||0),1);
-  div.innerHTML=arr.map(x=>{
-    const d=x.oport||0; const clr=semOp(d);
-    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
-      <span style="width:90px;text-align:right;color:var(--text2);flex-shrink:0;font-size:10.5px">${(x.regional||'').replace('REGIONAL ','')}</span>
-      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
-        <div style="width:${(d/max*100).toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
-      </div>
-      <span style="width:56px;font-weight:600;color:${clr}">${fmtD(d)}</span>
-    </div>`;
-  }).join('');
-}
+// ── OPORTUNIDAD ───────────────────────────────────────────────────
+let _opTO=null;
+window.opAplicar = function(){ if(_opTO)clearTimeout(_opTO); _opTO=setTimeout(_opRun,60); };
+window.opLimpiar = function(){
+  ['op-fil-empresa','op-fil-regional','op-fil-ciudad','op-fil-prestador','op-fil-espec'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  _opRun();
+};
+function _opRun(){
+  if(!ACOP_METRICAS) return;
+  const f = leerFiltros('op');
+  const filas = ACOP_METRICAS.filter(r=>pasaFiltro(r,f));
 
-function renderOpCIMes(arr){
-  const div=document.getElementById('op-ci-chart-mes'); if(!div) return;
-  const max=Math.max(...arr.map(x=>x.oport||0),1);
-  div.innerHTML=arr.map(m=>{
-    const d=m.oport||0; const clr=semOp(d);
-    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
-      <span style="width:60px;text-align:right;color:var(--text2);flex-shrink:0">${(m.mes||'').slice(0,3)}</span>
-      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
-        <div style="width:${(d/max*100).toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
-      </div>
-      <span style="width:56px;font-weight:600;color:${clr}">${fmtD(d)}</span>
-    </div>`;
-  }).join('');
-}
-
-function renderOpCIEspec(arr){
-  const tb=document.getElementById('op-ci-tabla-espec'); if(!tb) return;
-  tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
-    const d=x.oport||0; const clr=semOp(d);
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:7px 16px;font-size:11.5px;min-width:200px">${x.especialidad||'—'}</td>
-      <td style="text-align:center;font-weight:600;color:${clr}">${fmtD(d)}</td>
-      <td style="text-align:center;font-size:11.5px">${fmtN(x.op_n)}</td>
-      <td style="text-align:center"><span style="padding:2px 8px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${d<=10?'✓ OK':d<=15?'⚠ Atención':'✗ Crítico'}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Render Accesibilidad ─────────────────────────────────────────
-function renderAcc(d){
-  const r=d.resumen||{};
-  const clr=semAcc(r.acc_total||0);
-  setText('acc-kpi-global', fmtPct(r.acc_total));
-  document.getElementById('acc-kpi-global') && (document.getElementById('acc-kpi-global').style.color=clr);
-  setText('acc-kpi-num', fmtN(r.num_acc));
-  setText('acc-kpi-den', fmtN(r.den_acc));
-  renderAccRegional(d.por_regional||[]);
-  renderAccMes(d.por_mes||[]);
-  renderAccEspec(d.por_especialidad||[]);
-  setText('acc-status',`✓ ${fmtN(r.den_acc)} llamadas evaluadas`);
-}
-
-function renderAccRegional(arr){
-  const div=document.getElementById('acc-chart-regional'); if(!div) return;
-  div.innerHTML=arr.map(x=>{
-    const p=x.acc||0; const clr=semAcc(p);
-    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
-      <span style="width:90px;text-align:right;color:var(--text2);flex-shrink:0;font-size:10.5px">${(x.regional||'').replace('REGIONAL ','')}</span>
-      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
-        <div style="width:${p.toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
-      </div>
-      <span style="width:48px;font-weight:600;color:${clr}">${fmtPct(p)}</span>
-    </div>`;
-  }).join('');
-}
-
-function renderAccMes(arr){
-  const div=document.getElementById('acc-chart-mes'); if(!div) return;
-  div.innerHTML=arr.map(m=>{
-    const p=m.acc||0; const clr=semAcc(p);
-    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
-      <span style="width:60px;text-align:right;color:var(--text2);flex-shrink:0">${(m.mes||'').slice(0,3)}</span>
-      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
-        <div style="width:${p.toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
-      </div>
-      <span style="width:48px;font-weight:600;color:${clr}">${fmtPct(p)}</span>
-    </div>`;
-  }).join('');
-}
-
-function renderAccEspec(arr){
-  const tb=document.getElementById('acc-tabla-espec'); if(!tb) return;
-  tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
-    const p=x.acc||0; const clr=semAcc(p);
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:7px 16px;font-size:11.5px;min-width:200px">${x.especialidad||'—'}</td>
-      <td style="text-align:center;font-weight:600;color:${clr}">${fmtPct(p)}</td>
-      <td style="text-align:center;font-size:11.5px">${fmtN(x.num_acc)}</td>
-      <td style="text-align:center;font-size:11.5px">${fmtN(x.den_acc)}</td>
-      <td style="text-align:center"><span style="padding:2px 8px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${p>=90?'✓ OK':p>=80?'⚠ Atención':'✗ Crítico'}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Render Resolución 1552 ───────────────────────────────────────
-function render1552(d){
-  const r=d.resumen||{};
-  const clr=sem1552(r.pct_cumple_op1||0);
-  setText('op-1552-kpi-op1',  fmtD(r.promOP1_global));
-  setText('op-1552-kpi-op2',  fmtD(r.promOP2_global));
-  setText('op-1552-kpi-pct',  fmtPct(r.pct_cumple_op1));
-  document.getElementById('op-1552-kpi-pct') && (document.getElementById('op-1552-kpi-pct').style.color=clr);
-  setText('op-1552-kpi-cumple', fmtN(r.cumple_op1));
-  setText('op-1552-kpi-no',    fmtN(r.no_cumple_op1));
-  render1552Regional(d.por_regional||[]);
-  render1552Mes(d.por_mes||[]);
-  render1552Espec(d.por_especialidad||[]);
-  setText('op-1552-status',`✓ ${fmtN(r.total_consultas)} consultas evaluadas`);
-}
-
-function render1552Regional(arr){
-  const tb=document.getElementById('op-1552-tabla-regional'); if(!tb) return;
-  tb.querySelector('tbody').innerHTML=arr.map(x=>{
-    const clr=sem1552(x.pctCumple||0);
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:7px 12px;font-size:11.5px">${(x.regional||'').replace('REGIONAL ','')}</td>
-      <td style="text-align:center;font-weight:600;color:var(--blue)">${fmtD(x.promOP1)}</td>
-      <td style="text-align:center;font-size:11.5px">${fmtN(x.cons)}</td>
-      <td style="text-align:center"><span style="padding:2px 10px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${fmtPct(x.pctCumple)}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function render1552Mes(arr){
-  const div=document.getElementById('op-1552-chart-mes'); if(!div) return;
-  const max=Math.max(...arr.map(x=>x.promOP1||0),1);
-  div.innerHTML=arr.map(m=>{
-    const d=m.promOP1||0; const clr=sem1552(m.pctCumple||0);
-    return `<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">
-      <span style="width:60px;text-align:right;color:var(--text2);flex-shrink:0">${(m.mes||'').slice(0,3)} ${String(m.año||'').slice(2)}</span>
-      <div style="flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden">
-        <div style="width:${(d/max*100).toFixed(0)}%;height:100%;background:${clr};border-radius:4px"></div>
-      </div>
-      <span style="width:56px;font-weight:600;color:${clr}">${fmtD(d)}</span>
-    </div>`;
-  }).join('');
-}
-
-function render1552Espec(arr){
-  const tb=document.getElementById('op-1552-tabla-espec'); if(!tb) return;
-  tb.querySelector('tbody').innerHTML=arr.slice(0,20).map(x=>{
-    const clr=sem1552(x.pctCumple||0);
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:7px 16px;font-size:11px;min-width:220px">${x.especialidad||'—'}</td>
-      <td style="text-align:center;font-weight:600;color:var(--blue)">${fmtD(x.promOP1)}</td>
-      <td style="text-align:center;color:var(--text2)">${x.meta||'—'} d</td>
-      <td style="text-align:center;font-size:11.5px">${fmtN(x.cons)}</td>
-      <td style="text-align:center"><span style="padding:2px 10px;border-radius:5px;background:${clr}22;color:${clr};font-size:11px;font-weight:600">${fmtPct(x.pctCumple)}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Filtros ──────────────────────────────────────────────────────
-function poblarFiltrosACOP(d){
-  const regs  = d.por_regional||[];
-  const esps  = d.por_especialidad||[];
-  const meses = d.por_mes||[];
-  // Extraer años únicos de los meses (campo año si existe, o de FECHA MEDICION)
-  const años = [...new Set(meses.map(m=>m.año).filter(Boolean))].sort();
-  const regOpts = regs.map(x=>`<option value="${x.regional}">${x.regional}</option>`).join('');
-  const espOpts = esps.map(x=>`<option value="${x.especialidad}">${x.especialidad}</option>`).join('');
-  const mesOpts = meses.map(x=>`<option value="${x.mes}">${x.mes}</option>`).join('');
-  const añoOpts = años.map(a=>`<option value="${a}">${a}</option>`).join('');
-  ['op-ci-fil-regional','acc-fil-regional'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+regOpts;}});
-  ['op-ci-fil-espec','acc-fil-espec'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+espOpts;}});
-  ['op-ci-fil-mes','acc-fil-mes'].forEach(id=>{const el=document.getElementById(id);if(el){const b=el.options[0].outerHTML;el.innerHTML=b+mesOpts;}});
-  ['op-ci-fil-año','acc-fil-año'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){const b=el.options[0].outerHTML;el.innerHTML=b+añoOpts;}
+  // Agrupar por prestador (cod BH) — promedio ponderado de oportunidad
+  const porPrest = {};
+  let sumOportGlobal=0, nOportGlobal=0;
+  filas.forEach(r=>{
+    const c = String(r.cod||'').trim(); if(!c) return;
+    if(!porPrest[c]) porPrest[c]={cod:c,prestador:r.prestador||c,regional:r.regional||'',sum:0,n:0};
+    porPrest[c].sum += (+r.oport_sum||0);
+    porPrest[c].n   += (+r.oport_n||0);
+    sumOportGlobal += (+r.oport_sum||0);
+    nOportGlobal   += (+r.oport_n||0);
   });
-  // Mostrar wrappers de año solo si hay años disponibles
-  if(años.length > 0) {
-    const wAcc = document.getElementById('acc-año-wrap');
-    const wCI  = document.getElementById('op-ci-año-wrap');
-    if(wAcc) wAcc.style.display='';
-    if(wCI)  wCI.style.display='';
+  const arr = Object.values(porPrest).map(p=>({
+    ...p, prom: p.n>0 ? p.sum/p.n : null
+  })).filter(p=>p.prom!==null).sort((a,b)=>b.prom-a.prom);
+
+  const promGlobal = nOportGlobal>0 ? sumOportGlobal/nOportGlobal : null;
+  setText('op-kpi-prom', promGlobal!==null ? fmtD(promGlobal)+' días' : '—');
+  setText('op-kpi-prest', fmtN(arr.length));
+  setText('op-kpi-n', fmtN(nOportGlobal));
+  setText('op-count', `${arr.length} prestadores`);
+
+  const tbody = document.querySelector('#op-tabla tbody');
+  if(tbody){
+    tbody.innerHTML = arr.slice(0,500).map(p=>{
+      const s = semOportunidad(p.prom);
+      return `<tr>
+        <td>${p.cod}</td>
+        <td style="max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(p.prestador||'').replace(/"/g,'')}">${p.prestador||'—'}</td>
+        <td>${p.regional||'—'}</td>
+        <td style="text-align:center;font-weight:600;color:${s.c}">${fmtD(p.prom)}</td>
+        <td style="text-align:center">${fmtN(p.n)}</td>
+        <td style="text-align:center;font-size:14px">${s.ic}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Sin datos para estos filtros</td></tr>';
   }
+  setText('op-status', `Meta de oportunidad: ≤ 5 días 🟢 · 6-12 🟡 · >12 🔴`);
 }
 
-function poblarFiltros1552(d){
-  const regs  = d.por_regional||[];
-  const esps  = d.por_especialidad||[];
-  const meses = d.por_mes||[];
-  const regOpts = regs.map(x=>`<option value="${x.regional}">${x.regional}</option>`).join('');
-  const espOpts = esps.map(x=>`<option value="${x.especialidad}">${x.especialidad}</option>`).join('');
-  const mesOpts = meses.map(x=>`<option value="${x.key}">${x.mes} ${x.año}</option>`).join('');
-  const el1=document.getElementById('op-1552-fil-regional');if(el1){const b=el1.options[0].outerHTML;el1.innerHTML=b+regOpts;}
-  const el2=document.getElementById('op-1552-fil-espec');  if(el2){const b=el2.options[0].outerHTML;el2.innerHTML=b+espOpts;}
-  const el3=document.getElementById('op-1552-fil-mes');    if(el3){const b=el3.options[0].outerHTML;el3.innerHTML=b+mesOpts;}
+// ── ACCESIBILIDAD ─────────────────────────────────────────────────
+let _accTO=null;
+window.accAplicar = function(){ if(_accTO)clearTimeout(_accTO); _accTO=setTimeout(_accRun,60); };
+window.accLimpiar = function(){
+  ['acc-fil-empresa','acc-fil-regional','acc-fil-ciudad','acc-fil-prestador','acc-fil-espec'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  _accRun();
+};
+function _accRun(){
+  if(!ACOP_METRICAS) return;
+  const f = leerFiltros('acc');
+  const filas = ACOP_METRICAS.filter(r=>pasaFiltro(r,f));
+
+  // Agrupar por prestador: Σ disp / Σ intentos
+  const porPrest = {};
+  let dispG=0, intG=0;
+  filas.forEach(r=>{
+    const c = String(r.cod||'').trim(); if(!c) return;
+    if(!porPrest[c]) porPrest[c]={cod:c,prestador:r.prestador||c,disp:0,intentos:0};
+    porPrest[c].disp     += (+r.disp||0);
+    porPrest[c].intentos += (+r.intentos||0);
+    dispG += (+r.disp||0);
+    intG  += (+r.intentos||0);
+  });
+  const arr = Object.values(porPrest).map(p=>({
+    ...p, pct: p.intentos>0 ? (p.disp/p.intentos)*100 : null
+  })).filter(p=>p.pct!==null).sort((a,b)=>b.intentos-a.intentos);
+
+  const pctGlobal = intG>0 ? (dispG/intG)*100 : null;
+  setText('acc-kpi-global', pctGlobal!==null ? fmtPct(pctGlobal) : '—');
+  setText('acc-kpi-num', fmtN(dispG));
+  setText('acc-kpi-den', fmtN(intG));
+  setText('acc-count', `${arr.length} prestadores`);
+
+  const tbody = document.querySelector('#acc-tabla tbody');
+  if(tbody){
+    tbody.innerHTML = arr.slice(0,500).map(p=>{
+      const s = semAccesibilidad(p.pct);
+      return `<tr>
+        <td>${p.cod}</td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(p.prestador||'').replace(/"/g,'')}">${p.prestador||'—'}</td>
+        <td style="text-align:center;font-weight:600;color:${s.c}">${fmtPct(p.pct)}</td>
+        <td style="text-align:center">${fmtN(p.disp)}</td>
+        <td style="text-align:center">${fmtN(p.intentos)}</td>
+        <td style="text-align:center;font-size:14px">${s.ic}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Sin datos para estos filtros</td></tr>';
+  }
+
+  // Tipificación por GESTION (usa ACOP_GESTION con los mismos filtros que apliquen)
+  renderGestion(f);
+  setText('acc-status','Meta de accesibilidad: ≥ 80% 🟢 · 60-80% 🟡 · <60% 🔴');
 }
 
-window.aplicarFiltrosOpCI = function(){
-  if(!ACOP_DATA) return;
-  const reg=document.getElementById('op-ci-fil-regional')?.value||'';
-  const esp=document.getElementById('op-ci-fil-espec')?.value||'';
-  const mes=document.getElementById('op-ci-fil-mes')?.value||'';
-  const año=document.getElementById('op-ci-fil-año')?.value||'';
-  renderOpCIRegional(ACOP_DATA.por_regional.filter(x=>!reg||x.regional===reg));
-  renderOpCIEspec(ACOP_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
-  renderOpCIMes(ACOP_DATA.por_mes.filter(x=>(!mes||x.mes===mes)&&(!año||String(x.año)===año)));
-};
-window.resetFiltrosOpCI=()=>{['op-ci-fil-regional','op-ci-fil-espec','op-ci-fil-mes','op-ci-fil-año'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosOpCI();};
-
-window.aplicarFiltrosAcc = function(){
-  if(!ACOP_DATA) return;
-  const reg=document.getElementById('acc-fil-regional')?.value||'';
-  const esp=document.getElementById('acc-fil-espec')?.value||'';
-  const mes=document.getElementById('acc-fil-mes')?.value||'';
-  const año=document.getElementById('acc-fil-año')?.value||'';
-  renderAccRegional(ACOP_DATA.por_regional.filter(x=>!reg||x.regional===reg));
-  renderAccEspec(ACOP_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
-  renderAccMes(ACOP_DATA.por_mes.filter(x=>(!mes||x.mes===mes)&&(!año||String(x.año)===año)));
-};
-window.resetFiltrosAcc=()=>{['acc-fil-regional','acc-fil-espec','acc-fil-mes','acc-fil-año'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltrosAcc();};
-
-window.aplicarFiltros1552 = function(){
-  if(!RES1552_DATA) return;
-  const reg=document.getElementById('op-1552-fil-regional')?.value||'';
-  const esp=document.getElementById('op-1552-fil-espec')?.value||'';
-  const mes=document.getElementById('op-1552-fil-mes')?.value||'';
-  render1552Regional(RES1552_DATA.por_regional.filter(x=>!reg||x.regional===reg));
-  render1552Espec(RES1552_DATA.por_especialidad.filter(x=>!esp||x.especialidad===esp));
-  render1552Mes(RES1552_DATA.por_mes.filter(x=>!mes||x.key===mes));
-};
-window.resetFiltros1552=()=>{['op-1552-fil-regional','op-1552-fil-espec','op-1552-fil-mes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window.aplicarFiltros1552();};
-
-// ── Demos ────────────────────────────────────────────────────────
-function renderAcopDemo(){
-  ACOP_DATA={resumen:{acc_total:87.3,oport_total:7.7,num_acc:1823034,den_acc:2087381,op_registros:116284},
-    por_regional:[{regional:'BOGOTA',acc:92,oport:5.1,num_acc:520000,den_acc:565000},{regional:'MEDELLIN',acc:90,oport:6.2,num_acc:380000,den_acc:422000},{regional:'CALI',acc:87,oport:8.1,num_acc:310000,den_acc:356000},{regional:'BARRANQUILLA',acc:85,oport:9.0,num_acc:290000,den_acc:341000},{regional:'BUCARAMANGA',acc:83,oport:10.2,num_acc:220000,den_acc:265000},{regional:'CENTRO ORIENTE',acc:82,oport:11.4,num_acc:103034,den_acc:138381}],
-    por_mes:[{mes:'ENERO',acc:79.6,oport:8.2,num_acc:150000,den_acc:188000},{mes:'ABRIL',acc:88.1,oport:7.9,num_acc:160000,den_acc:181000},{mes:'JULIO',acc:90.8,oport:7.5,num_acc:175000,den_acc:192000},{mes:'OCTUBRE',acc:93.0,oport:6.8,num_acc:180000,den_acc:193000},{mes:'ENERO',acc:93.6,oport:6.5,num_acc:185000,den_acc:197000},{mes:'MARZO',acc:81.6,oport:8.5,num_acc:172000,den_acc:211000}],
-    por_especialidad:[{especialidad:'PEDIATRIA',acc:100,oport:4.6,num_acc:95000,den_acc:95000,op_n:12000},{especialidad:'MEDICINA GENERAL',acc:98,oport:2.1,num_acc:320000,den_acc:326000,op_n:45000},{especialidad:'GINECOLOGIA',acc:96,oport:6.8,num_acc:88000,den_acc:91000,op_n:9500},{especialidad:'MEDICINA INTERNA',acc:94,oport:8.3,num_acc:76000,den_acc:80000,op_n:8200},{especialidad:'ORTOPEDIA Y TRAUMATOLOGIA',acc:91,oport:9.1,num_acc:65000,den_acc:71000,op_n:7100},{especialidad:'NEUROLOGIA',acc:88,oport:12.4,num_acc:45000,den_acc:51000,op_n:4900},{especialidad:'PSIQUIATRIA',acc:85,oport:14.2,num_acc:38000,den_acc:44000,op_n:4100},{especialidad:'REUMATOLOGIA',acc:80,oport:18.5,num_acc:32000,den_acc:40000,op_n:3500}]
-  };
-  renderOpCI(ACOP_DATA); renderAcc(ACOP_DATA); poblarFiltrosACOP(ACOP_DATA);
-  setText('op-ci-status','');
-  setText('acc-status','');
-}
-
-function renderRes1552Demo(){
-  RES1552_DATA={resumen:{total_consultas:5059859,promOP1_global:7.6,promOP2_global:3.2,cumple_op1:38530957,no_cumple_op1:2522000,pct_cumple_op1:87.0,pct_no_cumple_op1:13.0},
-    por_regional:[{regional:'BOGOTA',cons:1200000,promOP1:6.2,pctCumple:92},{regional:'MEDELLIN',cons:980000,promOP1:7.8,pctCumple:88},{regional:'CALI',cons:820000,promOP1:8.1,pctCumple:85},{regional:'BARRANQUILLA',cons:740000,promOP1:9.2,pctCumple:82},{regional:'CENTRO ORIENTE',cons:680000,promOP1:7.0,pctCumple:89},{regional:'BUCARAMANGA',cons:640000,promOP1:10.1,pctCumple:80}],
-    por_mes:[{key:'2025-10',año:2025,mes:'OCTUBRE',cons:420000,promOP1:8.2,pctCumple:85},{key:'2025-11',año:2025,mes:'NOVIEMBRE',cons:440000,promOP1:7.9,pctCumple:86},{key:'2025-12',año:2025,mes:'DICIEMBRE',cons:380000,promOP1:7.4,pctCumple:88},{key:'2026-01',año:2026,mes:'ENERO',cons:460000,promOP1:7.1,pctCumple:89},{key:'2026-02',año:2026,mes:'FEBRERO',cons:450000,promOP1:7.6,pctCumple:87},{key:'2026-03',año:2026,mes:'MARZO',cons:470000,promOP1:7.8,pctCumple:86},{key:'2026-04',año:2026,mes:'ABRIL',cons:440000,promOP1:8.0,pctCumple:84}],
-    por_especialidad:[{especialidad:'NEUROCIRUGIA',cons:92000,promOP1:22.8,meta:30,pctCumple:78},{especialidad:'NEUROLOGIA PEDIATRICA',cons:59000,promOP1:58.4,meta:40,pctCumple:42},{especialidad:'NEUROLOGIA',cons:628000,promOP1:64.2,meta:30,pctCumple:31},{especialidad:'PSIQUIATRIA',cons:280000,promOP1:45.2,meta:10,pctCumple:65},{especialidad:'FISIOTERAPIA',cons:902000,promOP1:54.9,meta:8,pctCumple:55},{especialidad:'ORTOPEDIA Y TRAUMATOLOGIA',cons:180000,promOP1:6.4,meta:30,pctCumple:95},{especialidad:'DOLOR Y CUIDADOS PALIATIVOS',cons:66000,promOP1:45.0,meta:20,pctCumple:52}],
-    por_mes_trends:[], top_prestadores:[]
-  };
-  render1552(RES1552_DATA); poblarFiltros1552(RES1552_DATA);
-  setText('op-1552-status','');
+function renderGestion(f){
+  if(!ACOP_GESTION) return;
+  // La vista gestión tiene: empresa, fuente, regional, cod, gestion (no ciudad ni especialidad)
+  const filas = ACOP_GESTION.filter(r=>{
+    if(f.empresa && String(r.empresa).trim()!==f.empresa) return false;
+    if(f.regional && String(r.regional).trim()!==f.regional) return false;
+    if(f.cod && String(r.cod).trim()!==f.cod) return false;
+    return true;
+  });
+  const porGestion = {};
+  let total=0;
+  filas.forEach(r=>{
+    const g = String(r.gestion||'(sin dato)').trim()||'(sin dato)';
+    const int = (+r.intentos||0);
+    porGestion[g] = (porGestion[g]||0) + int;
+    total += int;
+  });
+  const arr = Object.entries(porGestion).sort((a,b)=>b[1]-a[1]);
+  const tbody = document.querySelector('#acc-tabla-gestion tbody');
+  if(tbody){
+    tbody.innerHTML = arr.map(([g,n])=>`
+      <tr>
+        <td style="font-size:11px">${g}</td>
+        <td style="text-align:center">${fmtN(n)}</td>
+        <td style="text-align:center">${total>0?((n/total)*100).toFixed(1):'0'}%</td>
+      </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text2);padding:20px">Sin datos</td></tr>';
+  }
 }
 
 // ── Navigate trigger ─────────────────────────────────────────────
@@ -10768,17 +10585,15 @@ document.addEventListener('DOMContentLoaded', function(){
   if(typeof orig==='function'){
     window.navigate = function(scr){
       orig(scr);
-      if(scr==='red-oportunidad'){
-        setTimeout(()=>{ if(!ACOP_DATA) cargarACOP(); else renderOpCI(ACOP_DATA); }, 80);
-      }
-      if(scr==='red-accesibilidad'){
-        setTimeout(()=>{ if(!ACOP_DATA) cargarACOP(); else renderAcc(ACOP_DATA); }, 80);
+      if(scr==='red-oportunidad' || scr==='red-accesibilidad'){
+        setTimeout(()=>{ if(!ACOP_LOADED) cargarACOP(); else { opAplicar(); accAplicar(); } }, 80);
       }
     };
   }
 });
 
 })();
+
 </script>
 
 </body>
