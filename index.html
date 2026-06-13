@@ -9124,6 +9124,76 @@ function parsearCuentasMedicas(raw) {
 
 
 <!-- ═══════════════════════════════════════════════════════════════════
+     RED DE PRESTADORES · NOTA TÉCNICA (Seguimiento trimestral PGP/TECHO)
+════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-red-nota-tecnica">
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <select id="nt-fil-regional" onchange="ntAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:140px"><option value="">Regional</option></select>
+    <select id="nt-fil-modelo" onchange="ntAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:130px"><option value="">Tipo de modelo</option></select>
+    <select id="nt-fil-espec" onchange="ntAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:200px"><option value="">Especialidad</option></select>
+    <select id="nt-fil-prestador" onchange="ntAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:200px"><option value="">NIT / Prestador</option></select>
+    <select id="nt-fil-trimestre" onchange="ntAplicar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:11.5px;max-width:130px">
+      <option value="">Todos los trimestres</option>
+      <option value="1">I Trimestre</option>
+      <option value="2">II Trimestre</option>
+      <option value="3">III Trimestre</option>
+      <option value="4">IV Trimestre</option>
+    </select>
+    <button onclick="ntLimpiar()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
+    <button onclick="cargarNotaTecnica(true)" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">↺ Actualizar</button>
+    <span id="nt-count" style="font-size:11px;color:var(--text2)"></span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-strip cols-3" style="margin-bottom:16px">
+    <div class="kpi" style="--kc:var(--blue)">
+      <div class="kpi-label">Notas técnicas vigentes</div>
+      <div class="kpi-value" style="color:var(--blue)" id="nt-kpi-registros">—</div>
+      <div class="kpi-delta neu">Líneas de seguimiento</div>
+    </div>
+    <div class="kpi" style="--kc:var(--green)">
+      <div class="kpi-label">Valor NT total</div>
+      <div class="kpi-value" style="color:var(--green)" id="nt-kpi-valor">—</div>
+      <div class="kpi-delta neu">Suma valor NT vigente</div>
+    </div>
+    <div class="kpi" style="--kc:var(--teal)">
+      <div class="kpi-label">Prestadores</div>
+      <div class="kpi-value" style="color:var(--teal)" id="nt-kpi-prest">—</div>
+      <div class="kpi-delta neu">NITs únicos</div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card">
+    <div class="card-head"><div>
+      <div class="card-title">Seguimiento de Nota Técnica por prestador</div>
+      <div class="card-sub">Ejecución trimestral PGP / TECHO · valores en pesos</div>
+    </div></div>
+    <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+      <table class="table" id="nt-tabla">
+        <thead><tr id="nt-thead">
+          <th>Regional</th>
+          <th>Modelo</th>
+          <th>Especialidad</th>
+          <th>NIT</th>
+          <th>IPS</th>
+          <th style="text-align:right">Valor NT vigente</th>
+          <th style="text-align:right" class="nt-col-t1">Seg. I Trim.</th>
+          <th style="text-align:right" class="nt-col-t2">Seg. II Trim.</th>
+          <th style="text-align:right" class="nt-col-t3">Seg. III Trim.</th>
+          <th style="text-align:right" class="nt-col-t4">Seg. IV Trim.</th>
+        </tr></thead>
+        <tbody><tr><td colspan="10" style="text-align:center;color:var(--text2);padding:20px">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="nt-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0;margin-top:8px"></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
      ATENCIÓN EXTRAMURAL · PHD / PAD / UCC DOMICILIARIO
 ════════════════════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-extramural">
@@ -15001,3 +15071,200 @@ ${totalPqr?"<p>Se registraron <strong>"+totalPqr+"</strong> PQR para "+gesN+" en
 
 // ── Poblar selector gestores en reportes ─────────────────────────
 </script>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  NOTA TÉCNICA — Seguimiento trimestral PGP / TECHO (SEGUIMIENTOS OK)
+// ══════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+// Sheet de Nota Técnica (pestaña SEGUIMIENTOS OK). Usa el lector genérico APPS_SCRIPT_URL.
+const NT_SHEET_ID = '14AckL-RZN35WXwoeivQgTWQKzV1ZXrworMkxCHyYxPo'; // ← Pega aquí el ID del Google Sheet de Nota Técnica
+const NT_HOJA     = 'SEGUIMIENTOS OK';
+
+let NT_DATA = null;
+let NT_LOADED = false;
+
+const ntFmtN = v => isNaN(v)||v===null ? '—' : Number(v).toLocaleString('es-CO');
+// Formato peso colombiano
+const ntFmtPeso = v => {
+  if(v===null||v===undefined||isNaN(v)||v===0) return '—';
+  return '$ ' + Number(Math.round(v)).toLocaleString('es-CO');
+};
+const ntSet = (id,t)=>{ const e=document.getElementById(id); if(e) e.textContent=t; };
+
+// Normaliza valores que vienen como "$ 367,516,074", "1164763611.76", "$ 224.974.307"
+function ntParsePeso(v){
+  if(v===null||v===undefined||v==='') return 0;
+  if(typeof v==='number') return v;
+  let s = String(v).replace(/\$/g,'').replace(/\s/g,'').trim();
+  if(!s) return 0;
+  // Si tiene coma Y punto: la coma es separador de miles (formato US) → quitar comas
+  if(s.includes(',') && s.includes('.')){
+    s = s.replace(/,/g,'');
+  } else if(s.includes(',') && !s.includes('.')){
+    // Solo comas: separador de miles colombiano → quitar
+    s = s.replace(/,/g,'');
+  } else if((s.match(/\./g)||[]).length > 1){
+    // Múltiples puntos: separador de miles colombiano → quitar
+    s = s.replace(/\./g,'');
+  }
+  // Si queda un solo punto con 3 dígitos después y es grande, probablemente miles
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+window.cargarNotaTecnica = async function(force=false){
+  if(NT_LOADED && !force){ ntRender(); return; }
+  if(!NT_SHEET_ID){
+    ntSet('nt-status','⚠ Falta configurar NT_SHEET_ID con el ID del Google Sheet');
+    return;
+  }
+  if(typeof APPS_SCRIPT_URL==='undefined' || !APPS_SCRIPT_URL){
+    ntSet('nt-status','⚠ Lector genérico (APPS_SCRIPT_URL) no disponible');
+    return;
+  }
+  ntSet('nt-status','⏳ Cargando nota técnica...');
+  try{
+    const url = APPS_SCRIPT_URL + '?id='+NT_SHEET_ID+'&hoja='+encodeURIComponent(NT_HOJA);
+    const raw = await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
+    NT_DATA = parsearNotaTecnica(raw);
+    NT_LOADED = true;
+    console.log('[NT] Filas:', NT_DATA.length);
+    ntPoblarFiltros();
+    ntRender();
+  } catch(e){
+    console.error('[NT] Error:', e);
+    ntSet('nt-status','⚠ Error al cargar: '+e.message);
+  }
+};
+
+// El lector genérico devuelve array de arrays. Fila 0 = headers.
+function parsearNotaTecnica(raw){
+  if(!Array.isArray(raw) || raw.length < 2) return [];
+  const headers = raw[0].map(h=>String(h||'').toUpperCase().trim());
+  const fi = (...kws)=>{
+    for(const kw of kws){ const i=headers.findIndex(h=>h.includes(kw)); if(i>=0) return i; }
+    return -1;
+  };
+  const C = {
+    regional:  fi('REGIONAL'),
+    modelo:    fi('TIPO DE MODELO','MODELO'),
+    espec:     fi('ESPECIALIDAD'),
+    nit:       fi('NIT'),
+    ips:       fi('IPS'),
+    valor:     fi('VALOR NT'),
+    t1:        fi('I TRIMESTRE','SEGIMIENTO I','SEGUIMIENTO I'),
+    t2:        fi('II TRIMESTRE','SEGIMIENTO II','SEGUIMIENTO II'),
+    t3:        fi('III TRIMESTRE','SEGIMIENTO III','SEGUIMIENTO III'),
+    t4:        fi('IVTRIMESTRE','IV TRIMESTRE','SEGIMIENTO IV','SEGUIMIENTO IV'),
+  };
+  const out = [];
+  for(let r=1;r<raw.length;r++){
+    const row = raw[r];
+    const nit = String(row[C.nit]||'').replace(/\.0$/,'').trim();
+    const ips = String(row[C.ips]||'').trim();
+    if(!nit && !ips) continue; // fila vacía
+    out.push({
+      regional: String(row[C.regional]||'').trim(),
+      modelo:   String(row[C.modelo]||'').trim(),
+      especialidad: String(row[C.espec]||'').trim(),
+      nit, ips,
+      valor: ntParsePeso(row[C.valor]),
+      t1: ntParsePeso(row[C.t1]),
+      t2: ntParsePeso(row[C.t2]),
+      t3: ntParsePeso(row[C.t3]),
+      t4: ntParsePeso(row[C.t4]),
+    });
+  }
+  return out;
+}
+
+function ntPoblarFiltros(){
+  if(!NT_DATA) return;
+  const uniq = key => [...new Set(NT_DATA.map(r=>String(r[key]||'').trim()).filter(Boolean))].sort();
+  const fill = (id,items,label)=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML = `<option value="">${label}</option>`+items.map(v=>`<option value="${v}">${v}</option>`).join('');
+  };
+  fill('nt-fil-regional', uniq('regional'), 'Regional');
+  fill('nt-fil-modelo', uniq('modelo'), 'Tipo de modelo');
+  fill('nt-fil-espec', uniq('especialidad'), 'Especialidad');
+  // Prestador
+  const pMap={}; NT_DATA.forEach(r=>{const n=r.nit; if(n&&!pMap[n])pMap[n]=r.ips||n;});
+  const sel=document.getElementById('nt-fil-prestador');
+  if(sel) sel.innerHTML='<option value="">NIT / Prestador</option>'+Object.entries(pMap).sort((a,b)=>a[1].localeCompare(b[1])).map(([n,nm])=>`<option value="${n}">${n} · ${nm.slice(0,30)}</option>`).join('');
+}
+
+let _ntTO=null;
+window.ntAplicar = function(){ if(_ntTO)clearTimeout(_ntTO); _ntTO=setTimeout(ntRender,60); };
+window.ntLimpiar = function(){
+  ['nt-fil-regional','nt-fil-modelo','nt-fil-espec','nt-fil-prestador','nt-fil-trimestre'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ntRender();
+};
+
+function ntRender(){
+  if(!NT_DATA) return;
+  const f = {
+    regional: document.getElementById('nt-fil-regional')?.value||'',
+    modelo:   document.getElementById('nt-fil-modelo')?.value||'',
+    espec:    document.getElementById('nt-fil-espec')?.value||'',
+    nit:      document.getElementById('nt-fil-prestador')?.value||'',
+    trim:     document.getElementById('nt-fil-trimestre')?.value||'',
+  };
+  const filas = NT_DATA.filter(r=>{
+    if(f.regional && r.regional!==f.regional) return false;
+    if(f.modelo && r.modelo!==f.modelo) return false;
+    if(f.espec && r.especialidad!==f.espec) return false;
+    if(f.nit && r.nit!==f.nit) return false;
+    return true;
+  });
+
+  // KPIs
+  const valorTotal = filas.reduce((s,r)=>s+(r.valor||0),0);
+  const nits = new Set(filas.map(r=>r.nit));
+  ntSet('nt-kpi-registros', ntFmtN(filas.length));
+  ntSet('nt-kpi-valor', ntFmtPeso(valorTotal));
+  ntSet('nt-kpi-prest', ntFmtN(nits.size));
+  ntSet('nt-count', `${filas.length} registros`);
+
+  // Mostrar/ocultar columnas de trimestre según filtro
+  const trim = f.trim;
+  for(let t=1;t<=4;t++){
+    const show = !trim || trim===String(t);
+    document.querySelectorAll('.nt-col-t'+t).forEach(el=>{ el.style.display = show?'':'none'; });
+  }
+
+  const tbody=document.querySelector('#nt-tabla tbody');
+  if(tbody){
+    tbody.innerHTML = filas.map(r=>{
+      const cell = (val,t)=>`<td class="nt-col-t${t}" style="text-align:right;display:${(!trim||trim===String(t))?'':'none'}">${ntFmtPeso(val)}</td>`;
+      return `<tr>
+        <td>${r.regional||'—'}</td>
+        <td>${r.modelo||'—'}</td>
+        <td style="font-size:11px">${r.especialidad||'—'}</td>
+        <td>${r.nit||'—'}</td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(r.ips||'').replace(/"/g,'')}">${r.ips||'—'}</td>
+        <td style="text-align:right;font-weight:600">${ntFmtPeso(r.valor)}</td>
+        ${cell(r.t1,1)}${cell(r.t2,2)}${cell(r.t3,3)}${cell(r.t4,4)}
+      </tr>`;
+    }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--text2);padding:20px">Sin datos para estos filtros</td></tr>';
+  }
+  ntSet('nt-status', trim ? `Mostrando ${['','I','II','III','IV'][trim]} Trimestre` : 'Mostrando los 4 trimestres');
+}
+
+// Navigate trigger
+document.addEventListener('DOMContentLoaded', function(){
+  const orig = window.navigate;
+  if(typeof orig==='function'){
+    window.navigate = function(scr){
+      orig(scr);
+      if(scr==='red-nota-tecnica') setTimeout(()=>{ if(!NT_LOADED) cargarNotaTecnica(); }, 80);
+    };
+  }
+});
+
+})();
+</script>
+
