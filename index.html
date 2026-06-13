@@ -830,13 +830,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
   <!-- Selector de módulo -->
   <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--border2)">
-    <div id="rank-tab-prestadores" onclick="rankSetModulo('prestadores')"
-      style="padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none">
+    <div id="rank-tab-prestadores"
+      style="padding:10px 22px;font-size:13px;font-weight:500;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none">
       🏥 Red de Prestadores
-    </div>
-    <div id="rank-tab-gestores" onclick="rankSetModulo('gestores')"
-      style="padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px;user-select:none">
-      💊 Gestores Farmacéuticos
     </div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:4px">
       <button class="btn" onclick="calcularRanking()" style="font-size:11.5px">↺ Recalcular</button>
@@ -1538,80 +1534,6 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">Notificaciones enviadas</div><div class="kpi-value" style="color:var(--teal)" id="seg-kpi-notif">—</div><div class="kpi-delta up">Registradas en sistema</div></div>
   </div>
 
-  <!-- CRONOGRAMA -->
-  <div class="card">
-    <div class="card-head">
-      <div><div class="card-title">Cronograma de seguimiento 2026</div><div class="card-sub">Cortes de evaluación · Estado por período · Los datos de prestadores/gestores se actualizan con los datos reales cargados</div></div>
-    </div>
-    <div class="card-body">
-      <div class="crono-wrap">
-        <table class="crono-table">
-          <thead>
-            <tr>
-              <th class="left" style="width:160px">Período</th>
-              <th>Corte</th>
-              <th>Prestadores</th>
-              <th>Gestores</th>
-              <th>Indicadores</th>
-              <th>Informe</th>
-              <th>Notificaciones</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="text-align:left;font-weight:500;color:var(--text)">Enero 2026</td>
-              <td style="font-family:'DM Mono',monospace;font-size:11px">31/01/2026</td>
-              <td><span class="badge bg-g">1,232</span></td>
-              <td><span class="badge bg-g">6/6</span></td>
-              <td><span class="badge bg-g">34/34</span></td>
-              <td><div class="h-btn download" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px" onclick="toastMsg('Informe Ene-2026 disponible al conectar el sistema de informes')">⬇ Descargar</div></td>
-              <td><span class="badge bg-g">8 enviadas</span></td>
-              <td><span class="crono-pill" style="background:var(--gdim);color:var(--green)">✓ Completo</span></td>
-            </tr>
-            <tr>
-              <td style="text-align:left;font-weight:500;color:var(--text)">Febrero 2026</td>
-              <td style="font-family:'DM Mono',monospace;font-size:11px">28/02/2026</td>
-              <td><span class="badge bg-g">1,238</span></td>
-              <td><span class="badge bg-g">6/6</span></td>
-              <td><span class="badge bg-g">34/34</span></td>
-              <td><div class="h-btn download" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px" onclick="toastMsg('Informe Feb-2026 disponible al conectar el sistema de informes')">⬇ Descargar</div></td>
-              <td><span class="badge bg-g">11 enviadas</span></td>
-              <td><span class="crono-pill" style="background:var(--gdim);color:var(--green)">✓ Completo</span></td>
-            </tr>
-            <tr>
-              <td style="text-align:left;font-weight:500;color:var(--text)">Marzo 2026</td>
-              <td style="font-family:'DM Mono',monospace;font-size:11px">31/03/2026</td>
-              <td><span class="badge bg-b">1,248</span></td>
-              <td><span class="badge bg-b">6/6</span></td>
-              <td><span class="badge bg-a">28/34</span></td>
-              <td><div class="h-btn" style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;opacity:.5" title="Disponible al cierre del período">⬇ Pendiente</div></td>
-              <td><span class="badge bg-a">8 pendientes</span></td>
-              <td><span class="crono-pill" style="background:var(--bdim);color:var(--blue)">● En curso</span></td>
-            </tr>
-            <tr style="opacity:.55">
-              <td style="text-align:left;font-weight:500;color:var(--text2)">Abril 2026</td>
-              <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">30/04/2026</td>
-              <td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td>
-              <td><span class="crono-pill" style="background:var(--bg3);color:var(--text3)">Programado</span></td>
-            </tr>
-            <tr style="opacity:.55">
-              <td style="text-align:left;font-weight:500;color:var(--text2)">Mayo 2026</td>
-              <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">31/05/2026</td>
-              <td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td>
-              <td><span class="crono-pill" style="background:var(--bg3);color:var(--text3)">Programado</span></td>
-            </tr>
-            <tr style="opacity:.55">
-              <td style="text-align:left;font-weight:500;color:var(--text2)">Junio 2026 · T2</td>
-              <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">30/06/2026</td>
-              <td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td>
-              <td><span class="crono-pill" style="background:var(--pdim);color:var(--purple)">Corte T2</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 
   <!-- HALLAZGOS + INFORMES POR CONTRATO -->
   <!-- HALLAZGOS CON NOTIFICACION - ancho completo -->
@@ -12497,11 +12419,9 @@ function renderCoberturaPanel(){
 }
 
 window.rankSetModulo = function(mod){
-  RANK_MODULO=mod;
-  document.getElementById('rank-tab-prestadores')?.style && (document.getElementById('rank-tab-prestadores').style.cssText=mod==='prestadores'?'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none':'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px;user-select:none');
-  document.getElementById('rank-tab-gestores')?.style && (document.getElementById('rank-tab-gestores').style.cssText=mod==='gestores'?'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--blue);color:var(--blue);margin-bottom:-1px;user-select:none':'padding:10px 22px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px;user-select:none');
+  RANK_MODULO='prestadores'; // gestores eliminado: el ranking solo aplica a Red de Prestadores
   const titulo=document.getElementById('rank-tabla-titulo');
-  if(titulo) titulo.textContent=mod==='prestadores'?'Ranking · Red de Prestadores':'Ranking · Gestores Farmacéuticos';
+  if(titulo) titulo.textContent='Ranking · Red de Prestadores';
   RANK_DATA=[]; RANK_FILTRADO=[];
   calcularRanking();
 };
@@ -15080,7 +15000,7 @@ ${totalPqr?"<p>Se registraron <strong>"+totalPqr+"</strong> PQR para "+gesN+" en
 'use strict';
 
 // Sheet de Nota Técnica (pestaña SEGUIMIENTOS OK). Usa el lector genérico APPS_SCRIPT_URL.
-const NT_SHEET_ID = '14AckL-RZN35WXwoeivQgTWQKzV1ZXrworMkxCHyYxPo'; // ← Pega aquí el ID del Google Sheet de Nota Técnica
+const NT_SHEET_ID = '14AckL-RZN35WXwoeivQgTWQKzV1ZXrworMkxCHyYxPo'; // ID del Google Sheet de Nota Técnica
 const NT_HOJA     = 'SEGUIMIENTOS OK';
 
 let NT_DATA = null;
