@@ -10798,56 +10798,32 @@ document.addEventListener('DOMContentLoaded', function(){
 <!-- ══ HABILITACIÓN RED DE PRESTADORES ══ -->
 <div class="screen" id="screen-red-habilitacion">
 
-  <!-- KPIs -->
-  <div class="kpi-strip cols-5" id="hab-kpi-strip">
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total evaluados</div><div class="kpi-value" style="color:var(--green)" id="hab-kpi-total">—</div><div class="kpi-delta up" id="hab-kpi-total-d">Cargando...</div></div>
-    <div class="kpi" style="--kc:#0099D1"><div class="kpi-label">✅ Si habilitado</div><div class="kpi-value" style="color:#0099D1" id="hab-kpi-si">—</div><div class="kpi-delta up" id="hab-kpi-si-d">— servicios</div></div>
-    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">❌ No habilitado</div><div class="kpi-value" style="color:var(--red)" id="hab-kpi-no">—</div><div class="kpi-delta dn" id="hab-kpi-no-d">— servicios</div></div>
-    <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">⚠️ En proceso exclusión</div><div class="kpi-value" style="color:var(--amber)" id="hab-kpi-proceso">—</div><div class="kpi-delta warn" id="hab-kpi-proceso-d">— servicios</div></div>
-    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">🚫 Excluido</div><div class="kpi-value" style="color:var(--teal)" id="hab-kpi-excluido">—</div><div class="kpi-delta" id="hab-kpi-excluido-d">— servicios</div></div>
+  <!-- KPIs basados en VALIDACION_NIT -->
+  <div class="kpi-strip cols-4" id="hab-kpi-strip">
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total evaluados</div><div class="kpi-value" style="color:var(--green)" id="hab-kpi-total">—</div><div class="kpi-delta up" id="hab-kpi-total-d">Servicios / CUPS</div></div>
+    <div class="kpi" style="--kc:#0099D1"><div class="kpi-label">✅ Habilitados</div><div class="kpi-value" style="color:#0099D1" id="hab-kpi-si">—</div><div class="kpi-delta up" id="hab-kpi-si-d">OK_HABILITADO</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="kpi-label">❌ No habilitados</div><div class="kpi-value" style="color:var(--red)" id="hab-kpi-no">—</div><div class="kpi-delta dn" id="hab-kpi-no-d">NO_HABILITADO</div></div>
+    <div class="kpi" style="--kc:var(--teal)"><div class="kpi-label">% Habilitación</div><div class="kpi-value" style="color:var(--teal)" id="hab-kpi-pct">—</div><div class="kpi-delta" id="hab-kpi-pct-d">Habilitados / Total</div></div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-    <!-- Gráfica por prestadores -->
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Distribución por resultado de evaluación</div><div class="card-sub">N° de prestadores y % por estado de habilitación</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-        <canvas id="hab-chart-resultado" height="160"></canvas>
-        <div id="hab-leyenda-resultado" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:11px"></div>
+  <!-- Gráfica única: VALIDACION_NIT (responde a filtros) -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head"><div><div class="card-title">Validación de habilitación por NIT</div><div class="card-sub">Distribución Habilitado vs No habilitado · según filtros aplicados</div></div></div>
+    <div class="card-body" style="padding:16px 20px;display:grid;grid-template-columns:1fr 2fr;gap:20px;align-items:center">
+      <div>
+        <canvas id="hab-chart-validacion" height="170"></canvas>
       </div>
-    </div>
-    <!-- Semaforización (5 categorías reales) -->
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Semáforo de validación</div><div class="card-sub">Por N° de servicios evaluados según estado</div></div></div>
-      <div class="card-body" style="padding:16px 20px">
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
-          <div style="background:#D1EFF9;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
-            <div style="font-size:10px;color:#003D53;font-weight:600;margin-bottom:4px">✅ CUMPLE</div>
-            <div style="font-size:22px;font-weight:700;color:#003D53;line-height:1.1" id="hab-sem-cumple">—</div>
-            <div style="font-size:9.5px;color:#4A7A95;margin-top:2px" id="hab-sem-cumple-pct">— %</div>
-          </div>
-          <div style="background:#E8F4D9;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
-            <div style="font-size:10px;color:#3D6817;font-weight:600;margin-bottom:4px">🔗 INTERDEP.</div>
-            <div style="font-size:22px;font-weight:700;color:#3D6817;line-height:1.1" id="hab-sem-interdep">—</div>
-            <div style="font-size:9.5px;color:#5A8F2A;margin-top:2px" id="hab-sem-interdep-pct">— %</div>
-          </div>
-          <div style="background:#FDECEA;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
-            <div style="font-size:10px;color:#B50303;font-weight:600;margin-bottom:4px">❌ NO CUMPLE</div>
-            <div style="font-size:22px;font-weight:700;color:#B50303;line-height:1.1" id="hab-sem-nocumple">—</div>
-            <div style="font-size:9.5px;color:#B50303;margin-top:2px" id="hab-sem-nocumple-pct">— %</div>
-          </div>
-          <div style="background:#FFF4DC;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
-            <div style="font-size:10px;color:#8B6314;font-weight:600;margin-bottom:4px">ℹ️ NO APLICA</div>
-            <div style="font-size:22px;font-weight:700;color:#8B6314;line-height:1.1" id="hab-sem-noaplica">—</div>
-            <div style="font-size:9.5px;color:#A68240;margin-top:2px" id="hab-sem-noaplica-pct">— %</div>
-          </div>
-          <div style="background:#EEE;border-radius:10px;padding:12px 8px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center">
-            <div style="font-size:10px;color:#555;font-weight:600;margin-bottom:4px">⬜ VACÍO</div>
-            <div style="font-size:22px;font-weight:700;color:#555;line-height:1.1" id="hab-sem-vacio">—</div>
-            <div style="font-size:9.5px;color:#888;margin-top:2px" id="hab-sem-vacio-pct">— %</div>
-          </div>
+      <div id="hab-validacion-detalle" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;background:#D1EFF9;border-radius:10px;padding:14px 18px">
+          <div style="font-size:13px;color:#003D53;font-weight:600;flex:1">✅ Habilitados (OK_HABILITADO)</div>
+          <div style="font-size:24px;font-weight:700;color:#003D53" id="hab-val-si">—</div>
+          <div style="font-size:12px;color:#4A7A95;min-width:48px;text-align:right" id="hab-val-si-pct">— %</div>
         </div>
-        <canvas id="hab-chart-semaforo" height="80"></canvas>
+        <div style="display:flex;align-items:center;gap:12px;background:#FDECEA;border-radius:10px;padding:14px 18px">
+          <div style="font-size:13px;color:#B50303;font-weight:600;flex:1">❌ No habilitados (NO_HABILITADO)</div>
+          <div style="font-size:24px;font-weight:700;color:#B50303" id="hab-val-no">—</div>
+          <div style="font-size:12px;color:#B50303;min-width:48px;text-align:right" id="hab-val-no-pct">— %</div>
+        </div>
       </div>
     </div>
   </div>
@@ -10855,36 +10831,35 @@ document.addEventListener('DOMContentLoaded', function(){
   <!-- Filtros + Tabla -->
   <div class="card">
     <div class="card-head" style="flex-wrap:wrap;gap:10px">
-      <div><div class="card-title">Detalle por prestador</div><div class="card-sub">Regional · Departamento · Municipio · Sucursal · Interdependencia · CUPS</div></div>
+      <div><div class="card-title">Detalle por prestador</div><div class="card-sub">Regional · Departamento · Municipio · Sucursal · Interdependencia · CUPS · Contrato</div></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <input id="hab-buscar" placeholder="🔍 Prestador / CUPS / NIT" oninput="habFiltrar()"
-          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;width:170px;background:var(--bg3);color:var(--text);outline:none">
-        <select id="hab-filtro-regional" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:135px">
-          <option value="">Regionales</option>
-        </select>
-        <select id="hab-filtro-resultado" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:155px">
-          <option value="">Resultado</option>
-          <option value="SI HABILITADO">✅ Habilitado</option>
-          <option value="NO HABILITADO">❌ No habilitado</option>
-          <option value="CONTRATO EN PROCESO DE EXCLUSION">⚠️ En exclusión</option>
-          <option value="CONTRATO EXCLUIDO">🚫 Excluido</option>
-          <option value="NO REQUIERE HABILITACION">ℹ️ No requiere</option>
-        </select>
-        <select id="hab-filtro-semaforo" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:155px">
+          style="padding:6px 10px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;width:160px;background:var(--bg3);color:var(--text);outline:none">
+        <select id="hab-filtro-regional" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:120px"><option value="">Regional</option></select>
+        <select id="hab-filtro-depto" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:130px"><option value="">Departamento</option></select>
+        <select id="hab-filtro-municipio" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:130px"><option value="">Municipio</option></select>
+        <select id="hab-filtro-nit" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:170px"><option value="">NIT / Prestador</option></select>
+        <select id="hab-filtro-sucursal" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:150px"><option value="">Sucursal</option></select>
+        <select id="hab-filtro-interdep" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:120px"><option value="">Interdep.</option></select>
+        <select id="hab-filtro-cups" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:150px"><option value="">CUPS</option></select>
+        <select id="hab-filtro-semaforo" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:150px">
           <option value="">Semáforo</option>
-          <option value="__CUMPLE_SOLO">✅ Cumple</option>
-          <option value="INTERDEP">🔗 Interdependencia</option>
+          <option value="CUMPLE">✅ Cumple</option>
+          <option value="CUMPLE INTERDEPENDENCIA">🔗 Cumple interdependencia</option>
           <option value="NO CUMPLE">❌ No cumple</option>
           <option value="NO APLICA">ℹ️ No aplica</option>
           <option value="__VACIO">⬜ Vacío</option>
         </select>
-        <select id="hab-filtro-interdep" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:135px" title="Filtra por valor de la columna Interdependencia">
-          <option value="">Interdep.</option>
+        <select id="hab-filtro-resultado" onchange="habFiltrar()" style="padding:6px 8px;border:1px solid var(--border2);border-radius:8px;font-size:11.5px;background:var(--bg3);color:var(--text);outline:none;max-width:150px">
+          <option value="">Resultado</option>
+          <option value="OK_HABILITADO">✅ Habilitado</option>
+          <option value="NO_HABILITADO">❌ No habilitado</option>
         </select>
+        <button onclick="habLimpiar()" style="padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer">✕ Limpiar</button>
         <span style="font-size:11px;color:var(--text2)" id="hab-count-label">— registros</span>
       </div>
     </div>
-    <div class="card-body" style="padding:0;overflow-x:auto;max-height:400px;overflow-y:auto">
+    <div class="card-body" style="padding:0;overflow-x:auto;max-height:440px;overflow-y:auto">
       <table class="hab-table" id="hab-tabla">
         <thead>
           <tr>
@@ -10898,354 +10873,230 @@ document.addEventListener('DOMContentLoaded', function(){
             <th>CUPS</th>
             <th>Semáforo</th>
             <th>Resultado evaluación</th>
-            <th>Obs.</th>
+            <th>Estado contrato</th>
+            <th>N° contrato</th>
           </tr>
         </thead>
         <tbody id="hab-tbody"></tbody>
       </table>
     </div>
-  </div>
-
-  <!-- Modal observaciones -->
-  <div class="hab-modal-bg" id="hab-modal">
-    <div class="hab-modal">
-      <span class="modal-close" onclick="document.getElementById('hab-modal').classList.remove('open')">✕</span>
-      <h3 id="hab-modal-titulo">Observaciones</h3>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:12px" id="hab-modal-sub"></div>
-      <div style="background:var(--bg3);border-radius:8px;padding:14px;font-size:12px;color:var(--text);line-height:1.6;min-height:60px" id="hab-modal-obs"></div>
-    </div>
+    <div id="hab-status" style="font-size:11px;color:var(--text2);text-align:center;padding:8px 0"></div>
   </div>
 </div>
 
 <!-- ══ JS HABILITACIÓN ══ -->
 <script>
 (function(){
-  const COLORES_RESULTADO = {
-    'SI HABILITADO':                    '#0099D1',
-    'NO HABILITADO':                    '#B50303',
-    'CONTRATO EN PROCESO DE EXCLUSION': '#B86C00',
-    'CONTRATO EXCLUIDO':                '#7A0000',
-    'NO REQUIERE HABILITACION':         '#2E7300',
-  };
+'use strict';
 
-  function norm(s){ return String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+const HAB_SCRIPT = 'https://script.google.com/macros/s/AKfycbw1pzI76bapmDdepdHpXSbdRH31WDS47rtqHYgJyQSjqrGXI6ntEo7idxT50Meeld1u/exec';
+const HAB_MAX_VISIBLE = 1000; // filas visibles en la tabla (los KPIs usan el total filtrado)
 
-  function badgeResultado(r){
-    const n = norm(r);
-    if(n.includes('SI HABILITADO')) return `<span class="badge-si">✅ Si habilitado</span>`;
-    if(n.includes('NO HABILITADO')) return `<span class="badge-no">❌ No habilitado</span>`;
-    if(n.includes('PROCESO DE EXCLUSION')) return `<span class="badge-proceso">⚠️ En proceso exclusión</span>`;
-    if(n.includes('EXCLUIDO')) return `<span class="badge-excluido">🚫 Excluido</span>`;
-    if(n.includes('NO REQUIERE')) return `<span class="badge-norequiere">ℹ️ No requiere</span>`;
-    return `<span style="color:var(--text2)">${r||'—'}</span>`;
-  }
+// Índices de columnas según el orden que devuelve el Apps Script
+const COL = {
+  regional:0, depto:1, municipio:2, nit:3, razon:4, cod_suc:5, sucursal:6,
+  interdep:7, cups:8, fecha:9, contrato:10, estado:11, semaforo:12, validacion:13
+};
 
-  function badgeSemaforo(s){
-    const n = norm(s);
-    if(n.includes('NO CUMPLE')) return `<span class="badge-nocumple">❌ No cumple</span>`;
-    if(n.includes('CUMPLE')) return `<span class="badge-cumple">✅ Cumple</span>`;
-    return `<span style="color:var(--text2)">${s||'—'}</span>`;
-  }
+let HAB_ROWS = [];      // todas las filas (array de arrays)
+let HAB_FILTRADO = [];
+let HAB_LOADED = false;
+let habChart = null;
 
-  function badgeInterdep(v){
-    const n = norm(v);
-    if(n.includes('SI') || n === 'S') return `<span class="badge-intersi">SI aplica</span>`;
-    return `<span class="badge-interna">NO aplica</span>`;
-  }
+const norm = s => String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const fmtN = v => isNaN(v)||v===null ? '—' : Number(v).toLocaleString('es-CO');
+const setTxt = (id,t)=>{ const e=document.getElementById(id); if(e) e.textContent=t; };
 
-  let HAB_DATA = [];
-  let HAB_FILTRADO = [];
+function badgeSemaforo(s){
+  const n = norm(s);
+  if(n.includes('NO CUMPLE')) return '<span class="badge-nocumple">❌ No cumple</span>';
+  if(n.includes('CUMPLE INTERDEPENDENCIA')) return '<span class="badge-cumple">🔗 Cumple interdep.</span>';
+  if(n.includes('CUMPLE')) return '<span class="badge-cumple">✅ Cumple</span>';
+  if(n.includes('NO APLICA')) return '<span class="badge-norequiere">ℹ️ No aplica</span>';
+  return '<span style="color:var(--text2)">⬜ Vacío</span>';
+}
+function badgeValidacion(v){
+  const n = norm(v);
+  if(n.includes('OK_HABILITADO')||n==='OK HABILITADO') return '<span class="badge-si">✅ Habilitado</span>';
+  if(n.includes('NO_HABILITADO')||n==='NO HABILITADO') return '<span class="badge-no">❌ No habilitado</span>';
+  return `<span style="color:var(--text2)">${v||'—'}</span>`;
+}
+function badgeInterdep(v){
+  const n = norm(v);
+  if(n==='SI'||n==='S') return '<span class="badge-intersi">SI aplica</span>';
+  return '<span class="badge-interna">NO aplica</span>';
+}
+function badgeEstado(v){
+  const n = norm(v);
+  if(n.includes('VIGENTE')&&!n.includes('NO')) return `<span style="color:var(--green);font-weight:600">${v}</span>`;
+  if(n==='ACTIVO') return `<span style="color:var(--green);font-weight:600">${v}</span>`;
+  if(n.includes('NO VIGENTE')) return `<span style="color:var(--red);font-weight:600">${v}</span>`;
+  return v||'—';
+}
 
-  window.renderizarHabilitacion = function(){
-    HAB_DATA = DATOS_CARGADOS.homologacion_rows || [];
-    if(!HAB_DATA.length){
-      document.getElementById('hab-tbody').innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text2)">⏳ Cargando datos de habilitación...</td></tr>';
-      return;
-    }
+window.renderizarHabilitacion = function(){
+  if(HAB_LOADED){ poblarFiltrosHab(); habFiltrar(); return; }
+  cargarHabilitacion();
+};
 
-    // KPIs por resultado
-    const byRes = {};
-    HAB_DATA.forEach(r => {
-      const k = norm(r.resultado);
-      byRes[k] = (byRes[k]||0) + 1;
-    });
-    const total = HAB_DATA.length;
-    const si    = byRes['SI HABILITADO'] || 0;
-    const no    = byRes['NO HABILITADO'] || 0;
-    const proc  = byRes['CONTRATO EN PROCESO DE EXCLUSION'] || 0;
-    const excl  = byRes['CONTRATO EXCLUIDO'] || 0;
-    const norq  = byRes['NO REQUIERE HABILITACION'] || 0;
-
-    document.getElementById('hab-kpi-total').textContent   = total.toLocaleString('es-CO');
-    document.getElementById('hab-kpi-total-d').textContent = `${((si/total)*100).toFixed(1)}% habilitados`;
-    document.getElementById('hab-kpi-si').textContent      = si.toLocaleString('es-CO');
-    document.getElementById('hab-kpi-si-d').textContent    = `${((si/total)*100).toFixed(1)}% del total`;
-    document.getElementById('hab-kpi-no').textContent      = no.toLocaleString('es-CO');
-    document.getElementById('hab-kpi-no-d').textContent    = `${((no/total)*100).toFixed(1)}% del total`;
-    document.getElementById('hab-kpi-proceso').textContent = proc.toLocaleString('es-CO');
-    document.getElementById('hab-kpi-proceso-d').textContent = `${((proc/total)*100).toFixed(1)}% del total`;
-    document.getElementById('hab-kpi-excluido').textContent = excl.toLocaleString('es-CO');
-    document.getElementById('hab-kpi-excluido-d').textContent = `${((excl/total)*100).toFixed(1)}% del total`;
-
-    // Semáforo — 5 categorías reales
-    let cumple=0, interdep=0, noCumple=0, noAplica=0, vacio=0;
-    HAB_DATA.forEach(r=>{
-      const s = norm(r.semaforo);
-      if(!s || s==='-' || s==='—') vacio++;
-      else if(s.includes('INTERDEP')) interdep++;
-      else if(s.includes('NO APLICA') || s==='N/A') noAplica++;
-      else if(s.includes('NO CUMPLE') || s.startsWith('NO ')) noCumple++;
-      else if(s.includes('CUMPLE')) cumple++;
-      else vacio++;
-    });
-    const totSem = cumple + interdep + noCumple + noAplica + vacio || 1;
-    const pct = n => ((n/totSem)*100).toFixed(1) + '%';
-    document.getElementById('hab-sem-cumple').textContent       = cumple.toLocaleString('es-CO');
-    document.getElementById('hab-sem-cumple-pct').textContent   = pct(cumple);
-    document.getElementById('hab-sem-interdep').textContent     = interdep.toLocaleString('es-CO');
-    document.getElementById('hab-sem-interdep-pct').textContent = pct(interdep);
-    document.getElementById('hab-sem-nocumple').textContent     = noCumple.toLocaleString('es-CO');
-    document.getElementById('hab-sem-nocumple-pct').textContent = pct(noCumple);
-    document.getElementById('hab-sem-noaplica').textContent     = noAplica.toLocaleString('es-CO');
-    document.getElementById('hab-sem-noaplica-pct').textContent = pct(noAplica);
-    document.getElementById('hab-sem-vacio').textContent        = vacio.toLocaleString('es-CO');
-    document.getElementById('hab-sem-vacio-pct').textContent    = pct(vacio);
-
-    // Poblar select regional
-    const regionales = [...new Set(HAB_DATA.map(r=>r.regional).filter(Boolean))].sort();
-    const selReg = document.getElementById('hab-filtro-regional');
-    selReg.innerHTML = '<option value="">Todas las regionales</option>' +
-      regionales.map(r=>`<option value="${r}">${r}</option>`).join('');
-
-    // Poblar select interdependencia con conteos para mayor claridad
-    const interdepCount = {};
-    HAB_DATA.forEach(r=>{
-      const v = String(r.interdep||'').trim() || '(vacío)';
-      interdepCount[v] = (interdepCount[v]||0) + 1;
-    });
-    const interdepEntries = Object.entries(interdepCount)
-      .sort((a,b)=>b[1]-a[1]); // ordenar de mayor a menor
-    const selInt = document.getElementById('hab-filtro-interdep');
-    if(selInt) selInt.innerHTML = '<option value="">Interdep. (todas)</option>' +
-      interdepEntries.map(([v,c])=>`<option value="${v}">${v} (${c.toLocaleString('es-CO')})</option>`).join('');
-
-    // Gráficas
-    dibujarGraficaResultado(byRes, total);
-    dibujarGraficaSemaforo({cumple, interdep, noCumple, noAplica, vacio});
-
+async function cargarHabilitacion(){
+  const tb = document.getElementById('hab-tbody');
+  if(tb) tb.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--text2)">⏳ Cargando datos de habilitación (124K registros)...</td></tr>';
+  setTxt('hab-status','⏳ Cargando...');
+  try{
+    const d = await fetch(HAB_SCRIPT,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
+    if(!d.ok) throw new Error(d.error||'Respuesta inválida');
+    HAB_ROWS = d.rows || [];
+    HAB_LOADED = true;
+    console.log('[HAB] Filas cargadas:', HAB_ROWS.length);
+    poblarFiltrosHab();
     habFiltrar();
-  };
-
-  function dibujarGraficaResultado(byRes, total){
-    const canvas = document.getElementById('hab-chart-resultado');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const W = canvas.parentElement?.offsetWidth - 40 || 460;
-    const H = 220;
-    canvas.width = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0,0,W,H);
-
-    const entries = Object.entries(byRes).sort((a,b)=>b[1]-a[1]);
-    const maxV = entries[0]?.[1] || 1;
-    const barH = 28, gap = 12;
-    const labelW = 230, valW = 90;       // más ancho para que entren los nombres completos
-    const barZone = W - labelW - valW - 8;
-
-    entries.forEach(([k,v],i)=>{
-      const y = i*(barH+gap)+4;
-      const color = COLORES_RESULTADO[k] || '#888';
-      const bw = Math.max(4, (v/maxV)*barZone);
-
-      // Label completo — auto-ajusta el font-size si es muy largo
-      ctx.fillStyle = '#212121';
-      let fontSize = 10.5;
-      ctx.font = fontSize+'px Figtree, sans-serif';
-      while(ctx.measureText(k).width > labelW - 8 && fontSize > 8){
-        fontSize -= 0.5;
-        ctx.font = fontSize+'px Figtree, sans-serif';
-      }
-      ctx.fillText(k, 0, y+18);
-
-      // Background track + Bar fill
-      ctx.fillStyle = color+'18';
-      ctx.beginPath(); ctx.roundRect(labelW, y+3, barZone, barH-6, 4); ctx.fill();
-      ctx.fillStyle = color;
-      ctx.beginPath(); ctx.roundRect(labelW, y+3, bw, barH-6, 4); ctx.fill();
-
-      // Valor dentro de la barra si cabe, sino justo al final
-      const valTxt = v.toLocaleString('es-CO');
-      ctx.font = 'bold 11px Figtree, sans-serif';
-      const valW2 = ctx.measureText(valTxt).width;
-      if(bw >= valW2 + 14){
-        ctx.fillStyle = '#fff';
-        ctx.fillText(valTxt, labelW + bw - valW2 - 6, y+18);
-      } else {
-        ctx.fillStyle = color;
-        ctx.fillText(valTxt, labelW + bw + 4, y+18);
-      }
-      // % a la derecha
-      const vx = labelW + barZone + 8;
-      ctx.fillStyle = '#4A7A95';
-      ctx.font = '10px Figtree, sans-serif';
-      ctx.fillText('(' + ((v/total)*100).toFixed(1) + '%)', vx, y+18);
-    });
-
-    // Leyenda
-    const ley = document.getElementById('hab-leyenda-resultado');
-    if(ley) ley.innerHTML = entries.map(([k,v])=>
-      `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${COLORES_RESULTADO[k]||'#888'};flex-shrink:0;display:inline-block"></span><span style="color:var(--text2);font-size:10.5px">${k}: <b style="color:var(--text)">${v.toLocaleString('es-CO')}</b></span></span>`
-    ).join('');
+  }catch(e){
+    console.error('[HAB] Error:', e);
+    setTxt('hab-status','⚠ Error al cargar: '+e.message);
+    if(tb) tb.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--red)">⚠ Error al cargar: '+e.message+'</td></tr>';
   }
+}
 
-  function dibujarGraficaSemaforo(d){
-    const canvas = document.getElementById('hab-chart-semaforo');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const W = canvas.parentElement?.offsetWidth - 40 || 400;
-    const H = 100;
-    canvas.width = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0,0,W,H);
-
-    const total = d.cumple + d.interdep + d.noCumple + d.noAplica + d.vacio || 1;
-    const data = [
-      {v:d.cumple,   c:'#0099D1', l:'Cumple'},
-      {v:d.interdep, c:'#5A8F2A', l:'Interdep.'},
-      {v:d.noCumple, c:'#B50303', l:'No cumple'},
-      {v:d.noAplica, c:'#D4A24A', l:'No aplica'},
-      {v:d.vacio,    c:'#999',    l:'Vacío'},
-    ].filter(s=>s.v>0);
-
-    const barY = 18, barH = 32;
-    let x = 0;
-    // Pintar segmentos
-    const segs = [];
-    data.forEach(s=>{
-      const w = (s.v/total) * W;
-      ctx.fillStyle = s.c;
-      ctx.fillRect(x, barY, w, barH);
-      segs.push({...s, x, w});
-      x += w;
-    });
-    // Valores: dentro del segmento si cabe, fuera (con línea guía) si no
-    ctx.font = 'bold 11px Figtree';
-    ctx.textAlign = 'center';
-    segs.forEach(s=>{
-      const txt = s.v.toLocaleString('es-CO');
-      const txtW = ctx.measureText(txt).width;
-      if(s.w >= txtW + 8){
-        // Dentro del segmento
-        ctx.fillStyle = '#fff';
-        ctx.fillText(txt, s.x + s.w/2, barY + barH/2 + 4);
-      } else {
-        // Fuera del segmento, abajo con conector
-        const cx = s.x + s.w/2;
-        ctx.strokeStyle = s.c; ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cx, barY + barH);
-        ctx.lineTo(cx, barY + barH + 8);
-        ctx.stroke();
-        ctx.fillStyle = s.c;
-        ctx.fillText(txt, cx, barY + barH + 20);
-      }
-    });
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#666';
-    ctx.font = '9.5px Figtree';
-    ctx.fillText('Total = '+total.toLocaleString('es-CO')+' servicios', 0, 12);
+function poblarFiltrosHab(){
+  const uniqCol = idx => [...new Set(HAB_ROWS.map(r=>String(r[idx]||'').trim()).filter(Boolean))].sort();
+  const fill = (id,items,label)=>{
+    const el=document.getElementById(id); if(!el) return;
+    const val=el.value;
+    el.innerHTML = `<option value="">${label}</option>`+items.map(v=>`<option value="${v.replace(/"/g,'&quot;')}">${v}</option>`).join('');
+    if(items.includes(val)) el.value=val;
+  };
+  fill('hab-filtro-regional', uniqCol(COL.regional), 'Regional');
+  fill('hab-filtro-depto', uniqCol(COL.depto), 'Departamento');
+  fill('hab-filtro-municipio', uniqCol(COL.municipio), 'Municipio');
+  fill('hab-filtro-sucursal', uniqCol(COL.sucursal), 'Sucursal');
+  fill('hab-filtro-interdep', uniqCol(COL.interdep), 'Interdep.');
+  // CUPS puede ser enorme; limitar a los más frecuentes no, mejor todos pero ordenados
+  fill('hab-filtro-cups', uniqCol(COL.cups), 'CUPS');
+  // NIT + razón social
+  const pMap={}; HAB_ROWS.forEach(r=>{const n=String(r[COL.nit]||'').trim(); if(n&&!pMap[n])pMap[n]=String(r[COL.razon]||n).trim();});
+  const sel=document.getElementById('hab-filtro-nit');
+  if(sel){ const val=sel.value;
+    sel.innerHTML='<option value="">NIT / Prestador</option>'+Object.entries(pMap).sort((a,b)=>a[1].localeCompare(b[1])).map(([n,nm])=>`<option value="${n}">${n} · ${nm.slice(0,32)}</option>`).join('');
+    if(pMap[val]) sel.value=val;
   }
+}
 
-  let _habFiltrarTO = null;
-  window.habFiltrar = function(){
-    // Debounce para evitar redibujado en cada keystroke
-    if(_habFiltrarTO) clearTimeout(_habFiltrarTO);
-    _habFiltrarTO = setTimeout(_habFiltrarRun, 80);
-  };
+let _habTO=null;
+window.habFiltrar = function(){ if(_habTO)clearTimeout(_habTO); _habTO=setTimeout(_habRun,80); };
+window.habLimpiar = function(){
+  ['hab-buscar','hab-filtro-regional','hab-filtro-depto','hab-filtro-municipio','hab-filtro-nit','hab-filtro-sucursal','hab-filtro-interdep','hab-filtro-cups','hab-filtro-semaforo','hab-filtro-resultado'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  _habRun();
+};
 
-  function _habFiltrarRun(){
-    const buscar  = (document.getElementById('hab-buscar')?.value||'').toLowerCase();
-    const filtReg = document.getElementById('hab-filtro-regional')?.value||'';
-    const filtRes = (document.getElementById('hab-filtro-resultado')?.value||'').toUpperCase();
-    const filtSem = document.getElementById('hab-filtro-semaforo')?.value||'';
-    const filtInt = document.getElementById('hab-filtro-interdep')?.value||'';
+function _habRun(){
+  if(!HAB_LOADED) return;
+  const buscar = norm(document.getElementById('hab-buscar')?.value||'');
+  const fReg = document.getElementById('hab-filtro-regional')?.value||'';
+  const fDep = document.getElementById('hab-filtro-depto')?.value||'';
+  const fMun = document.getElementById('hab-filtro-municipio')?.value||'';
+  const fNit = document.getElementById('hab-filtro-nit')?.value||'';
+  const fSuc = document.getElementById('hab-filtro-sucursal')?.value||'';
+  const fInt = document.getElementById('hab-filtro-interdep')?.value||'';
+  const fCups= document.getElementById('hab-filtro-cups')?.value||'';
+  const fSem = document.getElementById('hab-filtro-semaforo')?.value||'';
+  const fRes = document.getElementById('hab-filtro-resultado')?.value||'';
 
-    HAB_FILTRADO = HAB_DATA.filter(r => {
-      // Búsqueda — normaliza NITs sin puntos para que matchee desde drill-down
-      const nitNorm = String(r.nit||'').replace(/\./g,'').trim();
-      const buscarNorm = buscar.replace(/\./g,'');
-      const texto = `${r.razon_social} ${r.sucursal} ${r.cups} ${r.nit} ${nitNorm}`.toLowerCase();
-      if(buscar && !texto.includes(buscarNorm)) return false;
-      if(filtReg && r.regional !== filtReg) return false;
-      if(filtRes && !norm(r.resultado).includes(filtRes)) return false;
-      if(filtInt){
-        const valInt = String(r.interdep||'').trim();
-        if(filtInt==='(vacío)'){ if(valInt!=='') return false; }
-        else { if(valInt !== filtInt) return false; }
-      }
-      // Semáforo: 5 valores discretos
-      if(filtSem){
-        const s = norm(r.semaforo);
-        if(filtSem==='__CUMPLE_SOLO'){
-          if(!(s.includes('CUMPLE') && !s.includes('NO') && !s.includes('INTERDEP'))) return false;
-        } else if(filtSem==='__VACIO'){
-          if(s && s!=='-' && s!=='—') return false;
-        } else if(filtSem==='INTERDEP'){
-          if(!s.includes('INTERDEP')) return false;
-        } else {
-          if(!s.includes(filtSem)) return false;
-        }
-      }
-      return true;
-    });
+  HAB_FILTRADO = HAB_ROWS.filter(r=>{
+    if(fReg && String(r[COL.regional]).trim()!==fReg) return false;
+    if(fDep && String(r[COL.depto]).trim()!==fDep) return false;
+    if(fMun && String(r[COL.municipio]).trim()!==fMun) return false;
+    if(fNit && String(r[COL.nit]).trim()!==fNit) return false;
+    if(fSuc && String(r[COL.sucursal]).trim()!==fSuc) return false;
+    if(fInt && String(r[COL.interdep]).trim()!==fInt) return false;
+    if(fCups && String(r[COL.cups]).trim()!==fCups) return false;
+    if(fSem){
+      const sem = norm(r[COL.semaforo]);
+      if(fSem==='__VACIO'){ if(sem!=='') return false; }
+      else if(sem!==norm(fSem)) return false;
+    }
+    if(fRes && norm(r[COL.validacion])!==norm(fRes)) return false;
+    if(buscar){
+      const hay = norm(r[COL.razon]).includes(buscar) || norm(r[COL.cups]).includes(buscar) || String(r[COL.nit]).includes(buscar);
+      if(!hay) return false;
+    }
+    return true;
+  });
 
-    document.getElementById('hab-count-label').textContent = `${HAB_FILTRADO.length.toLocaleString('es-CO')} registros`;
+  // KPIs basados en VALIDACION_NIT (sobre el total filtrado)
+  let si=0, no=0;
+  HAB_FILTRADO.forEach(r=>{
+    const v = norm(r[COL.validacion]);
+    if(v.includes('OK_HABILITADO')) si++;
+    else if(v.includes('NO_HABILITADO')) no++;
+  });
+  const total = HAB_FILTRADO.length;
+  const pct = total>0 ? (si/total*100) : 0;
+  setTxt('hab-kpi-total', fmtN(total));
+  setTxt('hab-kpi-si', fmtN(si));
+  setTxt('hab-kpi-no', fmtN(no));
+  setTxt('hab-kpi-pct', total>0 ? pct.toFixed(1)+'%' : '—');
+  setTxt('hab-val-si', fmtN(si));
+  setTxt('hab-val-no', fmtN(no));
+  setTxt('hab-val-si-pct', total>0 ? (si/total*100).toFixed(1)+'%' : '— %');
+  setTxt('hab-val-no-pct', total>0 ? (no/total*100).toFixed(1)+'%' : '— %');
+  setTxt('hab-count-label', `${fmtN(total)} registros`);
 
-    const tbody = document.getElementById('hab-tbody');
-    if(!tbody) return;
-    const MAX = 500;
-    tbody.innerHTML = HAB_FILTRADO.slice(0, MAX).map((r,i)=>`
-      <tr onclick="habAbrirModal(${i})">
-        <td>${r.regional||'—'}</td>
-        <td>${r.departamento||'—'}</td>
-        <td>${r.municipio||'—'}</td>
-        <td style="font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.razon_social||'—'}</td>
-        <td style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.sucursal||'—'}</td>
-        <td>${badgeInterdep(r.interdep)}</td>
-        <td style="white-space:nowrap">${r.fecha_inicio||'—'}</td>
-        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;color:var(--text2)">${r.cups||'—'}</td>
-        <td>${badgeSemaforo(r.semaforo)}</td>
-        <td>${badgeResultado(r.resultado)}</td>
-        <td><span style="cursor:pointer;color:var(--blue);font-size:13px" title="Ver observaciones">💬</span></td>
-      </tr>`).join('') + (HAB_FILTRADO.length > MAX ? `<tr><td colspan="11" style="text-align:center;padding:10px;color:var(--text2);font-size:11px">Mostrando primeros ${MAX} de ${HAB_FILTRADO.length} registros. Use los filtros para acotar.</td></tr>` : '');
-  };
+  dibujarChartValidacion(si, no);
+  renderTablaHab();
+}
 
-  window.habAbrirModal = function(i){
-    const r = HAB_FILTRADO[i];
-    if(!r) return;
-    document.getElementById('hab-modal-titulo').textContent = r.razon_social || r.nit;
-    document.getElementById('hab-modal-sub').textContent = `${r.sucursal||''} · ${r.regional||''} · ${r.municipio||''}`;
-    document.getElementById('hab-modal-obs').textContent = r.observacion || 'Sin observaciones registradas.';
-    document.getElementById('hab-modal').classList.add('open');
-  };
+function dibujarChartValidacion(si, no){
+  const cv = document.getElementById('hab-chart-validacion');
+  if(!cv || typeof Chart==='undefined') return;
+  if(habChart) habChart.destroy();
+  habChart = new Chart(cv.getContext('2d'),{
+    type:'doughnut',
+    data:{ labels:['Habilitados','No habilitados'],
+      datasets:[{ data:[si,no], backgroundColor:['#0099D1','#B50303'], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:true,
+      plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, padding:12 } } },
+      cutout:'62%' }
+  });
+}
 
-  // Trigger on navigate
-  const _origNav = window.navigate;
-  if(typeof _origNav === 'function'){
-    window.navigate = function(screen){
-      _origNav(screen);
-      if(screen === 'red-habilitacion') setTimeout(window.renderizarHabilitacion, 80);
+function renderTablaHab(){
+  const tbody = document.getElementById('hab-tbody');
+  if(!tbody) return;
+  const vis = HAB_FILTRADO.slice(0, HAB_MAX_VISIBLE);
+  tbody.innerHTML = vis.map(r=>`<tr>
+    <td>${r[COL.regional]||'—'}</td>
+    <td>${r[COL.depto]||'—'}</td>
+    <td>${r[COL.municipio]||'—'}</td>
+    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${String(r[COL.razon]||'').replace(/"/g,'')}">${r[COL.razon]||'—'}</td>
+    <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${String(r[COL.sucursal]||'').replace(/"/g,'')}">${r[COL.sucursal]||'—'}</td>
+    <td style="text-align:center">${badgeInterdep(r[COL.interdep])}</td>
+    <td>${r[COL.fecha]||'—'}</td>
+    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${String(r[COL.cups]||'').replace(/"/g,'')}">${r[COL.cups]||'—'}</td>
+    <td style="text-align:center">${badgeSemaforo(r[COL.semaforo])}</td>
+    <td style="text-align:center">${badgeValidacion(r[COL.validacion])}</td>
+    <td style="text-align:center">${badgeEstado(r[COL.estado])}</td>
+    <td>${r[COL.contrato]||'—'}</td>
+  </tr>`).join('') || '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--text2)">Sin registros para estos filtros</td></tr>';
+
+  if(HAB_FILTRADO.length > HAB_MAX_VISIBLE){
+    setTxt('hab-status', `Mostrando ${HAB_MAX_VISIBLE.toLocaleString('es-CO')} de ${HAB_FILTRADO.length.toLocaleString('es-CO')} registros — afina los filtros para ver el detalle completo. (Los KPIs reflejan el total filtrado).`);
+  } else {
+    setTxt('hab-status', `${HAB_FILTRADO.length.toLocaleString('es-CO')} registros`);
+  }
+}
+
+// Navigate trigger
+document.addEventListener('DOMContentLoaded', function(){
+  const orig = window.navigate;
+  if(typeof orig==='function'){
+    window.navigate = function(scr){
+      orig(scr);
+      if(scr==='red-habilitacion') setTimeout(()=>{ renderizarHabilitacion(); }, 80);
     };
   }
+});
 
-  // Also trigger when data loads
-  document.addEventListener('DOMContentLoaded', function(){
-    const _orig = window.cargaAutomatica;
-  });
 })();
 </script>
 
