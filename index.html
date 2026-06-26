@@ -10449,6 +10449,7 @@ async function cargarACOP(){
     setText('acc-status','⚠ Error al cargar: '+e.message);
   }
 }
+window.cargarACOP = cargarACOP; // exponer para que el reporte pueda dispararla
 
 // ── Poblar los filtros (compartidos por ambas pantallas) ──────────
 function poblarFiltrosACOP(){
