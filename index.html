@@ -1495,9 +1495,12 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <select id="rep-prest-selector" style="flex:1;min-width:220px;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
-            <option value="">— Selecciona un prestador —</option>
-          </select>
+          <input id="rep-prest-buscar" list="rep-prest-datalist" autocomplete="off"
+            placeholder="🔍 Escribe NIT o nombre del prestador..."
+            oninput="repSelPrest()"
+            style="flex:1;min-width:280px;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;background:var(--bg3);color:var(--text);outline:none">
+          <datalist id="rep-prest-datalist"></datalist>
+          <select id="rep-prest-selector" style="display:none"><option value=""></option></select>
           <button class="btn pri" onclick="generarFormatoSupervision()" style="font-size:12px;padding:7px 18px;white-space:nowrap">⬇ Generar Excel</button>
         </div>
         <div id="rep-prest-info" style="display:none;padding:8px 12px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text2)"></div>
@@ -13128,22 +13131,40 @@ document.addEventListener('DOMContentLoaded',function(){
 
 // Poblar selector de prestadores en reportes
 window.poblarSelectorReportes = function poblarSelectorReportes(){
-  const sel=document.getElementById('rep-prest-selector'); if(!sel) return;
+  const dl=document.getElementById('rep-prest-datalist');
   const prest=DATOS_CARGADOS.prestadores||[];
   if(!prest.length) return;
-  const sorted=[...prest].sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')));
-  sel.innerHTML='<option value="">— Selecciona un prestador —</option>'+
-    sorted.map(p=>`<option value="${String(p.nit||p.nombre||'').replace(/"/g,'')}">${String(p.nombre||p.nit||'').substring(0,55)} · ${p.modelo||'—'}</option>`).join('');
-  sel.onchange=function(){
-    const nit=this.value; if(!nit) return;
-    const p=prest.find(x=>String(x.nit||x.nombre||'')===nit)||{};
-    const info=document.getElementById('rep-prest-info');
-    if(info){
-      info.style.display='block';
-      info.textContent=`NIT: ${p.nit||'—'} · Contrato: ${p.contrato||'—'} · Modelo: ${p.modelo||'—'} · Regional: ${p.regional||'—'} · Ciudad: ${p.ciudad||'—'}`;
-    }
-  };
-}
+  if(dl){
+    const sorted=[...prest].sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')));
+    // El value que ve el usuario combina NIT + nombre para que pueda buscar por cualquiera
+    dl.innerHTML=sorted.map(p=>{
+      const nit=String(p.nit||'').replace(/"/g,'');
+      const nom=String(p.nombre||p.nit||'').replace(/"/g,'').substring(0,55);
+      return `<option value="${nit} · ${nom}">`;
+    }).join('');
+  }
+};
+
+// Resuelve el prestador escrito/elegido en el buscador y muestra su info
+window.repSelPrest = function repSelPrest(){
+  const inp=document.getElementById('rep-prest-buscar');
+  const sel=document.getElementById('rep-prest-selector');
+  const info=document.getElementById('rep-prest-info');
+  if(!inp||!sel) return;
+  const txt=String(inp.value||'').trim();
+  // El NIT es lo que está antes del " · "
+  const nit=txt.split('·')[0].replace(/\./g,'').trim();
+  sel.value=nit;
+  if(!nit){ if(info) info.style.display='none'; return; }
+  const prest=DATOS_CARGADOS.prestadores||[];
+  const p=prest.find(x=>String(x.nit||'').replace(/\./g,'').trim()===nit);
+  if(p && info){
+    info.style.display='block';
+    info.textContent=`NIT: ${p.nit||'—'} · Contrato: ${p.contrato||'—'} · Modelo: ${p.modelo||p.forma_contratacion||'—'} · Regional: ${p.regional||'—'} · Ciudad: ${p.ciudad||'—'}`;
+  } else if(info){
+    info.style.display='none';
+  }
+};
 
 // Generar Formato Supervisión Contractual en Excel
 // Template base64 del Formato Supervisión Contractual V3
@@ -13457,7 +13478,11 @@ window.descargarScriptPython=function(){
 
 window.generarFormatoSupervision=async function(){
   const sel=document.getElementById('rep-prest-selector');
-  const nit=sel?.value; if(!nit){toastMsg('Selecciona un prestador primero');return;}
+  const inp=document.getElementById('rep-prest-buscar');
+  // Resolver NIT: primero del selector oculto; si no, del texto del buscador
+  let nit=sel?.value;
+  if(!nit && inp){ nit=String(inp.value||'').split('·')[0].replace(/\./g,'').trim(); if(sel) sel.value=nit; }
+  if(!nit){toastMsg('Selecciona un prestador primero');return;}
   const prest=DATOS_CARGADOS.prestadores||[];
   const normNit=nit.replace(/\./g,'').trim();
   const normS=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
