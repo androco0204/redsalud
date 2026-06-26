@@ -10434,6 +10434,7 @@ async function cargarACOP(){
     ]);
     ACOP_METRICAS = mRes.metricas || [];
     ACOP_GESTION  = gRes.gestion  || [];
+    window.ACOP_METRICAS = ACOP_METRICAS; // exponer para el reporte de supervisión
     ACOP_LOADED = true;
     console.log('[ACOP] Métricas:', ACOP_METRICAS.length, 'grupos · Gestión:', ACOP_GESTION.length, 'grupos');
     poblarFiltrosACOP();
@@ -10947,6 +10948,7 @@ async function cargarHabilitacion(){
     const d = await fetch(HAB_SCRIPT,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
     if(!d.ok) throw new Error(d.error||'Respuesta inválida');
     HAB_ROWS = d.rows || [];
+    window.HAB_ROWS = HAB_ROWS; // exponer para que el reporte de supervisión lo pueda leer
     HAB_LOADED = true;
     console.log('[HAB] Filas cargadas:', HAB_ROWS.length);
     poblarFiltrosHab();
@@ -13467,36 +13469,42 @@ window.generarFormatoSupervision=async function(){
   // ── 1) HABILITACIÓN — fuente nueva HAB_SCRIPT (VALIDACION_NIT) ──────────
   let habTotal=0, habSi=0;
   try{
-    if(typeof HAB_SCRIPT!=='undefined' && HAB_SCRIPT && HAB_SCRIPT!=='PENDIENTE_DEPLOY'){
-      // Reusar datos ya cargados si existen; si no, traerlos
-      let habRows = (typeof HAB_ROWS!=='undefined' && HAB_ROWS && HAB_ROWS.length) ? HAB_ROWS : null;
-      if(!habRows){
-        const hd = await fetch(HAB_SCRIPT,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
-        habRows = hd.rows||[];
-      }
+    // Leer de la versión global expuesta por la pantalla de Habilitación
+    let habRows = (window.HAB_ROWS && window.HAB_ROWS.length) ? window.HAB_ROWS : null;
+    if(!habRows && typeof HAB_SCRIPT!=='undefined' && HAB_SCRIPT && HAB_SCRIPT!=='PENDIENTE_DEPLOY'){
+      const hd = await fetch(HAB_SCRIPT,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
+      habRows = hd.rows||[];
+    }
+    if(habRows && habRows.length){
       // Columnas: 3=NIT, 13=VALIDACION_NIT
       const delNit = habRows.filter(r=>String(r[3]||'').replace(/\./g,'').trim()===normNit);
       habTotal = delNit.length;
       habSi = delNit.filter(r=>normS(r[13]).includes('OK_HABILITADO')).length;
+      console.log('[Reporte] Habilitación NIT '+normNit+':', habSi+'/'+habTotal+' OK');
     }
   }catch(e){ console.warn('[Reporte] Habilitación no disponible:', e.message); }
 
-  // ── 2) ACCESIBILIDAD + OPORTUNIDAD (Cliente Incógnito) — carga ACOP ─────
+  // ── 2) ACCESIBILIDAD + OPORTUNIDAD (Cliente Incógnito) ─────────────────
+  // Usa ACOP_METRICAS ya cargado en memoria. El NIT se extrae del campo `cod`
+  // (formato NIT-sucursal); se toma la parte antes del primer guion.
   let accPct=null, opDias=null;
   try{
-    if(typeof ACOP_SCRIPT!=='undefined' && ACOP_SCRIPT && ACOP_SCRIPT!=='PENDIENTE_DEPLOY'){
-      let metr = (typeof ACOP_METRICAS!=='undefined' && ACOP_METRICAS && ACOP_METRICAS.length) ? ACOP_METRICAS : null;
-      if(!metr){
-        const md = await fetch(ACOP_SCRIPT+'?accion=metricas',{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
-        metr = md.metricas||[];
-      }
-      // Filtrar por NIT (el cod BH = NIT-sucursal; el campo nit ya viene)
-      const filas = metr.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+    let metr = (window.ACOP_METRICAS && window.ACOP_METRICAS.length) ? window.ACOP_METRICAS : null;
+    if(!metr && typeof cargarACOP==='function'){
+      await cargarACOP();
+      metr = (window.ACOP_METRICAS && window.ACOP_METRICAS.length) ? window.ACOP_METRICAS : null;
+    }
+    if(metr && metr.length){
+      const nitDeCod = c => String(c||'').split('-')[0].replace(/\./g,'').trim();
+      const filas = metr.filter(r=>nitDeCod(r.cod)===normNit);
       if(filas.length){
         let disp=0,int=0,osum=0,on=0;
         filas.forEach(r=>{ disp+=(+r.disp||0); int+=(+r.intentos||0); osum+=(+r.oport_sum||0); on+=(+r.oport_n||0); });
         accPct = int>0 ? (disp/int*100) : null;
         opDias = on>0 ? (osum/on) : null;
+        console.log('[Reporte] ACOP encontrado para NIT '+normNit+':', filas.length, 'grupos · acc='+(accPct!==null?accPct.toFixed(1):'—')+'% · op='+(opDias!==null?opDias.toFixed(1):'—')+'d');
+      } else {
+        console.log('[Reporte] ACOP: sin filas para NIT '+normNit);
       }
     }
   }catch(e){ console.warn('[Reporte] Accesibilidad/Oportunidad no disponible:', e.message); }
