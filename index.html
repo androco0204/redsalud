@@ -13545,19 +13545,66 @@ window.generarFormatoSupervision=async function(){
     }
   }catch(e){}
 
-  // ── 4) RESULTADOS EN SALUD — de RIESGOS_RED (si está cargado) ──────────
-  let resNum=null,resDen=null,resPct=null;
-  // (queda informativo; si no hay dato, va No Aplica)
+  // ── 4) NOTA TÉCNICA — de NT_DATA (Valor NT vigente por NIT) ────────────
+  let ntValor=null;
+  try{
+    let ntRows = (window.NT_DATA && window.NT_DATA.length) ? window.NT_DATA : null;
+    if(!ntRows && typeof cargarNotaTecnica==='function'){
+      await cargarNotaTecnica();
+      ntRows = (window.NT_DATA && window.NT_DATA.length) ? window.NT_DATA : null;
+    }
+    if(ntRows && ntRows.length){
+      const f=ntRows.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+      if(f.length){
+        // Valor NT vigente (suma si hay varias filas del prestador)
+        ntValor=f.reduce((a,r)=>a+(+r.valor||0),0);
+        console.log('[Reporte] Nota Técnica NIT '+normNit+': valor='+ntValor);
+      }
+    }
+  }catch(e){ console.warn('[Reporte] Nota Técnica no disponible:', e.message); }
 
-  // ── 5) CUENTAS MÉDICAS (glosa, radicación, devoluciones) ───────────────
+  // ── 5) RESULTADOS EN SALUD — solo si el prestador aplica (cohorte) ─────
+  let resInfo=null;
+  try{
+    if(typeof RIESGOS_DATA!=='undefined' && RIESGOS_DATA && RIESGOS_DATA.tabs){
+      // Buscar el prestador por nombre en las tabs regionales (la cohorte va por nombre)
+      const nomP=normS(p.nombre||'');
+      for(const tab of RIESGOS_DATA.tabs){
+        if(tab.tipo==='nacional') continue;
+        const idx=(tab.prestadores||[]).findIndex(pr=>{ const n=normS(pr); return n && (n.includes(nomP)||nomP.includes(n)); });
+        if(idx>=0){
+          // tomar el primer indicador medible con valor para ese prestador
+          const indConDato=(tab.indicadores||[]).find(i=>i.valores && i.valores[idx] && i.valores[idx].valor!=null && String(i.valores[idx].valor).trim()!=='' && String(i.valores[idx].valor).trim()!=='—');
+          if(indConDato){
+            resInfo={nombre:indConDato.nombre, valor:indConDato.valores[idx].valor, cohorte:RIESGOS_DATA.cohorte||'Cohorte'};
+            console.log('[Reporte] Resultados en Salud NIT '+normNit+' ('+p.nombre+'):', resInfo.valor);
+            break;
+          }
+        }
+      }
+    }
+  }catch(e){ console.warn('[Reporte] Resultados en Salud no disponible:', e.message); }
+
+  // ── 6) CUENTAS MÉDICAS (glosa, radicación, devoluciones) ───────────────
   const cmRows=(DATOS_CARGADOS.cuentas_medicas||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
   const sub=cmRows.reduce((a,r)=>a+(r.subtotal||0),0);
   const glos=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
   const dev=cmRows.reduce((a,r)=>a+(r.devoluciones||0),0);
 
-  // ── 6) PQR ──────────────────────────────────────────────────────────────
-  const pqrRows=(window.PQRS_RED_DATA||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const totalPqr=pqrRows.reduce((a,r)=>a+(r.total||0),0);
+  // ── 7) PQR (quejas) — de PQRS_RED_DATA, suma del total por NIT ─────────
+  let totalPqr=0;
+  try{
+    let pqrData=(window.PQRS_RED_DATA && window.PQRS_RED_DATA.length) ? window.PQRS_RED_DATA : null;
+    if(!pqrData && typeof cargarPqrsRed==='function'){
+      await cargarPqrsRed();
+      pqrData=(window.PQRS_RED_DATA && window.PQRS_RED_DATA.length) ? window.PQRS_RED_DATA : null;
+    }
+    if(pqrData && pqrData.length){
+      const f=pqrData.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+      totalPqr=f.reduce((a,r)=>a+(+r.total||0),0);
+      if(f.length) console.log('[Reporte] PQRS NIT '+normNit+': '+totalPqr+' quejas');
+    }
+  }catch(e){ console.warn('[Reporte] PQRS no disponible:', e.message); }
 
   const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const datos={
@@ -13573,6 +13620,8 @@ window.generarFormatoSupervision=async function(){
     accesibilidad: accPct!==null ? {pct:accPct} : null,
     oportunidad: opDias!==null ? {dias:opDias} : null,
     satisfaccion: satPct!==null ? {pct:satPct} : null,
+    nota_tecnica: ntValor!==null ? {valor:ntValor} : null,
+    resultados: resInfo ? {nombre:resInfo.nombre, valor:String(resInfo.valor), cohorte:resInfo.cohorte} : null,
     glosa:{subtotal:sub,glosado:glos,devoluciones:dev},
     pqr:{total:totalPqr}
   };
@@ -15038,6 +15087,7 @@ window.cargarNotaTecnica = async function(force=false){
     const url = APPS_SCRIPT_URL + '?id='+NT_SHEET_ID+'&hoja='+encodeURIComponent(NT_HOJA);
     const raw = await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
     NT_DATA = parsearNotaTecnica(raw);
+    window.NT_DATA = NT_DATA; // exponer para el reporte de supervisión
     NT_LOADED = true;
     console.log('[NT] Filas:', NT_DATA.length);
     ntPoblarFiltros();
