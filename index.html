@@ -13274,21 +13274,19 @@ def generar(datos):
     # Objeto del Contrato
     write(ws, 20, 2, p.get('especialidad','Prestación de servicios de salud'), wrap=True)
 
-    # ── Vigilancia Técnica ─────────────────────────────────────────
-    # Habilitación (fila 24)
-    hab_si = hab.get('habilitados', 0)
-    hab_total = hab.get('total', 0)
-    if hab_total:
-        pct = round(hab_si / hab_total * 100)
-        write(ws, 24, 10, f'Numerador: {hab_si}\\nDenominador: {hab_total}\\nResultado: {pct}%', wrap=True)
-        write(ws, 24, 12, 'X' if pct == 100 else '')
-        write(ws, 24, 13, 'X' if pct < 100 else '')
-        write(ws, 24, 14, '')
-        write(ws, 24, 15, hab.get('observacion', f'{hab_si}/{hab_total} servicios habilitados'))
-    else:
-        write(ws, 24, 14, 'X')
+    acc = datos.get('accesibilidad') or {}
+    op = datos.get('oportunidad') or {}
+    sat = datos.get('satisfaccion') or {}
+    res = datos.get('resultados') or {}
 
-    # Filas 25-38: marcar No Aplica por defecto (sin dato de Apps Script)
+    # helper: marcar cumplimiento en una fila (col 12=Cumple, 13=No Cumple, 14=No Aplica)
+    def marcar(row, cumple):
+        write(ws, row, 12, 'X' if cumple else '')
+        write(ws, row, 13, '' if cumple else 'X')
+        write(ws, row, 14, '')
+
+    # Primero: marcar TODAS las filas de indicadores (25-38) como No Aplica por defecto.
+    # Luego cada indicador con dato sobreescribe su fila.
     for row in range(25, 39):
         b = ws.cell(row=row, column=2).value
         if b and str(b).strip():
@@ -13296,35 +13294,81 @@ def generar(datos):
             write(ws, row, 13, '')
             write(ws, row, 14, 'X')
 
-    # Quejas/PQR (fila 28) - si hay dato
+    # ── Vigilancia Técnica ─────────────────────────────────────────
+    # Habilitación (fila 24) — fuente HAB_SCRIPT / VALIDACION_NIT
+    hab_si = hab.get('habilitados', 0)
+    hab_total = hab.get('total', 0)
+    if hab_total:
+        pct = round(hab_si / hab_total * 100)
+        write(ws, 24, 10, f'Numerador: {hab_si}\\nDenominador: {hab_total}\\nResultado: {pct}%', wrap=True)
+        marcar(24, pct == 100)
+        write(ws, 24, 15, hab.get('observacion', f'{hab_si}/{hab_total} servicios habilitados'))
+    else:
+        write(ws, 24, 14, 'X')
+
+    # Oportunidad (fila 25) — días promedio Cliente Incógnito. Meta <= 5 días
+    if op.get('dias') is not None:
+        d = op['dias']
+        write(ws, 25, 10, f'% Cumplimiento Oportunidad:\\nPromedio {d:.1f} días', wrap=True)
+        marcar(25, d <= 5)
+
+    # Accesibilidad (fila 26) — % accesibilidad. Meta >= 80%
+    if acc.get('pct') is not None:
+        a = acc['pct']
+        write(ws, 26, 10, f'% Accesibilidad: {a:.1f}%', wrap=True)
+        marcar(26, a >= 80)
+
+    # Quejas/PQR (fila 28)
     if pqr.get('total'):
         write(ws, 28, 10, f'Total PQR período: {pqr["total"]}', wrap=True)
-        write(ws, 28, 12, 'X' if pqr['total'] < 20 else '')
-        write(ws, 28, 13, 'X' if pqr['total'] >= 20 else '')
-        write(ws, 28, 14, '')
+        marcar(28, pqr['total'] < 20)
 
-    # Sanciones/Glosa (fila 37) - si hay dato
+    # Satisfacción (fila 29) — % satisfacción. Meta >= 85%
+    if sat.get('pct') is not None:
+        s = sat['pct']
+        write(ws, 29, 10, f'Porcentaje de Satisfacción:\\n{s:.1f}%', wrap=True)
+        marcar(29, s >= 85)
+
+    # Resultados en Salud (fila 30)
+    if res.get('resultado') is not None:
+        rnum = res.get('numerador', 0)
+        rden = res.get('denominador', 0)
+        rpct = res['resultado']
+        write(ws, 30, 10, f'Numerador: {rnum}\\nDenominador: {rden}\\nResultado: {rpct:.1f}%', wrap=True)
+        marcar(30, rpct >= 80)
+
+    # Sanciones/Glosa (fila 37)
     if glosa.get('subtotal', 0) > 0:
         pct_g = glosa['glosado'] / glosa['subtotal'] * 100
         write(ws, 37, 10, f'% Cumplimiento Indicadores:\\n{pct_g:.1f}%', wrap=True)
-        write(ws, 37, 12, 'X' if pct_g < 15 else '')
-        write(ws, 37, 13, 'X' if pct_g >= 15 else '')
-        write(ws, 37, 14, '')
+        marcar(37, pct_g < 15)
 
     # ── Vigilancia Administrativa (filas 45-48) ─────────────────────
     for row in [45, 46, 47, 48]:
         write(ws, row, 14, 'X')
 
-    # ── Vigilancia Financiera (filas 56-58) ────────────────────────
-    if glosa.get('subtotal', 0) > 0:
-        pct_g = glosa['glosado'] / glosa['subtotal'] * 100
-        write(ws, 58, 10, f'Resultado: {pct_g:.1f}%')
-        write(ws, 58, 12, 'X' if pct_g < 15 else '')
-        write(ws, 58, 13, 'X' if pct_g >= 15 else '')
-        write(ws, 58, 14, '')
+    # ── Vigilancia Financiera (filas 56-58) ── Gestión de Cuentas ──
+    sub_cm = glosa.get('subtotal', 0)
+    # Fila 56: radicación — informativo (valor radicado)
+    if sub_cm > 0:
+        write(ws, 56, 10, f'Valor radicado: \${sub_cm:,.0f}')
+        write(ws, 56, 12, 'X'); write(ws, 56, 13, ''); write(ws, 56, 14, '')
     else:
         write(ws, 56, 14, 'X')
+    # Fila 57: devoluciones
+    dev = glosa.get('devoluciones', 0)
+    if sub_cm > 0:
+        pct_d = dev / sub_cm * 100 if sub_cm else 0
+        write(ws, 57, 10, f'Resultado: {pct_d:.1f}%')
+        marcar(57, pct_d < 5)
+    else:
         write(ws, 57, 14, 'X')
+    # Fila 58: glosa. Meta < 15%
+    if sub_cm > 0:
+        pct_g = glosa['glosado'] / sub_cm * 100
+        write(ws, 58, 10, f'Resultado: {pct_g:.1f}%')
+        marcar(58, pct_g < 15)
+    else:
         write(ws, 58, 14, 'X')
 
     # ── Conclusiones ────────────────────────────────────────────────
@@ -13409,20 +13453,78 @@ window.descargarScriptPython=function(){
   toastMsg('supervision.py descargado — requiere: pip install openpyxl');
 };
 
-window.generarFormatoSupervision=function(){
+window.generarFormatoSupervision=async function(){
   const sel=document.getElementById('rep-prest-selector');
   const nit=sel?.value; if(!nit){toastMsg('Selecciona un prestador primero');return;}
   const prest=DATOS_CARGADOS.prestadores||[];
   const normNit=nit.replace(/\./g,'').trim();
-  const p=prest.find(x=>String(x.nit||'').replace(/\./g,'').trim()===normNit)||{nit,nombre:nit};
-  const habRows=(DATOS_CARGADOS.homologacion_rows||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
   const normS=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const habSi=habRows.filter(r=>normS(r.resultado).includes('SI HABILITADO')).length;
+  const p=prest.find(x=>String(x.nit||'').replace(/\./g,'').trim()===normNit)||{nit,nombre:nit};
+
+  const statusEl=document.getElementById('rep-server-status');
+  toastMsg('Recopilando indicadores del prestador...');
+
+  // ── 1) HABILITACIÓN — fuente nueva HAB_SCRIPT (VALIDACION_NIT) ──────────
+  let habTotal=0, habSi=0;
+  try{
+    if(typeof HAB_SCRIPT!=='undefined' && HAB_SCRIPT && HAB_SCRIPT!=='PENDIENTE_DEPLOY'){
+      // Reusar datos ya cargados si existen; si no, traerlos
+      let habRows = (typeof HAB_ROWS!=='undefined' && HAB_ROWS && HAB_ROWS.length) ? HAB_ROWS : null;
+      if(!habRows){
+        const hd = await fetch(HAB_SCRIPT,{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
+        habRows = hd.rows||[];
+      }
+      // Columnas: 3=NIT, 13=VALIDACION_NIT
+      const delNit = habRows.filter(r=>String(r[3]||'').replace(/\./g,'').trim()===normNit);
+      habTotal = delNit.length;
+      habSi = delNit.filter(r=>normS(r[13]).includes('OK_HABILITADO')).length;
+    }
+  }catch(e){ console.warn('[Reporte] Habilitación no disponible:', e.message); }
+
+  // ── 2) ACCESIBILIDAD + OPORTUNIDAD (Cliente Incógnito) — carga ACOP ─────
+  let accPct=null, opDias=null;
+  try{
+    if(typeof ACOP_SCRIPT!=='undefined' && ACOP_SCRIPT && ACOP_SCRIPT!=='PENDIENTE_DEPLOY'){
+      let metr = (typeof ACOP_METRICAS!=='undefined' && ACOP_METRICAS && ACOP_METRICAS.length) ? ACOP_METRICAS : null;
+      if(!metr){
+        const md = await fetch(ACOP_SCRIPT+'?accion=metricas',{redirect:'follow',headers:{'Accept':'application/json'}}).then(r=>r.json());
+        metr = md.metricas||[];
+      }
+      // Filtrar por NIT (el cod BH = NIT-sucursal; el campo nit ya viene)
+      const filas = metr.filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+      if(filas.length){
+        let disp=0,int=0,osum=0,on=0;
+        filas.forEach(r=>{ disp+=(+r.disp||0); int+=(+r.intentos||0); osum+=(+r.oport_sum||0); on+=(+r.oport_n||0); });
+        accPct = int>0 ? (disp/int*100) : null;
+        opDias = on>0 ? (osum/on) : null;
+      }
+    }
+  }catch(e){ console.warn('[Reporte] Accesibilidad/Oportunidad no disponible:', e.message); }
+
+  // ── 3) SATISFACCIÓN — de DATOS_CARGADOS.satisfaccion ───────────────────
+  let satPct=null;
+  try{
+    const sat=(DATOS_CARGADOS.satisfaccion||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
+    if(sat.length){
+      const vals=sat.map(r=>+r.resultado||0).filter(v=>v>0);
+      if(vals.length) satPct = vals.reduce((a,b)=>a+b,0)/vals.length;
+    }
+  }catch(e){}
+
+  // ── 4) RESULTADOS EN SALUD — de RIESGOS_RED (si está cargado) ──────────
+  let resNum=null,resDen=null,resPct=null;
+  // (queda informativo; si no hay dato, va No Aplica)
+
+  // ── 5) CUENTAS MÉDICAS (glosa, radicación, devoluciones) ───────────────
   const cmRows=(DATOS_CARGADOS.cuentas_medicas||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const sub=cmRows.reduce((a,r)=>a+r.subtotal,0);
+  const sub=cmRows.reduce((a,r)=>a+(r.subtotal||0),0);
   const glos=cmRows.reduce((a,r)=>a+(r.glosa_real||r.glosado||0),0);
+  const dev=cmRows.reduce((a,r)=>a+(r.devoluciones||0),0);
+
+  // ── 6) PQR ──────────────────────────────────────────────────────────────
   const pqrRows=(window.PQRS_RED_DATA||[]).filter(r=>String(r.nit||'').replace(/\./g,'').trim()===normNit);
-  const totalPqr=pqrRows.reduce((a,r)=>a+r.total,0);
+  const totalPqr=pqrRows.reduce((a,r)=>a+(r.total||0),0);
+
   const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const datos={
     periodo:`${meses[new Date().getMonth()]} ${new Date().getFullYear()}`,
@@ -13432,21 +13534,22 @@ window.generarFormatoSupervision=function(){
       especialidad:p.especialidad||'',fecha_inicio:p.fecha_inicio||'',
       descripcion_plan:p.descripcion_plan||'REGIMEN CONTRIBUTIVO',
       representante_legal:p.representante_legal||'',facturacion_2025:p.fact_2025||0},
-    habilitacion:{total:habRows.length,habilitados:habSi,
-      observacion:habRows.length?`${habSi} de ${habRows.length} servicios habilitados`:''},
-    glosa:{subtotal:sub,glosado:glos},
+    habilitacion:{total:habTotal,habilitados:habSi,
+      observacion:habTotal?`${habSi} de ${habTotal} servicios habilitados`:''},
+    accesibilidad: accPct!==null ? {pct:accPct} : null,
+    oportunidad: opDias!==null ? {dias:opDias} : null,
+    satisfaccion: satPct!==null ? {pct:satPct} : null,
+    glosa:{subtotal:sub,glosado:glos,devoluciones:dev},
     pqr:{total:totalPqr}
   };
 
-  // Mostrar info del prestador seleccionado
+  // Info del prestador seleccionado
   const infoEl=document.getElementById('rep-prest-info');
   if(infoEl){
     infoEl.style.display='block';
     infoEl.textContent=`${p.nombre||nit} · NIT ${p.nit||nit} · ${p.regional||'—'} · Contrato: ${p.contrato||'—'}`;
   }
 
-  // Llamar servidor local — genera Excel con formato completo
-  const statusEl=document.getElementById('rep-server-status');
   if(statusEl) statusEl.style.display='none';
   toastMsg('Generando Excel con formato...');
 
